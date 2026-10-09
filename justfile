@@ -56,6 +56,11 @@ gate2 experiment:
 
 # --- EC2 housekeeping ------------------------------------------------------
 
+# Create the access key for smol-lab-ci and wire up both profiles. Pim runs
+# this, with his own admin profile. The secret is never printed.
+aws-key admin_profile:
+    ./lab/aws-key.sh {{ admin_profile }}
+
 # Prove the assumed role works and a tagged launch would be permitted.
 aws-check:
     ./lab/aws-check.sh

@@ -79,20 +79,37 @@ if that is wrong.
 It deliberately does **not** create an access key, so no key is ever printed
 by a script. That is the next step, and it is yours.
 
-## Step 3: create the access key
+## Steps 3 and 4: create the access key and the profiles
 
-CLI:
+```sh
+just aws-key playground-admin
+```
+
+One command. It creates the key, writes both halves into
+`~/.aws/credentials` under `[smol-lab-base]` with `aws configure set`, writes
+the two profiles into `~/.aws/config`, and chmods the credentials file to
+600. It prints the key id, which is public, and never the secret: the secret
+exists in a shell variable for three lines and goes straight into the config.
+
+**Run it in your own terminal.** Not through Claude Code's `!` prefix, which
+captures command output into the conversation.
+
+It refuses to create a third key, since IAM allows two, and tells you how to
+delete an old one.
+
+The two-profile split is what makes long runs work: the SDK holds the key in
+`smol-lab-base` and re-assumes `SmolLabRole` whenever the hour is up, without
+anyone noticing.
+
+<details>
+<summary>By hand, if you would rather</summary>
 
 ```sh
 aws --profile playground-admin iam create-access-key --user-name smol-lab-ci
 ```
 
 Console: IAM, Users, `smol-lab-ci`, Security credentials, Create access key,
-pick "Command Line Interface", no description needed.
-
-Either way you get an access key id and a secret. The secret is shown once.
-
-## Step 4: put the key and the profiles in place
+pick "Command Line Interface". The secret is shown once.
 
 The key goes in `~/.aws/credentials`, nowhere else. Not in the repo, not in
 `lab/config.env`, not in an environment variable, not in a chat message.
@@ -114,18 +131,14 @@ chmod 600 ~/.aws/credentials
 region = eu-central-1
 
 [profile smol-lab]
-role_arn = arn:aws:iam::<account-id>:role/SmolLabRole
+role_arn = arn:aws:iam::076504012268:role/SmolLabRole
 source_profile = smol-lab-base
 role_session_name = smol-lab
 duration_seconds = 3600
 region = eu-central-1
 ```
 
-`<account-id>` is printed at the end of the bootstrap run.
-
-The two-profile split is what makes long runs work: the SDK holds the key in
-`smol-lab-base` and re-assumes `SmolLabRole` whenever the hour is up, without
-anyone noticing.
+</details>
 
 ## Step 5: verify
 
@@ -159,7 +172,7 @@ aws --profile playground-admin iam delete-access-key \
 ```
 
 `smol-lab-ci` may hold at most two keys, so create the new one before deleting
-the old.
+the old. `just aws-key` does the create-and-store half of that for you.
 
 ## Tearing it all down
 
