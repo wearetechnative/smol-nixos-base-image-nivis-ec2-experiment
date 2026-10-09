@@ -54,3 +54,10 @@ reads this file before it writes a module.
 - **`aws_s3_object` and `aws_iam_role_policy_attachment` are not taggable.** An
   IAM condition that requires `aws:RequestTag/Project` on every create will
   block those two and break the pipeline.
+- **IAM resolves a trust policy's principal at write time.** Creating a role
+  whose trust policy names a user that does not exist yet fails with
+  `MalformedPolicyDocument: Invalid principal in policy`. Create the user
+  first. A policy that only names the role as a `Resource` has no such
+  problem, because resource ARNs are not resolved. `bootstrap.sh` therefore
+  creates `smol-lab-ci` before `SmolLabRole`, and retries the role creation a
+  few times to ride out IAM's propagation delay.

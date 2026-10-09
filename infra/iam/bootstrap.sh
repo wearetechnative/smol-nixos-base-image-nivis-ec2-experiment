@@ -88,19 +88,43 @@ aws_ s3api put-bucket-lifecycle-configuration --bucket "$BUCKET" \
 
 # --- roles and policies ----------------------------------------------------
 
+# IAM resolves a principal ARN at write time, and a freshly created user takes
+# a moment to become resolvable. Retry rather than fail the whole run.
 upsert_role() {
-  local name="$1" trust="$2" desc="$3"
+  local name="$1" trust="$2" desc="$3" attempt=1 out=""
   if exists aws_ iam get-role --role-name "$name"; then
     say "role $name exists, updating its trust policy"
-    aws_ iam update-assume-role-policy --role-name "$name" \
-      --policy-document "$(render "$trust")" >/dev/null
-  else
-    say "creating role $name"
-    aws_ iam create-role --role-name "$name" \
+    while :; do
+      if out=$(aws_ iam update-assume-role-policy --role-name "$name" \
+        --policy-document "$(render "$trust")" 2>&1); then
+        return 0
+      fi
+      case "$out,$attempt" in
+        *MalformedPolicyDocument*,[1-5]) ;;
+        *) echo "$out" >&2; return 1 ;;
+      esac
+      say "principal not resolvable yet, retry $attempt"
+      attempt=$((attempt + 1))
+      sleep 5
+    done
+  fi
+
+  say "creating role $name"
+  while :; do
+    if out=$(aws_ iam create-role --role-name "$name" \
       --description "$desc" \
       --assume-role-policy-document "$(render "$trust")" \
-      --tags Key=Project,Value=smol-lab >/dev/null
-  fi
+      --tags Key=Project,Value=smol-lab 2>&1); then
+      return 0
+    fi
+    case "$out,$attempt" in
+      *MalformedPolicyDocument*,[1-5]) ;;
+      *) echo "$out" >&2; return 1 ;;
+    esac
+    say "principal not resolvable yet, retry $attempt"
+    attempt=$((attempt + 1))
+    sleep 5
+  done
 }
 
 put_inline_policy() {
@@ -122,11 +146,12 @@ upsert_role vmimport vmimport-trust.json \
   "VM Import/Export service role for the smol lab"
 put_inline_policy role vmimport smol-lab-vmimport vmimport-permissions.json
 
-upsert_role SmolLabRole SmolLabRole-trust.json \
-  "The role the smol lab works through"
-put_inline_policy role SmolLabRole smol-lab-permissions SmolLabRole-permissions.json
-
-# --- the user --------------------------------------------------------------
+# --- the user, before the role that trusts it ------------------------------
+#
+# SmolLabRole's trust policy names this user as its principal, and IAM rejects
+# a principal that does not exist yet. The user's own policy only names the
+# role as a Resource, and resource ARNs are not resolved, so this order works
+# and the other does not.
 if exists aws_ iam get-user --user-name smol-lab-ci; then
   say "user smol-lab-ci exists"
 else
@@ -135,6 +160,10 @@ else
     --tags Key=Project,Value=smol-lab >/dev/null
 fi
 put_inline_policy user smol-lab-ci smol-lab-assume-role smol-lab-ci-policy.json
+
+upsert_role SmolLabRole SmolLabRole-trust.json \
+  "The role the smol lab works through"
+put_inline_policy role SmolLabRole smol-lab-permissions SmolLabRole-permissions.json
 
 # --- the budget ------------------------------------------------------------
 if exists aws_ budgets describe-budget --account-id "$ACCOUNT_ID" \
