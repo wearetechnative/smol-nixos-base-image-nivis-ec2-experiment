@@ -1,0 +1,1 @@
+# smol-nixos-base-image-nivis-ec2-experiment
