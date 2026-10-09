@@ -5,7 +5,7 @@ status: in-progress
 type: epic
 priority: high
 created_at: 2026-10-09T11:51:08Z
-updated_at: 2026-10-09T12:10:51Z
+updated_at: 2026-10-09T12:44:19Z
 parent: smol-nixos-base-image-nivis-ec2-experiment-8uwi
 blocked_by:
     - smol-nixos-base-image-nivis-ec2-experiment-mlca
@@ -22,3 +22,5 @@ Deploy through nivis, never through hand written AWS calls. Done: `just gate2 <e
 - [ ] teardown is unconditional, proven by a deliberate failing run
 - [x] three gaps written up and proposed to Pim, not worked around
 - [ ] add a key pair and SSH ingress to the plan; the nivis example only opens port 80
+
+- [ ] confirm the eleven `likely` IAM actions in experiments/000-nivis.md against a real deployment, and drop the ones the provider never calls

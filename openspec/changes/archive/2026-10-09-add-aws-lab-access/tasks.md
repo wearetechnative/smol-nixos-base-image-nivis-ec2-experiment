@@ -2,7 +2,7 @@
 
 - [x] 1.1 Ask Pim for the AWS region and record it in `lab/config.env`
 - [x] 1.2 Propose a budget amount and get Pim's decision
-- [ ] 1.3 Ask whether the mutable track is wanted, and record the answer in `STATE.md`
+- [x] 1.3 Moved out of this change: whether the mutable track is wanted belongs to the "Mutable track" epic under milestone `03`, which already carries it as its first item
 - [x] 1.4 Agree the list of permitted instance types, starting from `t3.micro`
 - [x] 1.5 Decide gap 3: create the `vmimport` role once in `bootstrap.sh`, or let the lab create it per run and grant `SmolLabRole` the IAM writes
 - [x] 1.6 Decide gaps 1 and 2: whether `lab/console.sh` and the `lab/reap.sh` fallback may call `aws ec2` directly for read-only diagnostics and tag-filtered cleanup
@@ -14,7 +14,7 @@
 - [x] 2.3 Write the resource-type-to-action mapping into `experiments/000-nivis.md`
 - [x] 2.4 Verify the mapping covers teardown as well as creation, so `just reap` cannot be left unable to clean up
 - [x] 2.5 Record the three gaps: no serial console, orphans after a crashed run, and the vmimport role's IAM cost
-- [ ] 2.6 Confirm every `likely` action in the mapping with a dry run, and drop the ones the provider never calls
+- [x] 2.6 Moved out of this change: the `likely` actions can only be confirmed by a real deployment, so they are carried as a task on the "nivis deploy adapter and gate 2" epic
 
 ## 3. Write the IAM artifacts
 
@@ -43,5 +43,5 @@
 ## 6. Hand over and wait
 
 - [x] 6.1 Show Pim a short summary in chat and point at `docs/SETUP-AWS.md`
-- [ ] 6.2 Stop and wait until Pim confirms the setup is done
-- [ ] 6.3 After Pim confirms, run `just aws-check` and record the result in `STATE.md`
+- [x] 6.2 Stop and wait until Pim confirms the setup is done
+- [x] 6.3 After Pim confirms, run `just aws-check` and record the result in `STATE.md`

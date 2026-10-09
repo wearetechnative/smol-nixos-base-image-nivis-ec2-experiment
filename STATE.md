@@ -10,9 +10,9 @@ Phase 0, bootstrap. The scaffolding is in place and gate 1 is green on
 
 ## Current experiment
 
-None. The OpenSpec change `add-aws-lab-access` is written out: the five policy
-documents, `infra/iam/bootstrap.sh`, `docs/SETUP-AWS.md` and
-`lab/aws-check.sh`. Task 6.2 is the only thing left in it, and it is Pim's.
+None. The OpenSpec change `add-aws-lab-access` is done and archived. Next is
+the nivis deploy adapter, which turns `experiments/000-nivis.md` into
+`lab/deploy-ec2.sh` and makes gate 2 real.
 
 | field          | value |
 | -------------- | ----- |
@@ -44,21 +44,29 @@ else.
 - Budget: 50 EUR per month, alert at 80 percent.
 - Instance types: `t3.micro` and `t3.small`, enforced by the IAM policy.
 
-## Waiting on Pim
+## AWS access
 
-**The lab is blocked here.** `docs/SETUP-AWS.md` is the walkthrough:
+Working since 2026-10-09. `just aws-check`:
 
-1. `./infra/iam/bootstrap.sh <admin-profile>` on the playground account.
-2. Create one access key for `smol-lab-ci`, put it in `~/.aws/credentials`,
-   put the two profiles in `~/.aws/config`.
-3. `just aws-check` should print one `PASS` line.
+```
+PASS: arn:aws:sts::076504012268:assumed-role/SmolLabRole/smol-lab
+      region eu-central-1, tagged launch of t3.micro permitted
+```
 
-Say when it passes. Nothing on EC2 can run before that.
+The lab's AWS profiles live in `lab/aws-config`, generated from
+`lab/config.env` and selected with `AWS_CONFIG_FILE`, because `~/.aws/config`
+is managed by home-manager here. The access key is in `~/.aws/credentials`
+under `[smol-lab-base]`.
+
+Nothing is blocked any more.
 
 ## Still open, not blocking
 
 - Is the mutable track wanted, or is the appliance track enough for the alpha?
-  Only affects milestone `03`.
+  Only affects milestone `03`, and the "Mutable track" epic carries it.
+- Eleven actions in `experiments/000-nivis.md` are marked `likely` rather than
+  `certain`. The first real deployment confirms or corrects them; expect one
+  round of "add this action, re-run bootstrap.sh".
 
 ## What already works
 
@@ -91,9 +99,6 @@ on 22. That key pair is what makes contract check 1 real.
 
 - `lab/deploy-ec2.sh`, `lab/console.sh`, `lab/reap.sh`
 - `lab/experiment.sh`, the pipeline that appends a ledger line
-- the AWS setup Pim runs, from `docs/SETUP-AWS.md`
-
-`lab/aws-check.sh` and the IAM artifacts are written and waiting to be run.
 
 ## Next three planned experiments
 
