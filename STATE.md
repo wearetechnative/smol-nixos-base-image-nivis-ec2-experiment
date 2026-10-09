@@ -5,27 +5,46 @@ it at every step change, not at the end of a session.
 
 ## Phase
 
-Phase 0, bootstrap. The scaffolding is in place and gate 1 is green on
-`systems/accepted`. No experiment has run yet, and the ledger is empty.
+Phase 0, bootstrap, essentially complete. Both gates are green on
+`systems/baseline` and the ledger has its first line. What is left of phase 0
+is `lab/experiment.sh`, the pipeline that ties build, measure, both gates and
+the ledger together.
 
 ## Current experiment
 
-`000-baseline`, step `gate2`, change `add-nivis-ec2-gate`, 33 of 42 tasks.
+None in flight. Experiment 001 is recorded and the account is empty.
 
-The harness is built and the first real run got as far as
-`ec2:CreateSecurityGroup`. **Blocked on Pim re-running
-`./infra/iam/bootstrap.sh <admin-profile>`** to apply the corrected policy.
-
-After that: `just aws-probe`, then `just gate2 000-baseline baseline`.
-
-| field          | value |
-| -------------- | ----- |
-| experiment id  | -     |
-| slug           | -     |
-| step           | -     |
-| branch         | -     |
+| field         | value |
+| ------------- | ----- |
+| experiment id | 1, done |
+| slug          | baseline |
+| step          | logged |
+| branch        | main |
 
 Steps are `building | measuring | gate1 | gate2 | logging`.
+
+## The baseline, frozen
+
+Ledger line 1. `systems/baseline` does not change from here.
+
+| measure           | value |
+| ----------------- | ----- |
+| closure           | 1516.25 MiB |
+| image, raw VHD    | 2598.64 MiB |
+| boot time         | 40.753s |
+| gate 1            | pass, 10 of 10, twice |
+| gate 2            | pass, 10 of 10, twice |
+
+Largest paths: the nixpkgs source at 199.75 MiB, `linux-6.18.55-modules` at
+145.17, `python3-3.14.7` at 136.55, `amazon-ssm-agent` at 110.09, `systemd`
+at 63.02. The first four have no obvious business in an appliance image.
+
+## Cost of one experiment
+
+About 15 minutes of gate 2 once the image is built: 2m52s upload, 7m51s
+snapshot import, 3 minutes to verify twice, under a minute to tear down. The
+snapshot import dominates and is AWS's. BRIEFING §9 stops at 4 EC2 hours in a
+session, which is roughly 16 runs.
 
 ## Live AWS resources
 
@@ -77,17 +96,16 @@ The trade, stated plainly: Claude can now rewrite `SmolLabRole`, so the fence
 around the playground account is no longer one Claude cannot move. Reading
 anything from `~/.aws/` is still denied, and no secret is ever printed.
 
-Pim applies the matching edit to `.claude/settings.json` by hand. The harness
-blocks an agent from editing its own allow list, which is the right default
-and worth keeping.
+Pim applied the matching edit to `.claude/settings.json` on 2026-10-09. The
+harness blocks an agent from editing its own allow list, which is the right
+default and worth keeping, so that edit stays a human one.
 
 ## Still open, not blocking
 
 - Is the mutable track wanted, or is the appliance track enough for the alpha?
   Only affects milestone `03`, and the "Mutable track" epic carries it.
-- Eleven actions in `experiments/000-nivis.md` are marked `likely` rather than
-  `certain`. The first real deployment confirms or corrects them; expect one
-  round of "add this action, re-run bootstrap.sh".
+- The Graviton track needs an aarch64 builder or emulation. Until then
+  `nix flake check` evaluates those outputs but cannot build them.
 
 ## What already works
 
@@ -97,11 +115,12 @@ and worth keeping.
   builder before it means anything.
 - `just gate1 accepted` passes all ten contract checks on first boot and again
   after a reboot.
-- `just measure <variant>` emits the measurement JSON. First reading on
-  `systems/accepted`, which is still identical to the baseline: **1516 MiB
-  closure**, largest paths `linux-6.18.55-modules` at 145 MiB and
-  `python3-3.14.7` at 137 MiB. Not a ledger entry; the ledger starts once
-  gate 2 exists.
+- `just measure <variant>` emits the measurement JSON, including image size
+  when `SMOL_IMAGE` points at a built image.
+- `just gate2 <id> <variant>` deploys through nivis, verifies twice around a
+  reboot, and tears everything down.
+- `just aws-check`, `just aws-probe`, `just reap`, `just reap-dry`,
+  `just console <instance>`.
 - `just docs` regenerates `docs/options.md`.
 
 ## What nivis covers, and what it does not
@@ -116,28 +135,40 @@ died before writing state, and SSH itself. The example pipeline opens port 80
 and has no key pair, so `lab/deploy-ec2.sh` adds an `aws_key_pair` and ingress
 on 22. That key pair is what makes contract check 1 real.
 
-## What the first gate 2 attempt established
+## What gate 2 established
 
-- The image is 2.6 GiB as a VHD, and uploads to S3 in 2m49s.
-- Teardown on failure works unprompted: the run died mid-apply and the trap
-  destroyed the key pair and the uploaded image.
-- One IAM gap, now fixed in `infra/iam/SmolLabRole-permissions.json`:
-  `ec2:CreateSecurityGroup` is authorised against the new group *and* the VPC
-  it goes in, and the VPC carries no request tag. The statement is split so
-  created resources keep the tag condition and referenced ones get region
-  only.
-- `ec2:ImportSnapshot`, `ec2:RegisterImage` and `ec2:RunInstances` are still
-  unproven: nothing has reached them yet.
+- Check 1 passes on EC2: `/root/.ssh/authorized_keys` is a real file outside
+  the nix store, so the key arrives through instance metadata. Gate 1 can
+  only skip this.
+- The root device is `/dev/nvme0n1p2`, so NVMe loaded and this is a genuine
+  Nitro boot. This is the check a kernel or initrd trim is most likely to
+  break.
+- Teardown is unconditional and proven: three failed attempts each cleaned up
+  after themselves without being asked, including the EBS snapshot.
+- Three IAM gaps, all found by running it and all now in `GOTCHAS.md`:
+  `CreateSecurityGroup` is authorised against the VPC too, `ImportSnapshot`
+  needs `iam:PassRole` on `vmimport`, and `RegisterImage` tags after
+  registering so there is no request tag to condition on.
+- `just aws-probe` now dry-runs `RegisterImage` and `RunInstances` as well as
+  really creating the cheap pair, so the next gap of that kind costs seconds.
+  Only `ImportSnapshot` still needs a real upload to reach.
 
-## What is missing before the first experiment
+## What is missing before experiment 2
 
-- `lab/experiment.sh`, the pipeline that appends a ledger line
+- `lab/experiment.sh`, the pipeline of BRIEFING §8 that ties build, measure,
+  gate 1, gate 2 and the ledger line together. Right now those are run by
+  hand.
 
 ## Next three planned experiments
 
-1. Establish baseline numbers for `systems/baseline` through both gates.
+1. `lab/experiment.sh`, so an experiment is one command rather than four.
 2. Replay natkr n1: `documentation.enable = false`.
 3. Replay natkr n2: `environment.defaultPackages = [ ]`.
+
+Worth jumping the queue: the baseline's top five paths include the nixpkgs
+source (199.75 MiB), `python3` (136.55) and `amazon-ssm-agent` (110.09).
+Those are not on the natkr or siraben lists because an ISO never had them,
+and together they are more than a quarter of the closure.
 
 ## Checkpoints
 

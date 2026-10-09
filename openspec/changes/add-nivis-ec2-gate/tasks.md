@@ -43,17 +43,17 @@
 
 ## 5. First real run
 
-- [ ] 5.1 Deploy `systems/baseline` end to end and watch where it breaks
-- [x] 5.0 Add `just aws-probe`, which creates and destroys the key pair and the security group, so an IAM gap costs seconds rather than a 2.6 GB upload
-- [ ] 5.2 Confirm or correct the eleven `likely` IAM actions in `experiments/000-nivis.md`; update the policy and have Pim re-run `bootstrap.sh` if needed
-- [ ] 5.3 Confirm contract check 1 passes on EC2, which it cannot do locally
+- [x] 5.1 Deploy `systems/baseline` end to end and watch where it breaks
+- [x] 5.0 Add `just aws-probe`: dry-run authorisation for `RegisterImage` and `RunInstances`, plus a real create and destroy of the key pair and the security group, so an IAM gap costs seconds rather than a 2.6 GiB upload
+- [x] 5.2 Confirm or correct the eleven `likely` IAM actions in `experiments/000-nivis.md`; update the policy and have Pim re-run `bootstrap.sh` if needed
+- [x] 5.3 Confirm contract check 1 passes on EC2, which it cannot do locally
 - [x] 5.4 Prove teardown on a failing run, then confirm the account is empty. The first attempt failed on `ec2:CreateSecurityGroup` and the trap destroyed the key pair and the uploaded image unprompted
-- [ ] 5.5 Record the baseline numbers and write ledger line 1
-- [ ] 5.6 Record the wall-clock cost of one gate 2 run in `STATE.md`, so the budget stop in BRIEFING §9 has a real number behind it
+- [x] 5.5 Record the baseline numbers and write ledger line 1
+- [x] 5.6 Record the wall-clock cost of one gate 2 run in `STATE.md`, so the budget stop in BRIEFING §9 has a real number behind it
 
 ## 6. Bookkeeping
 
-- [ ] 6.1 Update `experiments/000-nivis.md` with what the real run taught
-- [ ] 6.2 Append anything surprising to `GOTCHAS.md`
-- [ ] 6.3 Update `docs/TESTING.md` with the gate 2 section as built
+- [x] 6.1 Update `experiments/000-nivis.md` with what the real run taught
+- [x] 6.2 Append anything surprising to `GOTCHAS.md`
+- [x] 6.3 Update `docs/TESTING.md` with the gate 2 section as built
 - [ ] 6.4 Update `STATE.md`, then archive and commit

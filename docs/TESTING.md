@@ -13,7 +13,7 @@ contract (BRIEFING §3).
 
 | # | check | gate 1 | gate 2 |
 | - | ----- | ------ | ------ |
-| 1 | key-based SSH login with a key injected from instance metadata | skipped, no IMDS | yes |
+| 1 | key-based SSH login with a key injected from instance metadata | skipped, no IMDS | yes, confirmed in experiment 001 |
 | 2 | `systemctl is-system-running` is `running` | yes | yes |
 | 3 | no failed units | yes | yes |
 | 4 | DNS resolves | yes, against the gateway node | yes |
@@ -72,17 +72,63 @@ Keep that file short, and justify every line in it:
 ## Gate 2, EC2
 
 ```sh
-just gate2 <experiment-id>
+just gate2 <experiment-id> [variant]
 ```
 
-Deploys through nivis, never through hand-written AWS calls. It waits for SSH
-with a 10 minute timeout, runs the contract, reboots, runs it again, and
-records the boot time. If SSH never comes up it fetches the serial console
-with `lab/console.sh` and saves the output in the experiment note.
+Deploys through nivis: `lab/nivis-plan.nix` builds the image as a `drv` leaf,
+uploads it to the lab bucket, imports it as an EBS snapshot, registers an AMI
+and launches an instance. It waits for SSH with a ten minute timeout, pushes
+the same static curl gate 1 uses, runs `lab/verify.sh` with `VERIFY_ENV=ec2`,
+reboots, and runs it again. If SSH never comes up it fetches the serial
+console with `lab/console.sh` and saves the output in the experiment note.
 
-Teardown of the instance, the AMI and the snapshot is unconditional: pass or
-fail, nothing is left running. `just reap` is the backstop for anything tagged
-`Project=smol-lab` that outlived its experiment.
+The reboot wait keys on `/proc/sys/kernel/random/boot_id` changing, not on
+SSH answering, so a session that survives the reboot command cannot be
+mistaken for a machine that came back.
+
+Boot time is read off the guest with `systemd-analyze`. The API only knows
+when the launch call returned, which is a different thing.
+
+### What only gate 2 can prove
+
+- **Check 1, the metadata key.** The verification keypair is generated per
+  run, registered as an `aws_key_pair`, and never touches the image. Passing
+  check 1 on EC2 means the key genuinely arrived through IMDS.
+- **The Nitro drivers.** A baseline run shows the root device as
+  `/dev/nvme0n1p2`, which is only true if the NVMe driver loaded. This is the
+  check that a kernel or initrd trim is most likely to break.
+
+### Teardown
+
+Unconditional, in a trap on `EXIT`, `INT` and `TERM`. Pass, fail or
+interrupt, the instance, AMI, snapshot, key pair, security group and uploaded
+image all go. This was proven the hard way: the first three attempts failed
+mid-apply on IAM gaps and each one cleaned up after itself without being
+asked.
+
+`just reap` is the backstop. It runs `nivis destroy` for every state file
+under `experiments/state/`, then sweeps for resources tagged
+`Project=smol-lab` older than `SMOL_REAP_AFTER_MINUTES` that no state file
+accounts for. `just reap-dry` shows what it would remove.
+
+### Finding an IAM gap without paying for it
+
+```sh
+just aws-probe
+```
+
+Seconds, no upload. It dry-runs `ec2:RegisterImage` and `ec2:RunInstances`,
+which create nothing, and really creates and destroys the key pair and the
+security group. Between them that is most of the authorisation surface.
+
+What it cannot reach is `ec2:ImportSnapshot`, which needs a real uploaded
+image. A gap there still costs one 11 minute round trip.
+
+### Cost of one run
+
+About 15 minutes once the image is built: 2m52s to upload 2.6 GiB, 7m51s for
+the snapshot import, about 3 minutes to launch and verify twice, under a
+minute to tear down. The snapshot import dominates and is AWS's.
 
 ## Running everything
 

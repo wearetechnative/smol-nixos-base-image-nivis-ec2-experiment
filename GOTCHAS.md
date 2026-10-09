@@ -87,3 +87,17 @@ reads this file before it writes a module.
 - **Finding an IAM gap through a full deploy costs a 2.6 GB upload each
   time.** `just aws-probe` creates and destroys only the key pair and the
   security group, which covers most of the authorisation surface in seconds.
+- **`ec2:ImportSnapshot` needs `iam:PassRole` on the `vmimport` role.** The
+  caller hands the role to the VM Import service, and AWS checks that it may.
+  Grant it narrowly: `iam:PassRole` on that one role ARN, conditioned on
+  `iam:PassedToService: vmie.amazonaws.com`. It does not let the role create
+  or modify IAM.
+- **`ec2:RegisterImage` registers the AMI first and tags it afterwards**, so
+  there is no `aws:RequestTag` at register time and a tag-conditioned
+  statement denies it. Allow it with the region condition only; the AMI is
+  tagged a moment later through `ec2:CreateTags`, which does carry the tag, so
+  the delete path stays gated on `ec2:ResourceTag`.
+- **`nivis --target` does not restrict the graph** the way the name suggests.
+  An early version of `lab/aws-probe.sh` used it to reach one resource and
+  paid for the full 2.6 GiB upload anyway. The plan takes a `scope` variable
+  instead, and `scope=cheap` drops every resource that needs the image.

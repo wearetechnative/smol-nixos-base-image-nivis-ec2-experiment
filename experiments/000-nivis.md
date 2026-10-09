@@ -85,7 +85,7 @@ should confirm it. Nothing goes into
 | `aws_security_group` | `ec2:DescribeVpcs` | likely |
 | `aws_instance` | `ec2:RunInstances`, `ec2:TerminateInstances`, `ec2:DescribeInstances`, `ec2:CreateTags` | certain |
 | `aws_instance` (refresh) | `ec2:DescribeInstanceAttribute`, `ec2:DescribeInstanceTypes`, `ec2:DescribeInstanceCreditSpecifications`, `ec2:DescribeVolumes`, `ec2:DescribeSubnets`, `ec2:DescribeNetworkInterfaces` | likely |
-| `aws_iam_role` + `aws_iam_policy` + attachment | `iam:CreateRole`, `iam:GetRole`, `iam:DeleteRole`, `iam:TagRole`, `iam:CreatePolicy`, `iam:GetPolicy`, `iam:GetPolicyVersion`, `iam:ListPolicyVersions`, `iam:DeletePolicy`, `iam:AttachRolePolicy`, `iam:DetachRolePolicy`, `iam:ListAttachedRolePolicies` | certain, **but see gap 3** |
+| `aws_iam_role` + `aws_iam_policy` + attachment | not in the lab's plan; the bootstrap creates `vmimport` once, so the role needs none of these | gap 3, resolved |
 | `lab/console.sh` | `ec2:GetConsoleOutput` | certain, **see gap 1** |
 | `lab/aws-check.sh` | `sts:GetCallerIdentity`, `ec2:RunInstances` with `DryRun` | certain |
 
@@ -137,6 +137,34 @@ create or modify IAM.
 
 This is not a nivis gap, it is a choice about where the role is created, so it
 needs no change to nivis.
+
+## Confirmed against a real deployment, 2026-10-09
+
+Experiment 001 ran the whole pipeline end to end and gate 2 passed. Three of
+the `likely` rows above were wrong in a way a dry run would not have caught,
+and all three are now in `GOTCHAS.md`:
+
+| what | expected | actual |
+| ---- | -------- | ------ |
+| `ec2:CreateSecurityGroup` | one statement, tag-conditioned | authorised against the VPC too, which carries no request tag |
+| `ec2:ImportSnapshot` | `iam:PassRole` marked "verify" | required, on the `vmimport` role, conditioned on `vmie.amazonaws.com` |
+| `ec2:RegisterImage` | tag-conditioned | registers first and tags afterwards, so no request tag exists yet |
+
+The rest of the table held. `ec2:RunInstances` with the instance-type and tag
+conditions worked first time, and every teardown action worked on the first
+try.
+
+Timing of one full run, which is the per-experiment cost from here:
+
+| step | duration |
+| ---- | -------- |
+| upload 2.6 GiB to S3 | 2m52s |
+| EBS snapshot import | 7m51s |
+| launch, verify, reboot, verify | about 3 min |
+| teardown | under 1 min |
+
+The snapshot import dominates and is AWS's, not something the lab controls.
+The upload shrinks as the image does.
 
 ## Other findings
 

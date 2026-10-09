@@ -49,7 +49,16 @@ let
       type = "str";
       default = "x86_64-linux";
     };
+    # "full" is the gate 2 pipeline. "cheap" drops everything that needs the
+    # image, so an IAM gap in the create calls can be found in seconds rather
+    # than after a 2.6 GiB upload. See lab/aws-probe.sh.
+    scope = {
+      type = "str";
+      default = "full";
+    };
   } (ledger.vars or { });
+
+  cheap = vars.scope == "cheap";
 
   name = "smol-${vars.experiment}";
 
@@ -185,19 +194,35 @@ toIR {
 
   resources = [
     keyPair
-    upload
-    snapshot
-    ami
     securityGroup
-    instance
-  ];
+  ]
+  ++ (
+    if cheap then
+      [ ]
+    else
+      [
+        upload
+        snapshot
+        ami
+        instance
+      ]
+  );
 
   outputs = {
-    public_ip = instance.refAttr "public_ip";
-    instance_id = instance.refAttr "id";
-    ami_id = ami.refAttr "id";
-    snapshot_id = snapshot.refAttr "id";
-  };
+    key_name = keyPair.refAttr "key_name";
+    security_group_id = securityGroup.refAttr "id";
+  }
+  // (
+    if cheap then
+      { }
+    else
+      {
+        public_ip = instance.refAttr "public_ip";
+        instance_id = instance.refAttr "id";
+        ami_id = ami.refAttr "id";
+        snapshot_id = snapshot.refAttr "id";
+      }
+  );
 
   inherit ledger;
 }

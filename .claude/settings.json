@@ -27,17 +27,21 @@
       "Edit(*.md)",
       "Edit(ledger.jsonl)",
       "Edit(justfile)",
-      "Edit(flake.nix)"
+      "Edit(flake.nix)",
+      "Bash(aws:*)",
+      "Bash(./infra/iam/bootstrap.sh:*)",
+      "Bash(nivis:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(ssh-keygen:*)"
     ],
     "deny": [
-      "Bash(aws:*)",
       "Bash(sudo:*)",
       "Bash(rm -rf:*)",
       "Read(~/.aws/**)",
       "Bash(cat ~/.aws/*)",
       "Bash(env)",
-      "Bash(printenv:*)",
-      "Bash(*infra/iam/bootstrap.sh*)"
+      "Bash(printenv:*)"
     ]
   }
 }
