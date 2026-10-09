@@ -1,0 +1,178 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadOnlyDescribesInTheLabRegion",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Describe*",
+        "ec2:GetEbsEncryptionByDefault",
+        "ec2:GetEbsDefaultKmsKeyId"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "${REGION}"
+        }
+      }
+    },
+    {
+      "Sid": "SeeWhoWeAre",
+      "Effect": "Allow",
+      "Action": "sts:GetCallerIdentity",
+      "Resource": "*"
+    },
+    {
+      "Sid": "LaunchOnlyTheAgreedInstanceTypes",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:instance/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/Project": "smol-lab",
+          "ec2:InstanceType": ["t3.micro", "t3.small"]
+        },
+        "StringLike": {
+          "aws:RequestTag/Experiment": "*"
+        }
+      }
+    },
+    {
+      "Sid": "LaunchNeedsTheseSupportingResources",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": [
+        "arn:aws:ec2:${REGION}::image/*",
+        "arn:aws:ec2:${REGION}::snapshot/*",
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:subnet/*",
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:network-interface/*",
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:security-group/*",
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:key-pair/*",
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:volume/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "${REGION}"
+        }
+      }
+    },
+    {
+      "Sid": "CreateTheLabsOwnResourcesTaggedAsTheLabs",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateSecurityGroup",
+        "ec2:ImportKeyPair",
+        "ec2:RegisterImage",
+        "ec2:ImportSnapshot",
+        "ec2:CreateSnapshot"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "${REGION}",
+          "aws:RequestTag/Project": "smol-lab"
+        }
+      }
+    },
+    {
+      "Sid": "TagOnCreateOnly",
+      "Effect": "Allow",
+      "Action": "ec2:CreateTags",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "${REGION}",
+          "aws:RequestTag/Project": "smol-lab"
+        }
+      }
+    },
+    {
+      "Sid": "ManageTheSecurityGroupsOwnRules",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupEgress"
+      ],
+      "Resource": "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:security-group/*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:ResourceTag/Project": "smol-lab"
+        }
+      }
+    },
+    {
+      "Sid": "TearDownOnlyWhatIsTaggedAsTheLabs",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:TerminateInstances",
+        "ec2:StopInstances",
+        "ec2:RebootInstances",
+        "ec2:DeleteSecurityGroup",
+        "ec2:DeleteKeyPair",
+        "ec2:DeleteSnapshot",
+        "ec2:DeregisterImage",
+        "ec2:ModifyImageAttribute",
+        "ec2:ModifySnapshotAttribute",
+        "ec2:DeleteTags"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "${REGION}",
+          "ec2:ResourceTag/Project": "smol-lab"
+        }
+      }
+    },
+    {
+      "Sid": "ReadTheSerialConsoleOfOurOwnInstances",
+      "Effect": "Allow",
+      "Action": "ec2:GetConsoleOutput",
+      "Resource": "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:instance/*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:ResourceTag/Project": "smol-lab"
+        }
+      }
+    },
+    {
+      "Sid": "TheOneLabBucketAndNoOther",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetBucketTagging",
+        "s3:GetBucketVersioning",
+        "s3:GetBucketAcl",
+        "s3:GetBucketPolicy",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:GetBucketCORS",
+        "s3:GetBucketWebsite",
+        "s3:GetBucketLogging",
+        "s3:GetAccelerateConfiguration",
+        "s3:GetBucketRequestPayment",
+        "s3:GetReplicationConfiguration",
+        "s3:GetBucketObjectLockConfiguration",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:GetBucketOwnershipControls"
+      ],
+      "Resource": "arn:aws:s3:::${BUCKET}"
+    },
+    {
+      "Sid": "ImagesInAndOutOfTheLabBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:GetObjectTagging",
+        "s3:PutObjectTagging",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": "arn:aws:s3:::${BUCKET}/*"
+    }
+  ]
+}

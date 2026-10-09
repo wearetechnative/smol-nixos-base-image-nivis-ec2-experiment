@@ -10,10 +10,9 @@ Phase 0, bootstrap. The scaffolding is in place and gate 1 is green on
 
 ## Current experiment
 
-None. The OpenSpec change `add-aws-lab-access` is in progress, under the epic
-"AWS access, IAM and the setup Pim runs". Task group 2 is done: the AWS API
-actions are derived and written to `experiments/000-nivis.md`. Task group 3,
-the policy files, is blocked on the answers below.
+None. The OpenSpec change `add-aws-lab-access` is written out: the five policy
+documents, `infra/iam/bootstrap.sh`, `docs/SETUP-AWS.md` and
+`lab/aws-check.sh`. Task 6.2 is the only thing left in it, and it is Pim's.
 
 | field          | value |
 | -------------- | ----- |
@@ -33,21 +32,33 @@ else.
 | ---- | -- | ------ | ------- |
 | -    | -  | -      | -       |
 
-## Open questions for Pim
+## Decided with Pim, 2026-10-09
 
-Blocking, in the order they are needed:
+- Region: `eu-central-1`, in `lab/config.env`.
+- The `vmimport` role and the lab bucket are created once by
+  `infra/iam/bootstrap.sh`, not per deployment. `SmolLabRole` therefore has no
+  IAM write permission and no `s3:CreateBucket`.
+- `lab/console.sh` and the `lab/reap.sh` fallback may call `aws ec2` directly.
+  Both are read-only diagnostics or tag-filtered cleanup on resources the lab
+  created, not a deployment path. Deployment still goes through nivis only.
+- Budget: 50 EUR per month, alert at 80 percent.
+- Instance types: `t3.micro` and `t3.small`, enforced by the IAM policy.
 
-1. Which AWS region does the lab run in? Goes into `lab/config.env`.
-2. Where is the `vmimport` role created? Once in `bootstrap.sh`, which keeps
-   every IAM write permission out of `SmolLabRole`, or per run by the lab,
-   which is what nivis's example does. See `experiments/000-nivis.md` gap 3.
-3. May `lab/console.sh` and the `lab/reap.sh` fallback call `aws ec2`
-   directly? Serial console output has no nivis resource, and orphans from a
-   crashed run are invisible to `nivis destroy`. Gaps 1 and 2 in the same
-   note.
-4. What amount for the AWS Budget alert on the playground account?
-5. Is the mutable track wanted, or is the appliance track enough for the
-   alpha?
+## Waiting on Pim
+
+**The lab is blocked here.** `docs/SETUP-AWS.md` is the walkthrough:
+
+1. `./infra/iam/bootstrap.sh <admin-profile>` on the playground account.
+2. Create one access key for `smol-lab-ci`, put it in `~/.aws/credentials`,
+   put the two profiles in `~/.aws/config`.
+3. `just aws-check` should print one `PASS` line.
+
+Say when it passes. Nothing on EC2 can run before that.
+
+## Still open, not blocking
+
+- Is the mutable track wanted, or is the appliance track enough for the alpha?
+  Only affects milestone `03`.
 
 ## What already works
 
@@ -78,9 +89,11 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## What is missing before the first experiment
 
-- `lab/deploy-ec2.sh`, `lab/console.sh`, `lab/reap.sh`, `lab/aws-check.sh`
+- `lab/deploy-ec2.sh`, `lab/console.sh`, `lab/reap.sh`
 - `lab/experiment.sh`, the pipeline that appends a ledger line
 - the AWS setup Pim runs, from `docs/SETUP-AWS.md`
+
+`lab/aws-check.sh` and the IAM artifacts are written and waiting to be run.
 
 ## Next three planned experiments
 
