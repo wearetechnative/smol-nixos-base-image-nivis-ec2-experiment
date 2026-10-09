@@ -251,6 +251,33 @@ Hard rules:
   `ec2 run-instances` with the required tags, and prints only pass/fail plus
   the role ARN.
 
+### Amendment, 2026-10-09: Claude runs bootstrap.sh
+
+Pim lifted the rule above that says "Pim runs it. You never run it." Claude
+may now run `infra/iam/bootstrap.sh` with Pim's admin profile, named in
+`lab/config.env` as `SMOL_ADMIN_PROFILE`, and may call `aws` directly.
+
+The reason: the IAM policy is derived from what the pipeline turns out to
+need, and every correction otherwise costs a round trip through Pim. Three
+actions were still unproven when this was decided.
+
+What this gives up, stated plainly: Claude can now rewrite `SmolLabRole`, so
+the fence around what the lab may do in the playground account is no longer
+something Claude cannot move. It is a playground account, and that is the
+trade Pim chose.
+
+What does **not** change:
+
+- Claude still never reads, prints, copies or commits anything from
+  `~/.aws/`. The permission deny list still blocks it.
+- No secret is ever printed, logged or put in the repo. `lab/aws-key.sh`
+  still moves the key from the API response into `~/.aws/credentials` without
+  it passing through a terminal.
+- Claude still never asks Pim to paste a key or token into the chat.
+- Every widening of `SmolLabRole` is still written down: the policy file is
+  committed, and the reason goes in `experiments/000-nivis.md` or
+  `GOTCHAS.md`.
+
 ---
 
 ## 8. Experiment protocol

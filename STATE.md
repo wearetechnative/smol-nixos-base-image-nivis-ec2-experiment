@@ -32,9 +32,9 @@ Steps are `building | measuring | gate1 | gate2 | logging`.
 None. If this table is non-empty on resume, run `just reap` before anything
 else.
 
-| kind | id | region | created |
-| ---- | -- | ------ | ------- |
-| -    | -  | -      | -       |
+| kind | id  | region | created |
+| ---- | --- | ------ | ------- |
+| none | n/a | n/a    | n/a     |
 
 `just reap-dry` reports nothing to reap. The failed run of 2026-10-09 tore
 down its own key pair and uploaded image through the trap.
@@ -66,6 +66,20 @@ is managed by home-manager here. The access key is in `~/.aws/credentials`
 under `[smol-lab-base]`.
 
 Nothing is blocked any more.
+
+## Decided with Pim, 2026-10-09, second round
+
+Claude runs `infra/iam/bootstrap.sh` and may call `aws` directly. Recorded as
+an amendment in BRIEFING §7, because the briefing said the opposite and the
+briefing wins where the repo disagrees with it.
+
+The trade, stated plainly: Claude can now rewrite `SmolLabRole`, so the fence
+around the playground account is no longer one Claude cannot move. Reading
+anything from `~/.aws/` is still denied, and no secret is ever printed.
+
+Pim applies the matching edit to `.claude/settings.json` by hand. The harness
+blocks an agent from editing its own allow list, which is the right default
+and worth keeping.
 
 ## Still open, not blocking
 

@@ -91,10 +91,27 @@ each line justified.
 
 ## AWS
 
-Never run `aws` directly; everything goes through a `just` recipe that uses
-`AWS_PROFILE=smol-lab`. Never read, print or commit anything from `~/.aws/`.
-Never ask Pim to paste a key or token into the chat. `infra/iam/bootstrap.sh`
-is written by you and run by Pim, never by you.
+Lab operations go through `just` recipes that use `AWS_PROFILE=smol-lab`.
+Prefer them over a bare `aws` call, so every AWS access has a name and a
+place.
+
+Since the 2026-10-09 amendment to BRIEFING §7 you may run
+`infra/iam/bootstrap.sh` yourself, with the admin profile in
+`lab/config.env`, to apply a corrected IAM policy. That means you can widen
+your own permissions, so widen them deliberately: change the policy file,
+commit it with the reason, and say in your reply what you granted and why.
+Never reach for a wildcard because a specific action is tedious to find.
+
+Unchanged, and not negotiable: never read, print or commit anything from
+`~/.aws/`; never print a secret; never ask Pim to paste a key or token into
+the chat.
+
+Order of operations when a deploy is denied:
+
+1. `just aws-probe` to reproduce it in seconds rather than a 2.6 GB upload.
+2. Fix `infra/iam/SmolLabRole-permissions.json`.
+3. `./infra/iam/bootstrap.sh $SMOL_ADMIN_PROFILE`.
+4. Record what changed in `GOTCHAS.md` or `experiments/000-nivis.md`.
 
 ## Keeping track
 

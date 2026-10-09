@@ -1,6 +1,12 @@
 # AWS setup
 
-For Pim. Claude wrote this; Claude never runs any of it.
+For Pim. Claude wrote this.
+
+Since the 2026-10-09 amendment to BRIEFING §7, Claude also runs
+`infra/iam/bootstrap.sh` itself, with the admin profile named in
+`lab/config.env`. The walkthrough below still describes the whole setup, which
+is what you follow on a fresh account, and step 3 is still yours: Claude never
+handles the access key.
 
 One-time setup, then `just aws-check` is the only AWS command anyone types by
 hand. Roughly fifteen minutes.
@@ -66,7 +72,7 @@ gap 3.
 
 ```sh
 export SMOL_BUDGET_EMAIL=pim@technative.eu   # optional, gets the 80% alert
-./infra/iam/bootstrap.sh playground-admin
+./infra/iam/bootstrap.sh "$SMOL_ADMIN_PROFILE"
 ```
 
 It is safe to re-run: every step checks before it creates. It creates the lab
