@@ -1,4 +1,5 @@
 result
+lab/aws-config
 result-*
 experiments/logs/
 .direnv/

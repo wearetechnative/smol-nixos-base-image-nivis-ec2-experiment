@@ -15,6 +15,7 @@ EC2 gate cannot drift apart.
 | `deploy-ec2.sh`       | gate 2: a thin adapter around nivis | to write |
 | `console.sh`          | EC2 serial console output when SSH never comes up | to write |
 | `reap.sh`             | terminate and deregister everything tagged `Project=smol-lab` | to write |
+| `aws-env.sh`          | sourced by the AWS scripts: the lab's own `AWS_CONFIG_FILE` and profiles | done |
 | `aws-key.sh`          | create the access key and wire up both profiles, without printing the secret | done |
 | `aws-check.sh`        | prove the assumed role works, pass or fail only | done |
 

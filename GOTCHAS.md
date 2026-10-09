@@ -65,3 +65,9 @@ reads this file before it writes a module.
   budget in EUR on a USD-billed account fails with `InvalidParameterException:
   EUR is not in the supported unit set: [USD]`. There is no conversion; pick
   the account's currency and adjust the amount.
+- **`aws configure set` opens `~/.aws/config` even when writing a credential
+  key.** On a machine where that file is managed by home-manager it is
+  read-only, and the call fails with `Permission denied` after the access key
+  has already been created, leaving an unusable key in the account. The lab
+  keeps its own config at `lab/aws-config` and points `AWS_CONFIG_FILE` at it;
+  `lab/aws-key.sh` deletes the key again if storing fails.

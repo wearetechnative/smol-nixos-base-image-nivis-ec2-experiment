@@ -19,7 +19,7 @@ fmt:
     jj st > /dev/null
     nix fmt .
     nix develop -c shfmt -w -i 2 lab/*.sh
-    nix develop -c shellcheck lab/*.sh
+    nix develop -c shellcheck -x -P lab lab/*.sh
 
 # Regenerate docs/options.md from the smol.* option descriptions.
 docs:

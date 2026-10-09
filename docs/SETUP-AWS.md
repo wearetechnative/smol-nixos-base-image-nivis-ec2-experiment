@@ -86,10 +86,24 @@ just aws-key playground-admin
 ```
 
 One command. It creates the key, writes both halves into
-`~/.aws/credentials` under `[smol-lab-base]` with `aws configure set`, writes
-the two profiles into `~/.aws/config`, and chmods the credentials file to
-600. It prints the key id, which is public, and never the secret: the secret
-exists in a shell variable for three lines and goes straight into the config.
+`~/.aws/credentials` under `[smol-lab-base]` with `aws configure set`, and
+chmods that file to 600. It prints the key id, which is public, and never the
+secret: the secret exists in a shell variable for a handful of lines and goes
+straight into the credentials file.
+
+If storing fails, it deletes the key it just created, so a failed run never
+leaves an unusable key eating one of the two slots IAM allows.
+
+**The profiles do not go in `~/.aws/config`.** That file is managed by
+home-manager here and is read-only. The lab writes its own `lab/aws-config`
+instead, regenerated from `lab/config.env` on every AWS recipe and pointed at
+with `AWS_CONFIG_FILE`. It is gitignored and holds no secret. The key itself
+stays in `~/.aws/credentials`, which is writable and is where the briefing
+says it belongs.
+
+Because the lab's config file only knows the lab's two profiles, your admin
+profile is still read from your own `~/.aws/config`: the script unsets
+`AWS_CONFIG_FILE` for those calls.
 
 **Run it in your own terminal.** Not through Claude Code's `!` prefix, which
 captures command output into the conversation.
@@ -125,25 +139,31 @@ aws_secret_access_key = ...
 chmod 600 ~/.aws/credentials
 ```
 
+The profiles go in `lab/aws-config`, not `~/.aws/config`, because the latter
+is read-only here:
+
 ```ini
-# ~/.aws/config
 [profile smol-lab-base]
 region = eu-central-1
 
 [profile smol-lab]
+region = eu-central-1
 role_arn = arn:aws:iam::076504012268:role/SmolLabRole
 source_profile = smol-lab-base
 role_session_name = smol-lab
 duration_seconds = 3600
-region = eu-central-1
 ```
+
+Then `export AWS_CONFIG_FILE=$PWD/lab/aws-config` before any `aws` command
+against the lab. Or add the same two profiles to your home-manager config and
+skip the file.
 
 </details>
 
 ## Step 5: verify
 
 ```sh
-AWS_PROFILE=smol-lab aws sts get-caller-identity
+AWS_CONFIG_FILE=$PWD/lab/aws-config AWS_PROFILE=smol-lab aws sts get-caller-identity
 ```
 
 The ARN should read `arn:aws:sts::<account-id>:assumed-role/SmolLabRole/smol-lab`.

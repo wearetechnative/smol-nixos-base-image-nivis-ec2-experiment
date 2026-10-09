@@ -131,7 +131,9 @@
         }
         // {
           shellcheck = pkgs.runCommand "shellcheck-lab" { nativeBuildInputs = [ pkgs.shellcheck ]; } ''
-            shellcheck ${./lab}/*.sh
+            # -x follows `. aws-env.sh`, which the scripts share; -P tells
+            # shellcheck where the sourced file lives.
+            shellcheck -x -P ${./lab} ${./lab}/*.sh
             touch $out
           '';
         }

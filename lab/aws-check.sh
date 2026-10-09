@@ -6,18 +6,14 @@
 set -uo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
-repo=$(cd "$here/.." && pwd)
 
-if [ ! -f "$repo/lab/config.env" ]; then
+if [ ! -f "$here/config.env" ]; then
   echo "FAIL: lab/config.env is missing. See docs/SETUP-AWS.md step 1."
   exit 1
 fi
-# shellcheck source=/dev/null
-. "$repo/lab/config.env"
-
-: "${AWS_REGION:?FAIL: AWS_REGION is not set in lab/config.env}"
-: "${AWS_PROFILE:?FAIL: AWS_PROFILE is not set in lab/config.env}"
-export AWS_REGION AWS_PROFILE
+# shellcheck source=aws-env.sh
+. "$here/aws-env.sh"
+smol_write_profiles
 
 fail() {
   echo "FAIL: $1"
@@ -26,6 +22,10 @@ fail() {
 }
 
 command -v aws >/dev/null 2>&1 || fail "no aws CLI on PATH" "run inside 'nix develop'"
+
+aws configure get aws_access_key_id --profile "$smol_base_profile" >/dev/null 2>&1 ||
+  fail "no key stored for $smol_base_profile" \
+    "run: just aws-key <admin-profile>, see docs/SETUP-AWS.md"
 
 # --- 1. the role is assumed ------------------------------------------------
 arn=$(aws sts get-caller-identity --query Arn --output text 2>/dev/null) || {
