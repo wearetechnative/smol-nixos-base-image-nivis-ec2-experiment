@@ -10,9 +10,13 @@ Phase 0, bootstrap. The scaffolding is in place and gate 1 is green on
 
 ## Current experiment
 
-None. The OpenSpec change `add-aws-lab-access` is done and archived. Next is
-the nivis deploy adapter, which turns `experiments/000-nivis.md` into
-`lab/deploy-ec2.sh` and makes gate 2 real.
+`000-baseline`, step `gate2`, change `add-nivis-ec2-gate`, 33 of 42 tasks.
+
+The harness is built and the first real run got as far as
+`ec2:CreateSecurityGroup`. **Blocked on Pim re-running
+`./infra/iam/bootstrap.sh <admin-profile>`** to apply the corrected policy.
+
+After that: `just aws-probe`, then `just gate2 000-baseline baseline`.
 
 | field          | value |
 | -------------- | ----- |
@@ -31,6 +35,9 @@ else.
 | kind | id | region | created |
 | ---- | -- | ------ | ------- |
 | -    | -  | -      | -       |
+
+`just reap-dry` reports nothing to reap. The failed run of 2026-10-09 tore
+down its own key pair and uploaded image through the trap.
 
 ## Decided with Pim, 2026-10-09
 
@@ -95,9 +102,21 @@ died before writing state, and SSH itself. The example pipeline opens port 80
 and has no key pair, so `lab/deploy-ec2.sh` adds an `aws_key_pair` and ingress
 on 22. That key pair is what makes contract check 1 real.
 
+## What the first gate 2 attempt established
+
+- The image is 2.6 GiB as a VHD, and uploads to S3 in 2m49s.
+- Teardown on failure works unprompted: the run died mid-apply and the trap
+  destroyed the key pair and the uploaded image.
+- One IAM gap, now fixed in `infra/iam/SmolLabRole-permissions.json`:
+  `ec2:CreateSecurityGroup` is authorised against the new group *and* the VPC
+  it goes in, and the VPC carries no request tag. The statement is split so
+  created resources keep the tag condition and referenced ones get region
+  only.
+- `ec2:ImportSnapshot`, `ec2:RegisterImage` and `ec2:RunInstances` are still
+  unproven: nothing has reached them yet.
+
 ## What is missing before the first experiment
 
-- `lab/deploy-ec2.sh`, `lab/console.sh`, `lab/reap.sh`
 - `lab/experiment.sh`, the pipeline that appends a ledger line
 
 ## Next three planned experiments
