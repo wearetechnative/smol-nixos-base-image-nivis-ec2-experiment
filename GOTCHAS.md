@@ -61,3 +61,7 @@ reads this file before it writes a module.
   problem, because resource ARNs are not resolved. `bootstrap.sh` therefore
   creates `smol-lab-ci` before `SmolLabRole`, and retries the role creation a
   few times to ride out IAM's propagation delay.
+- **AWS Budgets only accepts the account's billing currency.** Asking for a
+  budget in EUR on a USD-billed account fails with `InvalidParameterException:
+  EUR is not in the supported unit set: [USD]`. There is no conversion; pick
+  the account's currency and adjust the amount.

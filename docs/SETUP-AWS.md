@@ -68,8 +68,13 @@ export SMOL_BUDGET_EMAIL=pim@technative.eu   # optional, gets the 80% alert
 ```
 
 It is safe to re-run: every step checks before it creates. It creates the lab
-bucket, the `vmimport` role, `SmolLabRole`, the `smol-lab-ci` user, and a
-monthly budget of 50 EUR.
+bucket, the `vmimport` role, the `smol-lab-ci` user, `SmolLabRole`, and a
+monthly budget.
+
+The budget is 55 USD, standing in for the agreed 50 EUR: AWS Budgets only
+accepts the account's billing currency, and the playground account bills in
+USD. Change `SMOL_BUDGET_AMOUNT` and `SMOL_BUDGET_UNIT` in `lab/config.env`
+if that is wrong.
 
 It deliberately does **not** create an access key, so no key is ever printed
 by a script. That is the next step, and it is yours.

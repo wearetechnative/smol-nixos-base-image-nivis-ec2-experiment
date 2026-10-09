@@ -31,8 +31,8 @@ if [ -z "$REGION" ]; then
   REGION="${AWS_REGION:?no region given and AWS_REGION is not set in lab/config.env}"
 fi
 
-BUDGET_AMOUNT="${SMOL_BUDGET_AMOUNT:-50}"
-BUDGET_UNIT="${SMOL_BUDGET_UNIT:-EUR}"
+BUDGET_AMOUNT="${SMOL_BUDGET_AMOUNT:-55}"
+BUDGET_UNIT="${SMOL_BUDGET_UNIT:-USD}"
 BUDGET_EMAIL="${SMOL_BUDGET_EMAIL:-}"
 
 aws_() { aws --profile "$PROFILE" --region "$REGION" "$@"; }
@@ -176,11 +176,29 @@ else
   if [ -n "$BUDGET_EMAIL" ]; then
     notifications=$(printf '[{"Notification":{"NotificationType":"ACTUAL","ComparisonOperator":"GREATER_THAN","Threshold":80,"ThresholdType":"PERCENTAGE"},"Subscribers":[{"SubscriptionType":"EMAIL","Address":"%s"}]}]' \
       "$BUDGET_EMAIL")
-    aws_ budgets create-budget --account-id "$ACCOUNT_ID" \
-      --budget "$budget_json" --notifications-with-subscribers "$notifications"
+    budget_out=$(aws_ budgets create-budget --account-id "$ACCOUNT_ID" \
+      --budget "$budget_json" --notifications-with-subscribers "$notifications" 2>&1) || budget_failed=1
   else
     say "no SMOL_BUDGET_EMAIL set, creating the budget without an alert subscriber"
-    aws_ budgets create-budget --account-id "$ACCOUNT_ID" --budget "$budget_json"
+    budget_out=$(aws_ budgets create-budget --account-id "$ACCOUNT_ID" \
+      --budget "$budget_json" 2>&1) || budget_failed=1
+  fi
+
+  if [ "${budget_failed:-0}" = 1 ]; then
+    case "$budget_out" in
+      *"not in the supported unit set"*)
+        echo
+        echo "The budget was NOT created: AWS Budgets only accepts the"
+        echo "account's billing currency. $budget_out" | tail -1
+        echo "Set SMOL_BUDGET_UNIT in lab/config.env to that currency and"
+        echo "re-run. Everything else above succeeded."
+        echo
+        ;;
+      *)
+        echo "$budget_out" >&2
+        exit 1
+        ;;
+    esac
   fi
 fi
 
