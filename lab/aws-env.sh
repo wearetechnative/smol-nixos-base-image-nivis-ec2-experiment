@@ -16,6 +16,13 @@ smol_repo=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 : "${AWS_PROFILE:?AWS_PROFILE is not set in lab/config.env}"
 : "${AWS_ACCOUNT_ID:?AWS_ACCOUNT_ID is not set in lab/config.env}"
 
+# A shell with an AWS profile already active (aws-vault, direnv, a prompt
+# helper) leaks credentials through the environment, and those win over
+# anything in a profile. Clear them so the lab's profile is authoritative.
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN \
+  AWS_SECURITY_TOKEN AWS_DEFAULT_PROFILE AWS_DEFAULT_REGION AWS_ROLE_ARN \
+  AWS_WEB_IDENTITY_TOKEN_FILE
+
 smol_base_profile="${AWS_PROFILE}-base"
 AWS_CONFIG_FILE="$smol_repo/lab/aws-config"
 export AWS_CONFIG_FILE AWS_REGION AWS_PROFILE

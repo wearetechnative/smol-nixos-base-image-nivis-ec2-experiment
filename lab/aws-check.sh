@@ -17,7 +17,8 @@ smol_write_profiles
 
 fail() {
   echo "FAIL: $1"
-  [ $# -gt 1 ] && echo "      $2"
+  shift
+  for line in "$@"; do echo "      $line"; done
   exit 1
 }
 
@@ -28,16 +29,39 @@ aws configure get aws_access_key_id --profile "$smol_base_profile" >/dev/null 2>
     "run: just aws-key <admin-profile>, see docs/SETUP-AWS.md"
 
 # --- 1. the role is assumed ------------------------------------------------
-arn=$(aws sts get-caller-identity --query Arn --output text 2>/dev/null) || {
+#
+# A new access key is not usable the instant it is created, so give IAM a few
+# seconds before calling it a failure.
+attempt=1
+while :; do
+  if arn=$(aws sts get-caller-identity --query Arn --output text 2>&1); then
+    break
+  fi
+  case "$arn,$attempt" in
+    *InvalidClientTokenId*,[1-6] | *SignatureDoesNotMatch*,[1-6])
+      echo "waiting for the new key to propagate, retry $attempt"
+      attempt=$((attempt + 1))
+      sleep 5
+      continue
+      ;;
+  esac
   fail "could not assume the role" \
-    "check ~/.aws/config and ~/.aws/credentials, see docs/SETUP-AWS.md step 4"
-}
+    "$(printf '%s' "$arn" | tr '\n' ' ' | cut -c1-300)" \
+    "config: $AWS_CONFIG_FILE, profile: $AWS_PROFILE" \
+    "see docs/SETUP-AWS.md step 5"
+done
 
 case "$arn" in
   *:assumed-role/SmolLabRole/*) ;;
+  *:user/smol-lab-ci)
+    fail "the key works but the role was not assumed" \
+      "got $arn" \
+      "role_arn or source_profile is missing from $AWS_CONFIG_FILE"
+    ;;
   *)
     fail "wrong identity: not an assumed SmolLabRole session" \
-      "got $arn; profile $AWS_PROFILE should have role_arn set"
+      "got $arn" \
+      "something else is supplying credentials; check for AWS_ variables"
     ;;
 esac
 

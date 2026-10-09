@@ -71,3 +71,8 @@ reads this file before it writes a module.
   has already been created, leaving an unusable key in the account. The lab
   keeps its own config at `lab/aws-config` and points `AWS_CONFIG_FILE` at it;
   `lab/aws-key.sh` deletes the key again if storing fails.
+- **A shell with an AWS profile already active leaks credentials through the
+  environment**, and `AWS_ACCESS_KEY_ID` or `AWS_SESSION_TOKEN` win over
+  anything a profile says. `lab/aws-env.sh` unsets them so the lab's profile
+  is authoritative. A diagnostic that swallows the AWS error message makes
+  this almost impossible to find, so `lab/aws-check.sh` prints it.
