@@ -1,0 +1,64 @@
+schema: spec-driven
+
+context: |
+  A lab that finds out how small a NixOS base image for AWS EC2 can get while
+  it still boots on EC2, deploys through nivis, and stays fully functional over
+  SSH. BRIEFING.md in the repo root is the source of truth.
+
+  Tech stack: Nix flakes (no flake-utils), NixOS modules, the NixOS test driver
+  for local boot tests, nivis for EC2 deployment, just, jj for version control,
+  beans for milestones and epics.
+
+  Every size-reduction strategy becomes one NixOS module option under `smol.*`
+  with a measured saving, trade-offs and a source. Two gates must pass before a
+  strategy is accepted: a local QEMU boot and a real EC2 deployment, both
+  running the same contract script `lab/verify.sh`.
+
+  Conventions: never pass a prebuilt `pkgs` to `nixosSystem`; `systems/baseline`
+  is frozen; removals of a package family get a
+  `system.forbiddenDependenciesRegexes` guard; no comments in code unless the
+  spec asks for them; no em dashes in prose.
+
+rules:
+  proposal:
+    - State which BRIEFING phase and milestone the change belongs to.
+    - Name the gate evidence that will prove the change works.
+  tasks:
+    - Every task that changes a smol.* module has a matching verification task.
+    - Keep tasks to at most two hours of work each.
+
+operations:
+  archive:
+    guidance:
+      - Commit with jj right after archiving, as Pim Snel, no attribution trailers.
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

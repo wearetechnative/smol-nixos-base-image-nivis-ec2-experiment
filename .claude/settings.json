@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(just:*)",
+      "Bash(nix build:*)",
+      "Bash(nix path-info:*)",
+      "Bash(nix why-depends:*)",
+      "Bash(nix-store --query:*)",
+      "Bash(nix eval:*)",
+      "Bash(nix flake check:*)",
+      "Bash(nix flake show:*)",
+      "Bash(nix fmt:*)",
+      "Bash(nix develop:*)",
+      "Bash(jj:*)",
+      "Bash(git:*)",
+      "Bash(beans:*)",
+      "Bash(openspec:*)",
+      "Bash(jq:*)",
+      "Edit(modules/**)",
+      "Edit(systems/**)",
+      "Edit(lab/**)",
+      "Edit(experiments/**)",
+      "Edit(openspec/**)",
+      "Edit(.beans/**)",
+      "Edit(docs/**)",
+      "Edit(infra/**)",
+      "Edit(*.md)",
+      "Edit(ledger.jsonl)",
+      "Edit(justfile)",
+      "Edit(flake.nix)"
+    ],
+    "deny": [
+      "Bash(aws:*)",
+      "Bash(sudo:*)",
+      "Bash(rm -rf:*)",
+      "Read(~/.aws/**)",
+      "Bash(cat ~/.aws/*)",
+      "Bash(env)",
+      "Bash(printenv:*)",
+      "Bash(*infra/iam/bootstrap.sh*)"
+    ]
+  }
+}

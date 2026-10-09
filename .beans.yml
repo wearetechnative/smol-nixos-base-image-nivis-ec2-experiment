@@ -1,0 +1,6 @@
+beans:
+    path: .beans
+    prefix: smol-nixos-base-image-nivis-ec2-experiment-
+    id_length: 4
+    default_status: todo
+    default_type: task
