@@ -30,7 +30,10 @@
       "Condition": {
         "StringEquals": {
           "aws:RequestTag/Project": "smol-lab",
-          "ec2:InstanceType": ["t3.micro", "t3.small"]
+          "ec2:InstanceType": [
+            "t3.micro",
+            "t3.small"
+          ]
         },
         "StringLike": {
           "aws:RequestTag/Experiment": "*"
@@ -62,15 +65,49 @@
       "Action": [
         "ec2:CreateSecurityGroup",
         "ec2:ImportKeyPair",
-        "ec2:RegisterImage",
+        "ec2:RegisterImage"
+      ],
+      "Resource": [
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:security-group/*",
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:key-pair/*",
+        "arn:aws:ec2:${REGION}::image/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "${REGION}",
+          "aws:RequestTag/Project": "smol-lab"
+        }
+      }
+    },
+    {
+      "Sid": "ReachWhatACreateRefersToButDoesNotCreate",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateSecurityGroup",
+        "ec2:RegisterImage"
+      ],
+      "Resource": [
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:vpc/*",
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:snapshot/*",
+        "arn:aws:ec2:${REGION}::snapshot/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "${REGION}"
+        }
+      }
+    },
+    {
+      "Sid": "StartASnapshotImport",
+      "Effect": "Allow",
+      "Action": [
         "ec2:ImportSnapshot",
         "ec2:CreateSnapshot"
       ],
       "Resource": "*",
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "${REGION}",
-          "aws:RequestTag/Project": "smol-lab"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },

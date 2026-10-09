@@ -41,7 +41,9 @@ filled in by the script:
 | `SeeWhoWeAre` | `sts:GetCallerIdentity`, so `just aws-check` can report the role |
 | `LaunchOnlyTheAgreedInstanceTypes` | launch an instance only as `t3.micro` or `t3.small`, only tagged `Project=smol-lab` |
 | `LaunchNeedsTheseSupportingResources` | the AMI, subnet, security group, key pair and volume a launch touches, in the lab region |
-| `CreateTheLabsOwnResourcesTaggedAsTheLabs` | create a security group, key pair, AMI or snapshot import, only tagged `Project=smol-lab` |
+| `CreateTheLabsOwnResourcesTaggedAsTheLabs` | create a security group, key pair or AMI, only tagged `Project=smol-lab` |
+| `ReachWhatACreateRefersToButDoesNotCreate` | the VPC a security group goes in and the snapshot an AMI registers, which a create refers to but does not create, so they carry no request tag |
+| `StartASnapshotImport` | start a VM import, which has no resource-level ARN to tag-condition on; the snapshot it produces is tagged by the provider afterwards |
 | `TagOnCreateOnly` | `ec2:CreateTags`, only when the tag being set is `Project=smol-lab` |
 | `ManageTheSecurityGroupsOwnRules` | open and close ports, only on a security group already tagged as the lab's |
 | `TearDownOnlyWhatIsTaggedAsTheLabs` | terminate, deregister and delete, only on resources already tagged `Project=smol-lab` |
@@ -221,6 +223,10 @@ money.
 - **`just aws-check` says the role may not launch a tagged instance.** The
   permissions policy drifted from what the pipeline needs. Claude updates
   `infra/iam/SmolLabRole-permissions.json`, you re-run `bootstrap.sh`.
+- **A deploy is denied on a create.** Run `just aws-probe` first: it creates
+  and destroys the key pair and the security group, which is most of the
+  authorisation surface, without paying for the 2.6 GB image upload. It
+  prints the exact action and resource ARN that was denied.
 - **A deployment fails on a permission the policy does not have.** Same loop.
   The action list in `experiments/000-nivis.md` is marked `certain` or
   `likely`; the `likely` ones are exactly the ones expected to need a round

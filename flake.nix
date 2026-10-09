@@ -71,6 +71,13 @@
     {
       nixosModules.smol = ./modules/smol;
 
+      # Gate 2. `nivis` evaluates this attribute by default; lab/deploy-ec2.sh
+      # drives it with --var. Evaluating it never touches AWS.
+      nivis.plan = import ./lab/nivis-plan.nix {
+        nivis = nivis.lib;
+        inherit (self) nixosConfigurations;
+      };
+
       # `<variant>-<system>` for every combination, plus unsuffixed aliases on
       # the primary x86_64 EC2 target.
       nixosConfigurations =
@@ -95,8 +102,17 @@
           // {
             default = self.nixosConfigurations."accepted-${system}".config.system.build.toplevel;
           }
+          // lib.mapAttrs' (
+            name: _:
+            lib.nameValuePair "image-${name}"
+              self.nixosConfigurations."${name}-${system}".config.system.build.images.amazon
+          ) variants
         )
         // {
+          # Pushed to the target before verifying, so the image itself never
+          # has to ship an HTTPS client. Both gates use this one.
+          static-curl = pkgs.pkgsStatic.curl;
+
           options-doc = import ./docs/options-doc.nix {
             inherit pkgs lib;
             smolModule = self.nixosModules.smol;

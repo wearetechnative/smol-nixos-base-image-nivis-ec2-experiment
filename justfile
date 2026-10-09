@@ -51,8 +51,9 @@ gate1-debug variant="candidate":
     nix run .#checks.{{ system }}.verify-{{ variant }}.driverInteractive
 
 # Gate 2: deploy through nivis, verify, reboot, verify, tear down.
-gate2 experiment:
-    ./lab/deploy-ec2.sh {{ experiment }}
+gate2 experiment variant="candidate":
+    jj st > /dev/null
+    ./lab/deploy-ec2.sh {{ experiment }} {{ variant }}
 
 # --- EC2 housekeeping ------------------------------------------------------
 
@@ -65,12 +66,22 @@ aws-key admin_profile:
 aws-check:
     ./lab/aws-check.sh
 
+# Create and destroy the two cheap resources of the gate 2 plan, to find an
+# IAM gap without paying for the image upload first.
+aws-probe:
+    jj st > /dev/null
+    ./lab/aws-probe.sh
+
 # Terminate and deregister everything tagged Project=smol-lab.
 reap:
     ./lab/reap.sh
 
-console instance:
-    ./lab/console.sh {{ instance }}
+console instance experiment="":
+    ./lab/console.sh {{ instance }} {{ experiment }}
+
+# What reap would remove, without removing it.
+reap-dry:
+    SMOL_REAP_DRY_RUN=1 ./lab/reap.sh
 
 # --- the experiment pipeline ----------------------------------------------
 

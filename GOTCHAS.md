@@ -76,3 +76,14 @@ reads this file before it writes a module.
   anything a profile says. `lab/aws-env.sh` unsets them so the lab's profile
   is authoritative. A diagnostic that swallows the AWS error message makes
   this almost impossible to find, so `lab/aws-check.sh` prints it.
+- **An IAM condition on `aws:RequestTag` denies a create that also touches an
+  untaggable resource.** `ec2:CreateSecurityGroup` is authorised against both
+  the new security group and the VPC it goes in. The VPC is not being
+  created, so it carries no request tag, and a single tag-conditioned
+  statement covering `Resource: "*"` denies the whole call. Split the
+  statement: the created resource keeps the tag condition, the referenced one
+  gets region-only. The same shape applies to `ec2:RegisterImage` and the
+  snapshot it points at, and to `ec2:RunInstances` and everything it attaches.
+- **Finding an IAM gap through a full deploy costs a 2.6 GB upload each
+  time.** `just aws-probe` creates and destroys only the key pair and the
+  security group, which covers most of the authorisation surface in seconds.
