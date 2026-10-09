@@ -5,13 +5,13 @@ status: in-progress
 type: epic
 priority: high
 created_at: 2026-10-09T11:51:08Z
-updated_at: 2026-10-09T12:01:07Z
+updated_at: 2026-10-09T12:10:51Z
 parent: smol-nixos-base-image-nivis-ec2-experiment-8uwi
 ---
 
 Claude never sees a secret and never runs the bootstrap. Done: Pim has run bootstrap.sh and `just aws-check` passes.
 
-- [ ] derive the minimal IAM actions from what nivis actually calls
+- [x] derive the minimal IAM actions from what nivis actually calls
 - [ ] `infra/iam/smol-lab-ci-policy.json`
 - [ ] `infra/iam/SmolLabRole-trust.json`
 - [ ] `infra/iam/SmolLabRole-permissions.json` with region lock, tag conditions and instance type limits

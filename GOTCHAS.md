@@ -42,3 +42,15 @@ reads this file before it writes a module.
   milestones and epics present and `--status` passed explicitly. Use
   `just status`, which prints `beans list` and `openspec list`, until the
   roadmap command works.
+- **The vmimport service role is the expensive part of the EC2 pipeline.** AWS
+  requires it for disk-image import, and nivis's example creates it per
+  deployment, which drags `iam:CreateRole`, `iam:CreatePolicy` and
+  `iam:AttachRolePolicy` into whatever role runs the lab. Create it once in
+  the bootstrap instead and point `aws_ebs_snapshot_import.role_name` at it.
+  See `experiments/000-nivis.md` gap 3.
+- **`default_tags` in the AWS provider is a list-nested block**, so nivis takes
+  `default_tags = [ { tags = { ... }; } ];`. A bare attrset is rejected at
+  apply. The same applies to `disk_container` and `user_bucket`.
+- **`aws_s3_object` and `aws_iam_role_policy_attachment` are not taggable.** An
+  IAM condition that requires `aws:RequestTag/Project` on every create will
+  block those two and break the pipeline.
