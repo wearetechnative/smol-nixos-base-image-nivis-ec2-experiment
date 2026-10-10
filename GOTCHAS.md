@@ -101,3 +101,26 @@ reads this file before it writes a module.
   An early version of `lab/aws-probe.sh` used it to reach one resource and
   paid for the full 2.6 GiB upload anyway. The plan takes a `scope` variable
   instead, and `scope=cheap` drops every resource that needs the image.
+- **`systems/baseline` must set `smol.profile` with `mkDefault`.** A plain
+  assignment there conflicts with `systems/accepted` picking a profile, and
+  the module system refuses rather than letting the more specific system win.
+  Changing it to `mkDefault` leaves the evaluated value identical, so the
+  baseline derivation hash and ledger line 1 are unaffected. Verified by
+  comparing the toplevel store path before and after.
+- **`system.disableInstallerTools` does not remove `nixos-rebuild`** on an EC2
+  image. It only gates `environment.systemPackages` through
+  `system.tools.<name>.enable`. `virtualisation/amazon-init.nix` puts
+  `config.system.build.nixos-rebuild` on its service PATH, so the tool and
+  its CPython stay in the closure until amazon-init goes too. Caught by a
+  `system.forbiddenDependenciesRegexes` guard on its first outing, which
+  turned a silent null result into a diagnosis.
+- **amazon-init is not what injects the SSH key.** It is easy to assume so,
+  and removing it looks alarming for contract check 1. The key comes from
+  `ec2-metadata-fetcher`, a separate service, and check 1 keeps passing.
+- **`amazon-ec2-utils` keeps a full CPython in any EC2 image.**
+  `51-ec2-hvm-devices.rules` runs `ebsnvme-id`, a Python script, to map
+  `xvd*` names onto NVMe devices. One udev rule holds 136.55 MiB. Nothing in
+  the published ISO work hits this, which is why our floor sits higher.
+- **A delta that is smaller than expected needs `nix why-depends` run again**,
+  not a shrug. Experiment 005 aimed at a 136.55 MiB interpreter, saved 12.34
+  MiB, and the explanation was a second holder nobody had looked for.

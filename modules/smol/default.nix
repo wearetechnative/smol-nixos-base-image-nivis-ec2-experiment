@@ -3,6 +3,10 @@
   imports = [
     ./profiles.nix
     # One file per strategy (BRIEFING §5). Append here when a strategy is added.
+    ./no-flake-registry.nix
+    ./no-amazon-init.nix
+    ./no-installer-tools.nix
+    ./no-ssm-agent.nix
   ];
 
   options.smol = {

@@ -5,19 +5,37 @@ it at every step change, not at the end of a session.
 
 ## Phase
 
-Phase 0, bootstrap, essentially complete. Both gates are green on
-`systems/baseline` and the ledger has its first line. What is left of phase 0
-is `lab/experiment.sh`, the pipeline that ties build, measure, both gates and
-the ledger together.
+Phase 0 complete. Phase 2 in progress, ahead of phase 1: auditing the
+platform's own defaults turned out to pay better than replaying the ISO work,
+so that came first.
+
+## Where the appliance track stands
+
+| id  | strategy | closure after | delta |
+| --- | -------- | ------------- | ----- |
+| 1   | baseline | 1516.25 MiB | frozen reference |
+| 2   | `noFlakeRegistry` | 1316.50 MiB | 199.75, 13.2% |
+| 3   | `noInstallerTools` | rejected, build failed | guard caught an incomplete removal |
+| 4   | `noAmazonInit` | 1215.40 MiB | 101.10, 7.7% |
+| 5   | `noInstallerTools` | 1203.06 MiB | 12.34, 1.0% |
+| 6   | `noSsmAgent` | 1092.73 MiB | 110.33, 9.2% |
+
+**1516.25 to 1092.73 MiB, 27.9% off the baseline, five accepted strategies.**
+Raw image 2598.64 to 1858.49 MiB, 28.5%. Boot time flat at about 40s
+throughout. Every one of the five passed both gates.
+
+All of it came from auditing what the EC2 platform turns on by default, not
+from either prior-art list. The natkr and siraben replays have not started.
 
 ## Current experiment
 
-None in flight. Experiment 001 is recorded and the account is empty.
+None in flight. Six experiments logged, the account is empty,
+`systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 1, done |
-| slug          | baseline |
+| experiment id | 6, done |
+| slug          | no-ssm-agent |
 | step          | logged |
 | branch        | main |
 
@@ -25,7 +43,8 @@ Steps are `building | measuring | gate1 | gate2 | logging`.
 
 ## The baseline, frozen
 
-Ledger line 1. `systems/baseline` does not change from here.
+Ledger line 1. `systems/baseline` does not change from here. Verified
+byte-identical after the `mkDefault` change in experiment 002.
 
 | measure           | value |
 | ----------------- | ----- |
@@ -55,8 +74,8 @@ else.
 | ---- | --- | ------ | ------- |
 | none | n/a | n/a    | n/a     |
 
-`just reap-dry` reports nothing to reap. The failed run of 2026-10-09 tore
-down its own key pair and uploaded image through the trap.
+`just reap` reports nothing to reap. Nine deployments so far, six of them
+successful and three failed mid-apply, and every one tore itself down.
 
 ## Decided with Pim, 2026-10-09
 
@@ -149,30 +168,36 @@ on 22. That key pair is what makes contract check 1 real.
   `CreateSecurityGroup` is authorised against the VPC too, `ImportSnapshot`
   needs `iam:PassRole` on `vmimport`, and `RegisterImage` tags after
   registering so there is no request tag to condition on.
-- `just aws-probe` now dry-runs `RegisterImage` and `RunInstances` as well as
-  really creating the cheap pair, so the next gap of that kind costs seconds.
-  Only `ImportSnapshot` still needs a real upload to reach.
-
-## What is missing before experiment 2
-
-- `lab/experiment.sh`, the pipeline of BRIEFING §8 that ties build, measure,
-  gate 1, gate 2 and the ledger line together. Right now those are run by
-  hand.
+- `just aws-probe` now dry-runs `RegisterImage` and `RunInstances` alongside
+  creating the cheap pair for real, so the next gap of that kind costs
+  seconds. Only `ImportSnapshot` still needs a real upload to reach.
 
 ## Next three planned experiments
 
-1. `lab/experiment.sh`, so an experiment is one command rather than four.
-2. Replay natkr n1: `documentation.enable = false`.
-3. Replay natkr n2: `environment.defaultPackages = [ ]`.
+1. `e8`: drop `amazon-ec2-utils`, whose `ebsnvme-id` udev helper is the last
+   thing holding a 136.55 MiB CPython. The riskiest of the three: that rule
+   maps `xvd*` names onto NVMe devices, and only gate 2 can say whether
+   anything still needs it.
+2. `n1`: `documentation.enable = false`, the first natkr replay.
+3. `n2`: `environment.defaultPackages = [ ]`.
 
-Worth jumping the queue: the baseline's top five paths include the nixpkgs
-source (199.75 MiB), `python3` (136.55) and `amazon-ssm-agent` (110.09).
-Those are not on the natkr or siraben lists because an ISO never had them,
-and together they are more than a quarter of the closure.
+After those, the largest things left are the kernel module tree at 145.17
+MiB, which is backlog item `e1` and the biggest single target remaining, and
+systemd at 63.02 MiB, which is siraben's `s1`.
 
 ## Checkpoints
 
 Write one every 5 experiments.
+
+- 2026-10-10, after experiment 6: **1516.25 to 1092.73 MiB, 27.9% off the
+  baseline**, five accepted strategies, every one through both gates, boot
+  time flat at about 40s. All of it came from auditing what
+  `virtualisation/amazon-image.nix` and the flake wrapper turn on by default,
+  none of it from the prior-art lists, which have not been started.
+  `lab/experiment.sh` now runs build, measure, gate 1, gate 2, decide and log
+  as one command. Three IAM gaps and four GOTCHAS found along the way. One
+  rejected experiment, 003, where the dependency guard caught an incomplete
+  removal and turned a null result into a diagnosis.
 
 - 2026-10-09: repo scaffolded. Flake without flake-utils, `smol.*` module
   skeleton with profile and track, verification contract v1, gate 1 green with

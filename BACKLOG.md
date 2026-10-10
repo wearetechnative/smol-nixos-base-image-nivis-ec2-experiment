@@ -44,6 +44,19 @@ Source: <https://gist.github.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6>
 | s8 | lastlog off, which drops sqlite | small | todo |
 | s9 | empty hwdb | small | todo |
 
+## Platform defaults, found by auditing the baseline
+
+Not on either prior-art list: an ISO has no platform to configure. Together
+these were 421 MiB of the 1516 MiB baseline, and they were the first quarter
+of the lab's savings.
+
+| # | hypothesis | measured | status |
+| - | ---------- | -------- | ------ |
+| p1 | drop the system flake registry, which pins the nixpkgs source | 199.75 MiB | accepted #2 |
+| p2 | drop `virtualisation.amazon-init`, which puts `nixos-rebuild` on a service PATH | 101.10 MiB | accepted #4 |
+| p3 | drop the installer tools, once p2 has removed the other reference | 12.34 MiB | accepted #5 |
+| p4 | drop the AWS Systems Manager agent | 110.33 MiB | accepted #6 |
+
 ## Phase 2: explore (BRIEFING §9)
 
 | # | hypothesis | expected saving | status |
@@ -55,6 +68,17 @@ Source: <https://gist.github.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6>
 | e5 | remove remaining duplicate util-linux and systemd builds | unknown | todo |
 | e6 | image compression at AMI registration time | unknown | todo |
 | e7 | filesystem choice for the root volume | unknown | todo |
+| e8 | drop `amazon-ec2-utils`, whose `ebsnvme-id` is a Python script and the last thing holding CPython | 136.55 MiB | todo |
+| e9 | `nix.enable = false` on the appliance track, plus the `register-nix-paths` override | unknown | todo |
+| e10 | drop the AWS Systems Manager agent | 110.09 MiB | accepted #6 |
+
+Item `e8` is the clearest example of BRIEFING §2's warning that our floor sits
+above the published ISO numbers. `51-ec2-hvm-devices.rules` runs
+`ebsnvme-id` to map `xvd*` names onto NVMe devices, and that one Python
+script keeps a 136.55 MiB interpreter in the image. Whether it can go depends
+on whether anything still resolves a device by its `xvd*` name; the root
+filesystem is found by label, so there is reason to think it can. Only gate 2
+can answer it.
 
 Phase 2 items are seeded from BRIEFING §9. New ones come from
 `nix why-depends` and `nix path-info -rS` on the largest remaining paths of
