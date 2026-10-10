@@ -190,6 +190,68 @@ true
 
 
 
+## smol\.noDuplicateSystemd\.enable
+
+
+
+Whether to enable building ` util-linux ` without systemd support, so the image stops
+carrying a second systemd\.
+
+A stock image has both ` systemd ` at 63\.02 MiB and
+` systemd-minimal-libs ` at 22\.26 MiB\. The second one is there because
+` agetty ` in ` util-linux-bin ` links against libsystemd, and nixpkgs builds
+that against ` systemdMinimal ` rather than the real systemd to avoid a
+dependency cycle: systemd needs util-linux for libmount and libblkid\.
+
+Pointing ` util-linux ` at the full systemd would close that cycle and is
+not an option\. Dropping the support removes the second build outright\.
+
+Measured saving (appliance track, EC2): not yet accepted\. Experiments
+\#18 and \#20 both failed\. Removing ` agetty `’s reference is not enough:
+` libfido2 ` and ` dbus-lib ` each hold a copy too, and both reach the
+closure through ` switch-to-configuration `\. Retry after
+` smol.noSwitchToConfiguration `\.
+Trade-offs: ` agetty ` no longer talks to systemd, and util-linux stops
+shipping its own systemd units, tmpfiles and sysusers fragments\. On a
+machine reached over SSH rather than a console that is cheap, but it is
+the kind of change whose breakage shows up as a failed unit rather than
+an error, which is what the contract’s check 3 is for\.
+Requires: ` smol.noLastlog `\. util-linux ships its systemd units,
+tmpfiles and sysusers fragments in its ` lastlog ` output, and NixOS adds
+that output to ` systemd.tmpfiles.packages ` whenever PAM’s lastlog is on\.
+Without systemd support the fragment does not exist and the ` etc `
+derivation fails to build\.
+Source: [https://gist\.github\.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6](https://gist\.github\.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6),
+backlog item ` e5 `, and siraben’s warning that a slim systemd must be an
+overlay or consumers pull a second full build
+\.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+
+```nix
+false
+```
+
+
+
+*Example:*
+
+```nix
+true
+```
+
+*Declared by:*
+ - [modules/smol/no-duplicate-systemd\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-duplicate-systemd.nix)
+
+
+
 ## smol\.noFirewall\.enable
 
 
@@ -397,6 +459,56 @@ true
 
 
 
+## smol\.noLastlog\.enable
+
+
+
+Whether to enable turning off PAM’s lastlog module\. ` programs/shadow.nix ` enables it for
+the ` login ` service, which pulls ` pam_lastlog2.so ` in, and with it
+sqlite, a tmpfiles fragment and a ` lastlog2-import.service `\.
+
+The appliance is reached over SSH and nobody reads “last login” on it\.
+
+Measured saving (appliance track, EC2): 3344 bytes, ledger \#19\.
+Effectively nothing: sqlite stays in the closure through another holder,
+so siraben’s reported win does not reproduce here\. Its value is as a
+prerequisite for ` smol.noDuplicateSystemd `, not as a saving\.
+Trade-offs: ` /var/log/wtmp ` is not updated by PAM and ` lastlog ` reports
+nothing\. On a machine with one user and no console logins that is no
+loss, but it is a real audit signal to give up on a machine where people
+do log in\.
+Requires: nothing\. ` smol.noDuplicateSystemd ` requires it, because the
+lastlog output is where util-linux’s systemd fragments live\.
+Source: [https://gist\.github\.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6](https://gist\.github\.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6),
+backlog item ` s8 `
+\.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+
+```nix
+false
+```
+
+
+
+*Example:*
+
+```nix
+true
+```
+
+*Declared by:*
+ - [modules/smol/no-lastlog\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-lastlog.nix)
+
+
+
 ## smol\.noPython\.enable
 
 
@@ -496,6 +608,60 @@ true
 
 *Declared by:*
  - [modules/smol/no-ssm-agent\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-ssm-agent.nix)
+
+
+
+## smol\.noSwitchToConfiguration\.enable
+
+
+
+Whether to enable removing ` switch-to-configuration ` through ` system.switch.enable = false `\. It is the program that activates a new system generation in
+place, which is precisely the thing the appliance track does not do:
+updates replace the AMI\.
+
+It is also a surprisingly expensive thing to keep\. It links dbus, and
+through the systemd it is built against it reaches ` libfido2 `, and both
+of those drag a second systemd build back into the closure\. Experiments
+18 and 20 could not remove that duplicate while this was present\.
+
+Measured saving (appliance track, EC2): **blocked upstream**, not
+accepted\. 19\.56 MiB measured and gate 1 green, but the image cannot be
+built: ` system.build.images.amazon ` runs
+` /nix/var/nix/profiles/system/bin/switch-to-configuration ` inside a
+chroot to install the bootloader, and panics without it\. See ledger \#21
+and ` experiments/021-no-switch-to-configuration.md `\.
+Trade-offs: the system cannot be switched to another generation at all,
+including rolling back to the previous one from the bootloader menu
+entry\. On the appliance track that is already true in spirit; this makes
+it true in fact\.
+Requires: the appliance track\. Asserts against ` smol.track = "mutable" `\.
+Source: [https://gist\.github\.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6](https://gist\.github\.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6),
+backlog item ` s6 `
+\.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+
+```nix
+false
+```
+
+
+
+*Example:*
+
+```nix
+true
+```
+
+*Declared by:*
+ - [modules/smol/no-switch-to-configuration\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-switch-to-configuration.nix)
 
 
 

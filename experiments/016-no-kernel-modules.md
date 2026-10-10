@@ -1,50 +1,24 @@
 # 016: no-kernel-modules
 
-- **Track:** appliance | mutable
-- **Contract:** 1
-- **Module:** `smol.<name>`
-- **Branch:** `exp/NNN-<slug>`
-- **Commit:** `<short sha>`
-- **Source:** <URL of the prior art, or "found by lab, exp #NNN">
+Rejected, gate 2 failed. Second of three attempts at natkr's `n7`.
 
-## Hypothesis
+With `ena` pinned into the initrd the instance still never answered SSH. The
+serial console showed the link up and:
 
-<One paragraph. What should get smaller, by what mechanism, and roughly how
-much. State it before running anything.>
+```
+A start job is running for DHCP Client (12s / 1min 33s)
+```
 
-## What changed
+repeating until the timeout, with no error anywhere and no mention of `ena`
+in the log at all.
 
-<The module, in a few lines. Link to the file rather than pasting it.>
+The cause was not visible in the logs. `CONFIG_PACKET=m` in the kernel
+config, and dhcpcd needs an `AF_PACKET` socket to send a DHCP request. With
+no module tree, `af_packet` cannot load, so dhcpcd waits forever.
 
-## Numbers
+Fixed by adding `af_packet`, `fuse` and `configfs` to the same list, all
+three of which are modular in this kernel. See experiment 017.
 
-| measure | before | after | delta |
-| ------------------ | ---- | ---- | ---- |
-| closure            |      |      |      |
-| image, raw         |      |      |      |
-| image, compressed  |      |      |      |
+Teardown ran: everything destroyed.
 
-Top store paths that moved:
-
-<From `just measure`, only the ones that actually changed.>
-
-## Gate 1, local
-
-<Pass or fail. On failure: which contract check, and the relevant lines of the
-serial log. Never paste the whole log.>
-
-## Gate 2, EC2
-
-<Pass or fail. Boot time. On failure: the serial console output from
-`just console <instance>`.>
-
-Teardown: <confirm the instance, AMI and snapshot are gone.>
-
-## Decision
-
-<Accepted or rejected, and the one-line reason. Accepted means both gates
-passed and the size went down. A rejected experiment keeps its branch.>
-
-## Surprises
-
-<Anything that belongs in GOTCHAS.md. Copy it there too.>
+Full account: `experiments/017-no-kernel-modules.md`.

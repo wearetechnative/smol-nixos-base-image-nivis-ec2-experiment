@@ -1,10 +1,11 @@
 ---
 # smol-nixos-base-image-nivis-ec2-experiment-b0eo
 title: Kernel and initrd for Nitro
-status: todo
+status: in-progress
 type: epic
+priority: normal
 created_at: 2026-10-09T11:51:38Z
-updated_at: 2026-10-09T11:51:38Z
+updated_at: 2026-10-10T18:43:32Z
 parent: smol-nixos-base-image-nivis-ec2-experiment-6waj
 ---
 
@@ -14,4 +15,4 @@ Item e1 of BACKLOG.md, the one hypothesis with the largest expected saving. A ke
 - [ ] a Nitro kernel config with ENA, NVMe and the EC2 essentials built in
 - [ ] prove it boots on a Nitro type through gate 2
 - [ ] decide what happens to the Xen based types, and record it
-- [ ] drop the module tree once the kernel carries everything
+- [x] drop the module tree, accepted #17; done without a custom kernel, since the 145 MiB was in the module tree rather than the kernel image

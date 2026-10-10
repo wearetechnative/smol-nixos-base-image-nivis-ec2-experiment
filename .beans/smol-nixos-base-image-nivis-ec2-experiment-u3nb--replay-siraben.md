@@ -3,8 +3,9 @@
 title: Replay siraben
 status: todo
 type: epic
+priority: normal
 created_at: 2026-10-09T11:51:38Z
-updated_at: 2026-10-09T11:51:38Z
+updated_at: 2026-10-10T18:43:31Z
 parent: smol-nixos-base-image-nivis-ec2-experiment-53cb
 ---
 
@@ -17,5 +18,5 @@ Items s1 to s9 of BACKLOG.md, source https://gist.github.com/siraben/a8fce991289
 - [ ] s5 trim the initrd module set, keeping ENA and NVMe
 - [ ] s6 system.switch.enable = false, appliance track only
 - [ ] s7 C.UTF-8 only, no locale archive
-- [ ] s8 lastlog off, dropping sqlite
+- [x] s8 accepted #19, but only 3344 bytes: sqlite has another holder
 - [ ] s9 empty hwdb

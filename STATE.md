@@ -11,7 +11,8 @@ so that came first.
 
 ## Where the appliance track stands
 
-**1516.25 to 698.13 MiB, 54.0% off the baseline**, ten accepted strategies.
+**1516.25 to 698.13 MiB, 54.0% off the baseline**, eleven accepted
+strategies.
 
 | id  | strategy | closure after | delta |
 | --- | -------- | ------------- | ----- |
@@ -32,6 +33,10 @@ so that came first.
 | 15  | `noKernelModules` | rejected, gate 2 failed | no `ena`, no network |
 | 16  | `noKernelModules` | rejected, gate 2 failed | no `af_packet`, dhcpcd hangs |
 | 17  | `noKernelModules` | 698.13 MiB | 152.93, 18.0% |
+| 18  | `noDuplicateSystemd` | rejected, build failed | util-linux lastlog ships the tmpfiles fragment |
+| 19  | `noLastlog` | 698.13 MiB | 3344 bytes; sqlite stays |
+| 20  | `noDuplicateSystemd` | rejected, guard failed | two more holders of systemd-minimal |
+| 21  | `noSwitchToConfiguration` | rejected, gate 2 failed | **needs-upstream**: the amazon image builder calls it |
 
 Boot time has moved between 36.2s and 41.9s with no clear relationship to
 closure size.
@@ -58,13 +63,13 @@ The overlay-based siraben items are now unblocked by the
 
 ## Current experiment
 
-None in flight. Seventeen ledger entries, the account is empty,
+None in flight. Twenty-one ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 17, done |
-| slug          | no-kernel-modules |
+| experiment id | 21, done |
+| slug          | no-switch-to-configuration |
 | step          | logged |
 | branch        | main |
 
@@ -203,20 +208,46 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## Next three planned experiments
 
-1. `s1`: slim systemd as a nixpkgs overlay. `systemd` at 63.02 MiB plus the
-   duplicate `systemd-minimal` at 22.26 is 85.28 MiB, the largest target
-   left. Unblocked by the `node.pkgsReadOnly` fix from experiment 008.
-2. `n8`: `system.etc.overlay` plus `services.userborn`, for `perl` at 55.18
-   MiB. Experiment 011 showed `defaultPackages` does not shift it.
-3. `e10` and `e11`: find out what pulls in `icu4c` (39.69 MiB) and whether
-   an image booted from a snapshot needs `grub` (36.30 MiB) in its closure
-   at all. Neither has an explanation yet, which under BRIEFING §9.3 makes
-   them backlog items rather than floor entries.
+The systemd cluster is 85.28 MiB and the largest target left, but the obvious
+route into it is blocked. What is left:
+
+1. `e13`: build systemd with `withFido2 = false`. One of the three holders of
+   the duplicate `systemd-minimal`, and an appliance has no security key.
+2. `e14`: find out why `dbus` links `systemd-minimal` rather than the systemd
+   already in the closure. The last holder before `e5` can be retried.
+3. `s1`: slim systemd proper, once the duplicate question is settled. Doing
+   it the other way round risks measuring a saving on one build while the
+   other stays full size.
+
+Then `e10` and `e11`: `icu4c` at 39.69 MiB and `grub` at 36.30 MiB still have
+no explanation, which under BRIEFING §9.3 makes them backlog items rather
+than floor entries.
+
+## Stop criteria, where they stand
+
+BRIEFING §9, criterion 1: "the last 8 accepted experiments each saved < 1% or
+< 2 MiB". Not met. Of the last eight accepted, two saved more than that
+(`noKernelModules` at 152.93 MiB, `noDocumentation` at 93.87 MiB), so the
+lab is not near its floor.
+
+Criterion 2: one item has reached `needs-upstream` with a concrete nixpkgs
+change named. Thirteen backlog items are still `todo`.
+
+Criterion 3: `FLOOR.md` is still empty.
 
 ## Checkpoints
 
 Write one every 5 experiments.
 
+- 2026-10-10, after experiment 21: eleven accepted, still 698.13 MiB. Four
+  experiments spent on the systemd duplicate and `switch-to-configuration`
+  with nothing to show in the closure, but the ground is mapped:
+  `systemd-minimal` has three holders, two of which sit behind
+  `switch-to-configuration`, which in turn cannot be removed because the
+  amazon image builder calls it. That last one is the lab's first
+  `needs-upstream` item and the first failure neither gate was designed to
+  catch, since gate 1 never builds an image and gate 2 only builds one on the
+  way to an instance. The dependency guard earned its place twice more.
 - 2026-10-10, after experiment 17: **1516.25 to 698.13 MiB, 54.0% off the
   baseline**, ten accepted. The module tree took three attempts and two
   failed EC2 deployments: `ena`, `af_packet`, `fuse` and `configfs` all have

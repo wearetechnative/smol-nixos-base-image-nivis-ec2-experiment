@@ -41,9 +41,9 @@ Source: <https://gist.github.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6>
 | s3 | dbus without X11, reusing the slim systemd | medium | todo |
 | s4 | xz compression for squashfs, initrd and kernel (`-9 -e --check=crc32`) | medium | todo |
 | s5 | trim the initrd module set | medium | todo |
-| s6 | `system.switch.enable = false` (appliance track only) | medium | todo |
+| s6 | `system.switch.enable = false` (appliance track only) | 13.79 MiB measured | **needs-upstream**, see below |
 | s7 | C.UTF-8 only, no locale archive | medium | todo |
-| s8 | lastlog off, which drops sqlite | small | todo |
+| s8 | lastlog off, which drops sqlite | small | accepted #19, but only 3344 bytes: sqlite stays |
 | s9 | empty hwdb | small | todo |
 
 ## Platform defaults, found by auditing the baseline
@@ -67,7 +67,7 @@ of the lab's savings.
 | e2 | networkd instead of dhcpcd | unknown | todo |
 | e3 | erofs or squashfs compressed store | unknown | todo |
 | e4 | dropbear instead of openssh | unknown | todo |
-| e5 | remove remaining duplicate util-linux and systemd builds | unknown | todo |
+| e5 | remove the duplicate systemd builds | 22.26 MiB | rejected #18 and #20, blocked behind s6; a different route is written up in experiments/018 |
 | e6 | image compression at AMI registration time | unknown | todo |
 | e7 | filesystem choice for the root volume | unknown | todo |
 | e8 | drop every Python script, so CPython leaves the image | 136.55 MiB | accepted #9, 136.87 MiB |
@@ -86,6 +86,34 @@ was held by four separate consumers, two of them EC2-specific, and it took
 experiments 5, 7, 8 and 9 to get rid of it. `e10` and `e11` are the two
 largest remaining paths with no explanation at all, which under BRIEFING §9.3
 makes them backlog items rather than floor entries.
+
+## needs-upstream
+
+Items that cannot be done here, with the nixpkgs change that would unlock
+each. BRIEFING §9's stop criterion 2 is satisfied by an item reaching this
+list with a concrete change named.
+
+### s6, `system.switch.enable = false`
+
+`config.system.build.images.amazon` builds its disk image by booting a
+builder VM, chrooting into the new root and running
+`/nix/var/nix/profiles/system/bin/switch-to-configuration boot` to install
+the bootloader. With the program gone the chroot fails and the builder VM
+panics, so the AMI cannot be produced at all. Gate 1 passes, because it never
+builds an image.
+
+What would unlock it: the `system.build.images.*` builders should install the
+bootloader without requiring `config.system.switch.enable`, or should use a
+build-time-only `switch-to-configuration` that does not enter the runtime
+closure. 13.79 MiB directly, and it also blocks `e5`.
+
+### New loose ends
+
+| # | what | why it matters |
+| - | ---- | -------------- |
+| e12 | find what holds `sqlite` after PAM's lastlog is off | siraben's `s8` reports sqlite leaving with lastlog; here it stays, and experiment 19 saved 3344 bytes instead |
+| e13 | build systemd with `withFido2 = false` | `libfido2` is one of three holders of the duplicate `systemd-minimal`; an appliance has no security key |
+| e14 | find out why `dbus` links `systemd-minimal` rather than the systemd already in the closure | the third holder, and the last one before `e5` can be retried |
 
 Phase 2 items are seeded from BRIEFING §9. New ones come from
 `nix why-depends` and `nix path-info -rS` on the largest remaining paths of

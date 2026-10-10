@@ -6,13 +6,16 @@
     ./nitro-kernel.nix
     ./no-default-packages.nix
     ./no-kernel-modules.nix
+    ./no-lastlog.nix
     ./no-documentation.nix
     ./no-python.nix
+    ./no-duplicate-systemd.nix
     ./no-firewall.nix
     ./no-flake-registry.nix
     ./no-amazon-init.nix
     ./no-installer-tools.nix
     ./no-ssm-agent.nix
+    ./no-switch-to-configuration.nix
   ];
 
   options.smol = {

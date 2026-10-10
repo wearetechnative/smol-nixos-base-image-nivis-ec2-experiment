@@ -1,50 +1,64 @@
 # 014: no-firewall
 
-- **Track:** appliance | mutable
+- **Track:** appliance
 - **Contract:** 1
-- **Module:** `smol.<name>`
-- **Branch:** `exp/NNN-<slug>`
-- **Commit:** `<short sha>`
-- **Source:** <URL of the prior art, or "found by lab, exp #NNN">
+- **Module:** `smol.noFirewall`
+- **Source:** found by lab, experiment 013
 
 ## Hypothesis
 
-<One paragraph. What should get smaller, by what mechanism, and roughly how
-much. State it before running anything.>
+Not a size hypothesis. Experiment 013 showed that removing the kernel module
+tree leaves `firewall.service` unable to load netfilter, so the contract's
+"no failed units" check fails. The firewall has to go first, and that is a
+decision worth making explicitly rather than smuggling in as a side effect of
+a size optimisation.
+
+On EC2 the security group is already a stateful packet filter, enforced
+outside the guest and unaffected by anything happening inside it.
 
 ## What changed
 
-<The module, in a few lines. Link to the file rather than pasting it.>
+```nix
+networking.firewall.enable = false;
+```
 
 ## Numbers
 
-| measure | before | after | delta |
-| ------------------ | ---- | ---- | ---- |
-| closure            |      |      |      |
-| image, raw         |      |      |      |
-| image, compressed  |      |      |      |
+| measure      | before      | after       | delta        |
+| ------------ | ----------- | ----------- | ------------ |
+| closure      | 900 314 800 | 892 396 888 | 7 917 912    |
+| closure, MiB | 858.60      | 851.07      | 7.53, 0.9%   |
 
-Top store paths that moved:
-
-<From `just measure`, only the ones that actually changed.>
+Small on its own. It exists to unlock experiment 017's 152.93 MiB.
 
 ## Gate 1, local
 
-<Pass or fail. On failure: which contract check, and the relevant lines of the
-serial log. Never paste the whole log.>
+Pass. Ten checks on first boot, ten after reboot.
 
 ## Gate 2, EC2
 
-<Pass or fail. Boot time. On failure: the serial console output from
-`just console <instance>`.>
-
-Teardown: <confirm the instance, AMI and snapshot are gone.>
+Pass. Boot time **36.249s**. Teardown: all six resources destroyed.
 
 ## Decision
 
-<Accepted or rejected, and the one-line reason. Accepted means both gates
-passed and the size went down. A rejected experiment keeps its branch.>
+**Accepted**, profile `aggressive` only, with a warning in the option
+description rather than a one-line trade-off note.
+
+This is the first strategy in this lab whose cost is **security** rather than
+functionality or convenience. The instance has no defence of its own. A
+misconfigured security group is no longer caught by a second layer, and
+anything listening on an unexpected port is reachable from wherever that
+group allows.
+
+On a machine whose only listening service is sshd, behind a group permitting
+only 22, that is defensible. It is not something anyone should inherit by
+enabling a profile without reading what is in it, and `REPORT.md` should say
+so in the recommendations rather than in a table.
 
 ## Surprises
 
-<Anything that belongs in GOTCHAS.md. Copy it there too.>
+None technically. The surprise is structural: a size experiment turned into a
+security decision, and the protocol handled it correctly by forcing it into
+its own module with its own assertion, instead of letting
+`smol.noKernelModules` quietly turn the firewall off as part of its
+implementation.
