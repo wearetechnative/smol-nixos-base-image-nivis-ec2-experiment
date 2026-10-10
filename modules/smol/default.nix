@@ -3,6 +3,9 @@
   imports = [
     ./profiles.nix
     # One file per strategy (BRIEFING §5). Append here when a strategy is added.
+    ./no-default-packages.nix
+    ./no-documentation.nix
+    ./no-python.nix
     ./no-flake-registry.nix
     ./no-amazon-init.nix
     ./no-installer-tools.nix

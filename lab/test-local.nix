@@ -18,6 +18,12 @@ in
 pkgs.testers.runNixOSTest {
   name = "smol-verify-${name}";
 
+  # The test driver otherwise hands each node a prebuilt `pkgs`, which makes
+  # `nixpkgs.overlays` an error rather than a merge. Several smol strategies
+  # install overlays from inside `config`, so gate 1 has to let the module
+  # system instantiate nixpkgs per node, exactly as the flake does.
+  node.pkgsReadOnly = false;
+
   nodes = {
     target =
       { ... }:

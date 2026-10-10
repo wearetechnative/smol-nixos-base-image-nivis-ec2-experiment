@@ -5,7 +5,7 @@ status: in-progress
 type: epic
 priority: high
 created_at: 2026-10-09T11:51:08Z
-updated_at: 2026-10-09T12:01:07Z
+updated_at: 2026-10-10T11:24:58Z
 parent: smol-nixos-base-image-nivis-ec2-experiment-8uwi
 ---
 
@@ -18,3 +18,5 @@ The contract of BRIEFING section 3, as one script both gates run. Done: `just ga
 - [x] `lab/test-support/qemu.nix` listing every forced override as a known hole
 - [x] `just gate1 accepted` and `just gate1 candidate` both green
 - [x] contract version 1 recorded in docs/TESTING.md and frozen
+
+Gate 1 needed node.pkgsReadOnly = false before any overlay-based strategy could pass it. Found by experiment 008; would have blocked every siraben item.

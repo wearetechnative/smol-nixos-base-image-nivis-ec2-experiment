@@ -10,12 +10,18 @@ let
   #   noDocumentation = [ "safe" "aggressive" ];
   #   noNix           = [ "aggressive" ];
   strategies = {
+    noDefaultPackages = [ "aggressive" ];
+    noDocumentation = [
+      "safe"
+      "aggressive"
+    ];
     noFlakeRegistry = [
       "safe"
       "aggressive"
     ];
     noAmazonInit = [ "aggressive" ];
     noInstallerTools = [ "aggressive" ];
+    noPython = [ "aggressive" ];
     noSsmAgent = [ "aggressive" ];
   };
 in

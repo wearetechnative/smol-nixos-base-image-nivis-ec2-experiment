@@ -124,3 +124,22 @@ reads this file before it writes a module.
 - **A delta that is smaller than expected needs `nix why-depends` run again**,
   not a shrug. Experiment 005 aimed at a 136.55 MiB interpreter, saved 12.34
   MiB, and the explanation was a second holder nobody had looked for.
+- **`runNixOSTest` hands each node a prebuilt `pkgs`**, so a strategy that
+  installs `nixpkgs.overlays` from inside `config` fails gate 1 with
+  "`nodes.target.nixpkgs.overlays` is defined multiple times while it's
+  expected to be unique". It is the same trap as passing a prebuilt `pkgs` to
+  `nixosSystem`, one layer down, and it blocks every overlay-based strategy
+  including siraben's slim systemd and util-linux. Set
+  `node.pkgsReadOnly = false` on the test.
+- **`amazon-ec2-utils` has a custom `installPhase` that never calls
+  `runHook postInstall`**, so a `postInstall` override on it silently does
+  nothing. Use `preFixup`, which also lands before `patchShebangs` and so
+  prevents the CPython reference rather than removing it afterwards. Its
+  `installCheckPhase` runs `ebsnvme-id --help`, so `doInstallCheck` has to go
+  too.
+- **CPython has four separate holders in a stock EC2 NixOS image.**
+  `nixos-rebuild` (twice over, through `systemPackages` and through
+  amazon-init's service PATH), `ebsnvme-id` in `amazon-ec2-utils`, and
+  `ec2metadata` in `cloud-utils`, which rides along with `growpart`. Removing
+  any three of them saves nothing. Follow `nix why-depends` until it comes
+  back empty rather than stopping at the first consumer.

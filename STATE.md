@@ -19,13 +19,39 @@ so that came first.
 | 4   | `noAmazonInit` | 1215.40 MiB | 101.10, 7.7% |
 | 5   | `noInstallerTools` | 1203.06 MiB | 12.34, 1.0% |
 | 6   | `noSsmAgent` | 1092.73 MiB | 110.33, 9.2% |
+| 7   | `noEbsNvmeId` | rejected, build failed | wrong build phase, my error |
+| 8   | `noPython` | rejected, gate 1 failed | harness could not handle an overlay |
+| 9   | `noPython` | 955.86 MiB | 136.87, 12.5% |
+| 10  | `noDocumentation` | 861.99 MiB | 93.87, 9.8% |
+| 11  | `noDefaultPackages` | 858.60 MiB | 3.39, 0.4% |
 
-**1516.25 to 1092.73 MiB, 27.9% off the baseline, five accepted strategies.**
-Raw image 2598.64 to 1858.49 MiB, 28.5%. Boot time flat at about 40s
-throughout. Every one of the five passed both gates.
+**1516.25 to 858.60 MiB, 43.4% off the baseline, eight accepted strategies.**
+Raw image 2598.64 to roughly 1624 MiB. Every accepted one passed both gates.
 
-All of it came from auditing what the EC2 platform turns on by default, not
-from either prior-art list. The natkr and siraben replays have not started.
+Boot time has moved between 36.4s and 41.9s with no clear relationship to
+closure size. Experiment 010 read a downward trend into three samples and
+011 broke it; treat it as noise around 38s until something measures it
+properly.
+
+Six of the eight came from auditing what the EC2 platform turns on by
+default. The two prior-art replays run so far both under-delivered against
+their ISO context, for the reason given in `experiments/011`.
+
+## What is left
+
+| MiB    | path | status |
+| ------ | ---- | ------ |
+| 145.17 | `linux-6.18.55-modules` | backlog `e1`, the biggest single target |
+| 63.02  | `systemd-261.3` | siraben `s1`, needs an overlay |
+| 55.18  | `perl-5.42.3` | natkr `n8`, `system.etc.overlay` plus userborn |
+| 39.69  | `icu4c-78.3` | unexamined, no backlog item yet |
+| 36.30  | `grub-2.14` | unexamined; an EC2 image may not need a bootloader at all |
+| 33.93  | `glibc-2.44-25` | irreducible |
+| 28.33  | `initrd-linux-6.18.55` | siraben `s4` and `s5` |
+| 22.26  | `systemd-minimal-261.3` | siraben `s1`, the duplicate build |
+
+`icu4c` and `grub` have no backlog item and no explanation yet, which under
+BRIEFING §9.3 means they are backlog items rather than floor entries.
 
 ## Current experiment
 
@@ -174,21 +200,29 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## Next three planned experiments
 
-1. `e8`: drop `amazon-ec2-utils`, whose `ebsnvme-id` udev helper is the last
-   thing holding a 136.55 MiB CPython. The riskiest of the three: that rule
-   maps `xvd*` names onto NVMe devices, and only gate 2 can say whether
-   anything still needs it.
-2. `n1`: `documentation.enable = false`, the first natkr replay.
-3. `n2`: `environment.defaultPackages = [ ]`.
+1. `n8`: `system.etc.overlay` plus `services.userborn`, to go after
+   `perl-5.42.3` at 55.18 MiB. Experiment 011 showed `defaultPackages` does
+   not shift it.
+2. `e1`: a Nitro kernel with ENA and NVMe built in and no loadable modules.
+   145.17 MiB, the biggest single target left, and the one gate 2 exists to
+   catch if it goes wrong.
+3. `s1`: slim systemd as an overlay, 63.02 MiB plus the 22.26 MiB duplicate
+   `systemd-minimal`. Now unblocked by the `node.pkgsReadOnly` fix.
 
-After those, the largest things left are the kernel module tree at 145.17
-MiB, which is backlog item `e1` and the biggest single target remaining, and
-systemd at 63.02 MiB, which is siraben's `s1`.
+Then `e11` and `e12`, which are new and currently unexplained.
 
 ## Checkpoints
 
 Write one every 5 experiments.
 
+- 2026-10-10, after experiment 11: **1516.25 to 858.60 MiB, 43.4% off the
+  baseline**, eight accepted strategies, three rejected. Two of the three
+  rejections were my own implementation errors; the third, experiment 008,
+  found that gate 1 could not handle a strategy installing an overlay, which
+  would have blocked every siraben item. Boot time does not track closure
+  size. The two natkr replays run so far both under-delivered against their
+  ISO figures, because the savings they describe are partly already gone and
+  partly held by things an ISO never carried.
 - 2026-10-10, after experiment 6: **1516.25 to 1092.73 MiB, 27.9% off the
   baseline**, five accepted strategies, every one through both gates, boot
   time flat at about 40s. All of it came from auditing what

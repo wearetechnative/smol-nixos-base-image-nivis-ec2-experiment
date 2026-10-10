@@ -15,8 +15,8 @@ Source: <https://natkr.com/2026-06-19-nixos-but-smol/> (ISO 458 → 183 MiB)
 
 | # | hypothesis | reported saving | status |
 | - | ---------- | --------------- | ------ |
-| n1 | `documentation.enable = false` | part of 458 → 183 MiB | todo |
-| n2 | `environment.defaultPackages = [ ]` | part of 458 → 183 MiB | todo |
+| n1 | `documentation.enable = false` | part of the ISO 458 to 183 MiB | accepted #10, 93.87 MiB |
+| n2 | `environment.defaultPackages = [ ]` | part of the ISO 458 to 183 MiB | accepted #11, only 3.39 MiB |
 | n3 | `nix.enable = false`, plus overriding `register-nix-paths` | part of 458 → 183 MiB | todo |
 | n4 | `programs.ssh` option stub + `disabledModules` on `programs/ssh.nix` | part of 458 → 183 MiB | todo |
 | n5 | trim `environment.systemPackages` to what the contract needs | part of 458 → 183 MiB | todo |
@@ -68,17 +68,22 @@ of the lab's savings.
 | e5 | remove remaining duplicate util-linux and systemd builds | unknown | todo |
 | e6 | image compression at AMI registration time | unknown | todo |
 | e7 | filesystem choice for the root volume | unknown | todo |
-| e8 | drop `amazon-ec2-utils`, whose `ebsnvme-id` is a Python script and the last thing holding CPython | 136.55 MiB | todo |
+| e8 | drop every Python script, so CPython leaves the image | 136.55 MiB | accepted #9, 136.87 MiB |
 | e9 | `nix.enable = false` on the appliance track, plus the `register-nix-paths` override | unknown | todo |
-| e10 | drop the AWS Systems Manager agent | 110.09 MiB | accepted #6 |
+| e10 | `icu4c-78.3`, 39.69 MiB; nothing known yet about what pulls it in | unknown | todo |
+| e11 | `grub-2.14`, 36.30 MiB. An EC2 image boots from a snapshot, so does a bootloader belong in the closure at all? | unknown | todo |
 
-Item `e8` is the clearest example of BRIEFING §2's warning that our floor sits
-above the published ISO numbers. `51-ec2-hvm-devices.rules` runs
-`ebsnvme-id` to map `xvd*` names onto NVMe devices, and that one Python
-script keeps a 136.55 MiB interpreter in the image. Whether it can go depends
-on whether anything still resolves a device by its `xvd*` name; the root
-filesystem is found by label, so there is reason to think it can. Only gate 2
-can answer it.
+`n8`, `system.etc.overlay` plus `services.userborn`, is now the priority
+among the natkr items: `perl-5.42.3` is 55.18 MiB and the third largest path
+left, and experiment 011 showed that taking it out of `defaultPackages` does
+not shift it.
+
+Item `e8` was the clearest example of BRIEFING §2's warning that our floor
+sits above the published ISO numbers, and it is now settled: the interpreter
+was held by four separate consumers, two of them EC2-specific, and it took
+experiments 5, 7, 8 and 9 to get rid of it. `e10` and `e11` are the two
+largest remaining paths with no explanation at all, which under BRIEFING §9.3
+makes them backlog items rather than floor entries.
 
 Phase 2 items are seeded from BRIEFING §9. New ones come from
 `nix why-depends` and `nix path-info -rS` on the largest remaining paths of

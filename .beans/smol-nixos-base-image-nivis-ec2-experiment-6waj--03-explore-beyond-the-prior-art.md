@@ -1,11 +1,11 @@
 ---
 # smol-nixos-base-image-nivis-ec2-experiment-6waj
 title: 03 Explore beyond the prior art
-status: todo
+status: in-progress
 type: milestone
 priority: normal
 created_at: 2026-10-09T11:50:36Z
-updated_at: 2026-10-09T11:51:46Z
+updated_at: 2026-10-10T11:24:58Z
 blocked_by:
     - smol-nixos-base-image-nivis-ec2-experiment-53cb
 ---

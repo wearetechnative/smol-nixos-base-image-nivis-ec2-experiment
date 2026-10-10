@@ -48,6 +48,95 @@ true
 
 
 
+## smol\.noDefaultPackages\.enable
+
+
+
+Whether to enable emptying ` environment.defaultPackages `, the set NixOS installs on every
+system whether or not anything asks for it: perl, rsync, strace and
+friends\. natkr’s second step\.
+
+Measured saving (appliance track, EC2): 3\.39 MiB closure, ledger \#11\.
+Far smaller than natkr’s ISO context suggests, because most of what
+` defaultPackages ` pulls in is also pulled in by something else on an EC2
+system\. perl in particular survives it; see BACKLOG\.md item ` n8 `\.
+Trade-offs: none of those commands exist on the target\. Anything shelling
+out to one of them breaks, which on this image means checking that
+nothing in the EC2 boot path does\. The verification contract uses only
+coreutils, systemd and util-linux, all of which arrive by other routes\.
+Requires: nothing\.
+Source: [https://natkr\.com/2026-06-19-nixos-but-smol/](https://natkr\.com/2026-06-19-nixos-but-smol/), backlog item n2
+\.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+
+```nix
+false
+```
+
+
+
+*Example:*
+
+```nix
+true
+```
+
+*Declared by:*
+ - [modules/smol/no-default-packages\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-default-packages.nix)
+
+
+
+## smol\.noDocumentation\.enable
+
+
+
+Whether to enable removing man pages, info pages, docbook documentation and the generated
+NixOS manual through ` documentation.enable = false `\. First item on
+natkr’s list, and the one with the least to argue about: nothing on a
+headless appliance reads a man page\.
+
+Measured saving (appliance track, EC2): 93\.87 MiB closure,
+94\.00 MiB raw image, ledger \#10\.
+Trade-offs: no ` man ` on the target\. ` nixos-help ` and the generated option
+documentation go too, though neither is reachable without a browser\.
+Requires: nothing\.
+Source: [https://natkr\.com/2026-06-19-nixos-but-smol/](https://natkr\.com/2026-06-19-nixos-but-smol/), backlog item n1
+\.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+
+```nix
+false
+```
+
+
+
+*Example:*
+
+```nix
+true
+```
+
+*Declared by:*
+ - [modules/smol/no-documentation\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-documentation.nix)
+
+
+
 ## smol\.noFlakeRegistry\.enable
 
 
@@ -139,6 +228,64 @@ true
 
 *Declared by:*
  - [modules/smol/no-installer-tools\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-installer-tools.nix)
+
+
+
+## smol\.noPython\.enable
+
+
+
+Whether to enable removing the CPython interpreter from an EC2 image\. A stock NixOS EC2
+system carries a full 136\.55 MiB CPython for the sake of exactly two
+scripts, neither of which the machine needs to boot or to be managed:
+
+ - ` ebsnvme-id ` in ` amazon-ec2-utils `, run by
+   ` 70-ec2-nvme-devices.rules ` to turn an EBS volume’s attachment name
+   into a ` /dev/sdX ` symlink on Nitro\.
+ - ` ec2metadata ` in ` cloud-utils `, which ships in the same output as
+   ` growpart ` and is pulled in with it by ` growpart.service `\.
+
+Both are stripped, along with the two udev rules that call the first\.
+Everything else stays: ` ec2udev-vbd ` and ` ec2nvme-nsid ` are shell,
+` growpart ` itself is shell, and the ` queue/io_timeout ` tuning in the NVMe
+rules is reliability rather than naming and must not be lost\.
+
+Measured saving (appliance track, EC2): 136\.87 MiB closure,
+137\.00 MiB raw image, ledger \#9\. Boot time also fell from about 40s to
+38\.1s, the first change in this lab to move it measurably\.
+Trade-offs: no ` /dev/sdX ` or ` /dev/xvdX ` symlink for an NVMe-backed EBS
+volume, so anything addressing a volume by its attachment name breaks\.
+The root filesystem is found by label and does not care\. No
+` ec2metadata ` command on the target, which is a convenience for humans
+rather than something the system uses\.
+Requires: ` smol.noInstallerTools `, which removes the third consumer\.
+Source: found by lab, exps \#005, \#007 and \#008, by following
+` nix why-depends ` to the interpreter four times over
+\.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+
+```nix
+false
+```
+
+
+
+*Example:*
+
+```nix
+true
+```
+
+*Declared by:*
+ - [modules/smol/no-python\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-python.nix)
 
 
 
