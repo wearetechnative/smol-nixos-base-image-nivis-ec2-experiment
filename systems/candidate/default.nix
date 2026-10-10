@@ -5,6 +5,4 @@
 { ... }:
 {
   imports = [ ../accepted ];
-
-  smol.nitroKernel.enable = true;
 }

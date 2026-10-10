@@ -15,6 +15,8 @@ let
       "safe"
       "aggressive"
     ];
+    noFirewall = [ "aggressive" ];
+    noKernelModules = [ "aggressive" ];
     noFlakeRegistry = [
       "safe"
       "aggressive"

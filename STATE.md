@@ -11,6 +11,8 @@ so that came first.
 
 ## Where the appliance track stands
 
+**1516.25 to 698.13 MiB, 54.0% off the baseline**, ten accepted strategies.
+
 | id  | strategy | closure after | delta |
 | --- | -------- | ------------- | ----- |
 | 1   | baseline | 1516.25 MiB | frozen reference |
@@ -24,44 +26,45 @@ so that came first.
 | 9   | `noPython` | 955.86 MiB | 136.87, 12.5% |
 | 10  | `noDocumentation` | 861.99 MiB | 93.87, 9.8% |
 | 11  | `noDefaultPackages` | 858.60 MiB | 3.39, 0.4% |
+| 12  | `nitroKernel` | rejected, build failed | kconfig dialogue derails |
+| 13  | `noKernelModules` | rejected, gate 1 failed | firewall needs netfilter modules |
+| 14  | `noFirewall` | 851.07 MiB | 7.53, 0.9% |
+| 15  | `noKernelModules` | rejected, gate 2 failed | no `ena`, no network |
+| 16  | `noKernelModules` | rejected, gate 2 failed | no `af_packet`, dhcpcd hangs |
+| 17  | `noKernelModules` | 698.13 MiB | 152.93, 18.0% |
 
-**1516.25 to 858.60 MiB, 43.4% off the baseline, eight accepted strategies.**
-Raw image 2598.64 to roughly 1624 MiB. Every accepted one passed both gates.
+Boot time has moved between 36.2s and 41.9s with no clear relationship to
+closure size.
 
-Boot time has moved between 36.4s and 41.9s with no clear relationship to
-closure size. Experiment 010 read a downward trend into three samples and
-011 broke it; treat it as noise around 38s until something measures it
-properly.
-
-Six of the eight came from auditing what the EC2 platform turns on by
-default. The two prior-art replays run so far both under-delivered against
-their ISO context, for the reason given in `experiments/011`.
+Seven of the ten accepted came from auditing what the EC2 platform turns on
+by default rather than from either prior-art list.
 
 ## What is left
 
-| MiB    | path | status |
-| ------ | ---- | ------ |
-| 145.17 | `linux-6.18.55-modules` | backlog `e1`, the biggest single target |
-| 63.02  | `systemd-261.3` | siraben `s1`, needs an overlay |
-| 55.18  | `perl-5.42.3` | natkr `n8`, `system.etc.overlay` plus userborn |
-| 39.69  | `icu4c-78.3` | unexamined, no backlog item yet |
-| 36.30  | `grub-2.14` | unexamined; an EC2 image may not need a bootloader at all |
-| 33.93  | `glibc-2.44-25` | irreducible |
-| 28.33  | `initrd-linux-6.18.55` | siraben `s4` and `s5` |
-| 22.26  | `systemd-minimal-261.3` | siraben `s1`, the duplicate build |
+| MiB   | path | status |
+| ----- | ---- | ------ |
+| 63.02 | `systemd-261.3` | siraben `s1`, needs an overlay |
+| 55.18 | `perl-5.42.3` | natkr `n8`, `system.etc.overlay` plus userborn |
+| 39.69 | `icu4c-78.3` | backlog `e10`, unexplained |
+| 36.30 | `grub-2.14` | backlog `e11`, unexplained |
+| 33.93 | `glibc-2.44-25` | irreducible |
+| 28.52 | `initrd-linux-6.18.55` | siraben `s4` and `s5` |
+| 22.26 | `systemd-minimal-261.3` | siraben `s1`, the duplicate build |
+| 21.97 | `linux-6.18.55` | the bzImage itself |
 
-`icu4c` and `grub` have no backlog item and no explanation yet, which under
-BRIEFING §9.3 means they are backlog items rather than floor entries.
+The overlay-based siraben items are now unblocked by the
+`node.pkgsReadOnly` fix from experiment 008, and `systemd` plus its duplicate
+`systemd-minimal` are 85.28 MiB between them, the largest remaining target.
 
 ## Current experiment
 
-None in flight. Six experiments logged, the account is empty,
+None in flight. Seventeen ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 6, done |
-| slug          | no-ssm-agent |
+| experiment id | 17, done |
+| slug          | no-kernel-modules |
 | step          | logged |
 | branch        | main |
 
@@ -200,21 +203,29 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## Next three planned experiments
 
-1. `n8`: `system.etc.overlay` plus `services.userborn`, to go after
-   `perl-5.42.3` at 55.18 MiB. Experiment 011 showed `defaultPackages` does
-   not shift it.
-2. `e1`: a Nitro kernel with ENA and NVMe built in and no loadable modules.
-   145.17 MiB, the biggest single target left, and the one gate 2 exists to
-   catch if it goes wrong.
-3. `s1`: slim systemd as an overlay, 63.02 MiB plus the 22.26 MiB duplicate
-   `systemd-minimal`. Now unblocked by the `node.pkgsReadOnly` fix.
-
-Then `e11` and `e12`, which are new and currently unexplained.
+1. `s1`: slim systemd as a nixpkgs overlay. `systemd` at 63.02 MiB plus the
+   duplicate `systemd-minimal` at 22.26 is 85.28 MiB, the largest target
+   left. Unblocked by the `node.pkgsReadOnly` fix from experiment 008.
+2. `n8`: `system.etc.overlay` plus `services.userborn`, for `perl` at 55.18
+   MiB. Experiment 011 showed `defaultPackages` does not shift it.
+3. `e10` and `e11`: find out what pulls in `icu4c` (39.69 MiB) and whether
+   an image booted from a snapshot needs `grub` (36.30 MiB) in its closure
+   at all. Neither has an explanation yet, which under BRIEFING §9.3 makes
+   them backlog items rather than floor entries.
 
 ## Checkpoints
 
 Write one every 5 experiments.
 
+- 2026-10-10, after experiment 17: **1516.25 to 698.13 MiB, 54.0% off the
+  baseline**, ten accepted. The module tree took three attempts and two
+  failed EC2 deployments: `ena`, `af_packet`, `fuse` and `configfs` all have
+  to be force-loaded in the initrd once nothing can be loaded at runtime.
+  Gate 1 passed all three attempts, which is its boundary rather than a
+  defect: under QEMU every device is virtio and built in, so a missing ENA
+  driver is invisible. Removing the module tree also turned out to require
+  giving up the in-guest firewall, which is the first strategy in this lab
+  whose trade-off is security rather than convenience.
 - 2026-10-10, after experiment 11: **1516.25 to 858.60 MiB, 43.4% off the
   baseline**, eight accepted strategies, three rejected. Two of the three
   rejections were my own implementation errors; the third, experiment 008,

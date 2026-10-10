@@ -143,3 +143,37 @@ reads this file before it writes a module.
   `ec2metadata` in `cloud-utils`, which rides along with `growpart`. Removing
   any three of them saves nothing. Follow `nix why-depends` until it comes
   back empty rather than stopping at the first consumer.
+- **Dropping `$out/kernel-modules` breaks the network before it breaks
+  anything else.** The briefing's seed warns that ENA and NVMe must be in the
+  initrd or built in; the detail that costs an experiment is that they are
+  not symmetrical. `nvme` is in `boot.initrd.availableKernelModules`, so udev
+  loads it in the initrd to find the root device. `ena` is in neither list,
+  because nothing in the initrd needs a network. So the instance boots,
+  mounts root, starts systemd, and then sits there unable to reach IMDS at
+  169.254.169.254. Pin it with `boot.initrd.kernelModules = [ "ena" ]`, which
+  force-loads it while the module still exists.
+- **`system.systemBuilderCommands` needs `lib.mkAfter`** when removing
+  something the builder creates. Without it the removal merges before
+  `kernel.nix`'s own `ln -s $out/kernel-modules` and the symlink comes
+  straight back, with the build succeeding and the closure unchanged.
+- **`boot.kernelPatches` takes `structuredExtraConfig`**, not
+  `extraStructuredConfig`, and every entry needs `lib.mkForce` because
+  nixpkgs' `common-config.nix` already has an opinion about nearly all of
+  them. Even then, disabling whole subsystems derails the `make config`
+  dialogue: the answer script runs off the end and prints "Error in reading
+  or end of file" several hundred times, naming no symbol.
+- **`CONFIG_PACKET=m`, and dhcpcd cannot send DHCP without it.** With the
+  module tree removed the link comes up, the driver is loaded, and
+  `A start job is running for DHCP Client` repeats until the timeout with no
+  error anywhere. Nothing in that symptom points at a kernel module. Add
+  `af_packet` to `boot.initrd.kernelModules`.
+- **Before removing a mechanism rather than a package, enumerate what depends
+  on it.** `grep '=m' "$(nix build .#...kernel.configfile)"` against the
+  services that start after switch-root produces the whole list in one pass.
+  Doing it afterwards cost this lab two EC2 round trips across experiments
+  015 and 016.
+- **Gate 1 cannot see a missing device driver.** Under QEMU every device is
+  virtio and built into the kernel, so a candidate with no ENA driver and no
+  loadable `af_packet` passes all ten checks locally and fails to get a
+  network on EC2. That boundary is the reason gate 2 exists, and it is worth
+  stating when gate 1 passes a change that touches hardware support.

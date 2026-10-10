@@ -21,11 +21,13 @@ Source: <https://natkr.com/2026-06-19-nixos-but-smol/> (ISO 458 → 183 MiB)
 | n4 | `programs.ssh` option stub + `disabledModules` on `programs/ssh.nix` | part of 458 → 183 MiB | todo |
 | n5 | trim `environment.systemPackages` to what the contract needs | part of 458 → 183 MiB | todo |
 | n6 | trim `system.extraDependencies` | part of 458 → 183 MiB | todo |
-| n7 | remove `$out/kernel-modules` from the system closure | part of 458 → 183 MiB | todo |
+| n7 | remove `$out/kernel-modules` from the system closure | part of the ISO 458 to 183 MiB | accepted #17, 152.93 MiB, after three attempts |
 | n8 | `system.etc.overlay` + `services.userborn` to drop Perl | part of 458 → 183 MiB | todo |
 
-n7 is expected to need EC2-specific work: ENA and NVMe must move into the
-initrd or the kernel first (GOTCHAS.md).
+n7 needed exactly the EC2-specific work the briefing predicted, and then
+some: `ena`, `af_packet`, `fuse` and `configfs` all had to be force-loaded in
+the initrd. Three attempts, two of them failed EC2 deployments. See
+`experiments/017-no-kernel-modules.md`.
 
 ## Phase 1: replay siraben
 
@@ -61,7 +63,7 @@ of the lab's savings.
 
 | # | hypothesis | expected saving | status |
 | - | ---------- | --------------- | ------ |
-| e1 | custom Nitro kernel config: ENA and NVMe built in, unused subsystems off | up to 145.17 MiB | in progress, exp #012 |
+| e1 | custom Nitro kernel config: ENA and NVMe built in, unused subsystems off | the module tree is already gone via n7; what is left is the 21.97 MiB bzImage and the 28.52 MiB initrd | rejected #12, kconfig dialogue derails; revisit with a different technique |
 | e2 | networkd instead of dhcpcd | unknown | todo |
 | e3 | erofs or squashfs compressed store | unknown | todo |
 | e4 | dropbear instead of openssh | unknown | todo |
