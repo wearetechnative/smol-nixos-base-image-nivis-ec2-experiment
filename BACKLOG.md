@@ -61,7 +61,7 @@ of the lab's savings.
 
 | # | hypothesis | expected saving | status |
 | - | ---------- | --------------- | ------ |
-| e1 | custom Nitro kernel config: ENA and NVMe built in, no loadable modules | unknown, likely large | todo |
+| e1 | custom Nitro kernel config: ENA and NVMe built in, unused subsystems off | up to 145.17 MiB | in progress, exp #012 |
 | e2 | networkd instead of dhcpcd | unknown | todo |
 | e3 | erofs or squashfs compressed store | unknown | todo |
 | e4 | dropbear instead of openssh | unknown | todo |

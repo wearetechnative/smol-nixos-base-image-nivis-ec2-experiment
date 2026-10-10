@@ -3,6 +3,7 @@
   imports = [
     ./profiles.nix
     # One file per strategy (BRIEFING §5). Append here when a strategy is added.
+    ./nitro-kernel.nix
     ./no-default-packages.nix
     ./no-documentation.nix
     ./no-python.nix
