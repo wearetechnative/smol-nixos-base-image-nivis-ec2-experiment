@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 515.03 MiB | 66.0% |
-| raw VHD | 2598.64 MiB | 630.16 MiB | 75.7% |
-| boot time | 40.8s | 13.5s | 66.9% |
+| closure | 1516.25 MiB | 501.82 MiB | 66.9% |
+| raw VHD | 2598.64 MiB | 614.16 MiB | 76.4% |
+| boot time | 40.8s | 12.4s | 69.5% |
 
-Fifteen accepted strategies. The image is what gets uploaded, imported as a
+Sixteen accepted strategies. The image is what gets uploaded, imported as a
 snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -55,6 +55,9 @@ snapshot and stored as an AMI, so it is the number that costs money.
 | 31  | `minimalSystemPackages` | 553.27 MiB | 57.32, 9.4%; 57 packages down to 16 |
 | 32 to 35 | `slimSystemd` | rejected | four builds, each naming one missing systemd file |
 | 36  | `slimSystemd` | 515.03 MiB | 38.24, 6.9%; systemd 63.02 to 52.04 MiB |
+| 37  | `noPerl` | rejected | **needs-upstream**: perl is held by `install-grub.pl` |
+| 38  | `emptyHwdb` | rejected, build failed | `systemd-hwdb` writes nothing from no input |
+| 39  | `emptyHwdb` | 501.82 MiB | 13.21, 2.6% |
 
 Boot time has moved between 36.2s and 41.9s with no clear relationship to
 closure size.
@@ -64,29 +67,39 @@ by default rather than from either prior-art list.
 
 ## What is left
 
+**127.53 MiB of it, a quarter of the closure, is behind one nixpkgs change.**
+`switch-to-configuration` is the sole remaining holder of perl, GRUB and
+`systemd-minimal`, and it cannot be removed because
+`system.build.images.amazon` calls it to install the bootloader. Four
+separate lines of attack ended there: `n8`, `e11`, `e5` and `s6` itself.
+
 | MiB   | path | status |
 | ----- | ---- | ------ |
-| 55.18 | `perl-5.42.3` | natkr `n8`, `system.etc.overlay` plus userborn. The largest target left |
-| 52.04 | `systemd-261.3` | already slimmed in #36; further cuts need the duplicate settled first |
-| 36.30 | `grub-2.14` | `e11`, held by `switch-to-configuration`, blocked behind `s6` |
+| 55.18 | `perl-5.42.3` | blocked behind `s6`, module written, gate 1 green |
+| 52.04 | `systemd-261.3` | already slimmed in #36 |
+| 36.30 | `grub-2.14` | blocked behind `s6` |
 | 33.93 | `glibc-2.44-25` | irreducible |
-| 24.77 | `initrd-linux-6.18.55` | siraben `s4` and `s5` |
-| 22.26 | `systemd-minimal-261.3` | `e5`, blocked behind `s6` |
-| 21.97 | `linux-6.18.55` | the bzImage itself |
+| 24.77 | `initrd-linux-6.18.55` | siraben `s4` and `s5`, not yet tried |
+| 22.26 | `systemd-minimal-261.3` | blocked behind `s6` |
+| 21.97 | `linux-6.18.55` | the bzImage |
 | 13.98 | `util-linux-2.42.3-lib` | unexamined |
+| 12.00 | `coreutils-full-9.11` | `coreutils` rather than `-full` may do |
+| 10.54 | `file-5.48` | unexamined, pulled by a systemd unit |
 
-Two of the eight are blocked behind the same `needs-upstream` item, `s6`,
-which is 58.56 MiB sitting behind one nixpkgs change.
+Switching to systemd-boot to escape `install-grub.pl` was checked and
+rejected without running it: NixOS installs systemd-boot with
+`systemd-boot-builder.py`, so it trades 91 MiB of perl and GRUB for a 136
+MiB CPython.
 
 ## Current experiment
 
-None in flight. Thirty-six ledger entries, the account is empty,
+None in flight. Thirty-nine ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 36, done |
-| slug          | slim-systemd |
+| experiment id | 39, done |
+| slug          | empty-hwdb |
 | step          | logged |
 | branch        | main |
 
@@ -225,12 +238,16 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## Next three planned experiments
 
-1. `n8`: `system.etc.overlay` plus `services.userborn`, for `perl` at 55.18
-   MiB. Now the largest single path, and the last big natkr item.
-2. `s4` and `s5`: xz the initrd and trim its module set, 24.77 MiB. The xz
-   gotcha from the briefing applies: single-threaded with crc32, or the
-   kernel's decoder silently truncates it.
-3. `s7`: C.UTF-8 only, no locale archive.
+1. `s4` and `s5`: xz the initrd and trim its module set, 24.77 MiB. The
+   briefing's xz gotcha applies: single-threaded with crc32, or the kernel's
+   decoder silently truncates it and panics at root mount.
+2. `coreutils` instead of `coreutils-full`, and find what pulls `file-5.48`.
+3. Write `FLOOR.md`, which is stop criterion 3 and still empty. Most of the
+   top ten now has an explanation, so it is mostly transcription.
+
+The honest next move after those is not another experiment: it is the
+upstream change for `s6`, which is worth more than everything left on the
+list combined.
 
 ## Stop criteria, where they stand
 

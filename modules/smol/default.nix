@@ -3,6 +3,7 @@
   imports = [
     ./profiles.nix
     # One file per strategy (BRIEFING §5). Append here when a strategy is added.
+    ./empty-hwdb.nix
     ./lean-image.nix
     ./minimal-system-packages.nix
     ./nitro-kernel.nix
@@ -10,6 +11,7 @@
     ./no-kernel-modules.nix
     ./no-lastlog.nix
     ./no-nix.nix
+    ./no-perl.nix
     ./no-documentation.nix
     ./no-python.nix
     ./no-duplicate-systemd.nix

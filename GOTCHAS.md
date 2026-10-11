@@ -222,3 +222,13 @@ reads this file before it writes a module.
   listing showed GRUB still there at 36.30 MiB, held by
   `switch-to-configuration` as well as by the system path. The rule from
   experiment 9 exists for this and was not followed.
+- **Switching from GRUB to systemd-boot to escape Perl trades up, not down.**
+  NixOS installs systemd-boot with `systemd-boot-builder.py`, so the 55.18
+  MiB of perl and 36.30 MiB of GRUB become a 136 MiB CPython. One `grep` for
+  `python` in `systemd-boot.nix` is cheaper than the experiment.
+- **`switch-to-configuration` is the sole remaining holder of 127.53 MiB.**
+  perl through `install-grub.pl`, GRUB through `grub-config.xml`,
+  `systemd-minimal` through `dbus-lib` and `libfido2`, plus itself. Four
+  separate lines of attack ended there. It cannot be removed because
+  `system.build.images.amazon` calls it to install the bootloader, which is
+  the lab's one `needs-upstream` item.

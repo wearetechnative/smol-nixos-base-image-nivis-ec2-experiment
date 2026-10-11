@@ -22,7 +22,7 @@ Source: <https://natkr.com/2026-06-19-nixos-but-smol/> (ISO 458 → 183 MiB)
 | n5 | trim `environment.systemPackages` to what the contract needs | part of the ISO 458 to 183 MiB | accepted #31, 57.32 MiB; 57 packages down to 16 |
 | n6 | trim `system.extraDependencies` | part of 458 → 183 MiB | todo |
 | n7 | remove `$out/kernel-modules` from the system closure | part of the ISO 458 to 183 MiB | accepted #17, 152.93 MiB, after three attempts |
-| n8 | `system.etc.overlay` + `services.userborn` to drop Perl | part of 458 → 183 MiB | todo |
+| n8 | `system.etc.overlay` + `services.userborn` to drop Perl | part of the ISO 458 to 183 MiB | **needs-upstream**: implemented in #37 and gate 1 green, but Perl stays because `install-grub.pl` holds it. Blocked behind `s6` |
 
 n7 needed exactly the EC2-specific work the briefing predicted, and then
 some: `ena`, `af_packet`, `fuse` and `configfs` all had to be force-loaded in
@@ -42,9 +42,9 @@ Source: <https://gist.github.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6>
 | s4 | xz compression for squashfs, initrd and kernel (`-9 -e --check=crc32`) | medium | todo |
 | s5 | trim the initrd module set | medium | todo |
 | s6 | `system.switch.enable = false` (appliance track only) | 13.79 MiB measured | **needs-upstream**, see below |
-| s7 | C.UTF-8 only, no locale archive | medium | todo |
+| s7 | C.UTF-8 only, no locale archive | medium | low value here: `glibc-locales` is 2.93 MiB after `n5`, todo |
 | s8 | lastlog off, which drops sqlite | small | accepted #19, but only 3344 bytes: sqlite stays |
-| s9 | empty hwdb | small | todo |
+| s9 | empty hwdb | small | accepted #39, 13.21 MiB |
 
 ## Platform defaults, found by auditing the baseline
 
@@ -119,7 +119,22 @@ builds an image.
 What would unlock it: the `system.build.images.*` builders should install the
 bootloader without requiring `config.system.switch.enable`, or should use a
 build-time-only `switch-to-configuration` that does not enter the runtime
-closure. 13.79 MiB directly, and it also blocks `e5`.
+closure.
+
+**This one item is worth 127.53 MiB**, which is 24.8% of the current 515.03
+MiB closure. `switch-to-configuration` is the sole remaining holder of all
+of these:
+
+| MiB   | path | item |
+| ----- | ---- | ---- |
+| 55.18 | `perl-5.42.3` | `n8`, through `install-grub.pl` |
+| 36.30 | `grub-2.14` | `e11`, through `grub-config.xml` |
+| 22.26 | `systemd-minimal-261.3` | `e5`, through `dbus-lib` and `libfido2` |
+| 13.79 | `switch-to-configuration` itself | `s6` |
+
+Each was pursued separately and each ended at the same place. The modules
+are written and their gate 1 runs are green; they are not enabled in any
+profile because on their own they save nothing.
 
 ### New loose ends
 

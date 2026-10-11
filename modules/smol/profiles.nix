@@ -10,6 +10,7 @@ let
   #   noDocumentation = [ "safe" "aggressive" ];
   #   noNix           = [ "aggressive" ];
   strategies = {
+    emptyHwdb = [ "aggressive" ];
     leanImage = [
       "safe"
       "aggressive"
