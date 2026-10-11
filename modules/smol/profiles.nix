@@ -32,6 +32,7 @@ let
     noAmazonInit = [ "aggressive" ];
     noInstallerTools = [ "aggressive" ];
     noPython = [ "aggressive" ];
+    noSudo = [ "aggressive" ];
     noSsmAgent = [ "aggressive" ];
     slimSystemd = [ "aggressive" ];
   };

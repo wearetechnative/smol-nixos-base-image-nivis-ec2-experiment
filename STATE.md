@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 489.07 MiB | 67.7% |
-| raw VHD | 2598.64 MiB | 600.16 MiB | 76.9% |
-| boot time | 40.8s | 13.0s | 68.1% |
+| closure | 1516.25 MiB | 483.26 MiB | 68.1% |
+| raw VHD | 2598.64 MiB | 592.16 MiB | 77.2% |
+| boot time | 40.8s | 12.3s | 69.9% |
 
-Seventeen accepted strategies. The image is what gets uploaded, imported as a
+Eighteen accepted strategies. The image is what gets uploaded, imported as a
 snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -61,6 +61,7 @@ snapshot and stored as an AMI, so it is the number that costs money.
 | 40  | `minimalCoreutils` | rejected | protocol trap: both sides of the comparison moved |
 | 41  | `minimalCoreutils` | 489.07 MiB | 12.75, 2.5% |
 | 42  | `minimalInitrdModules` | rejected, gate 1 panicked | 1.41 MiB; the initrd is userland, not modules |
+| 43  | `noSudo` | 483.26 MiB | 5.81, 1.2%; found by writing `FLOOR.md` |
 
 Boot time has moved between 36.2s and 41.9s with no clear relationship to
 closure size.
@@ -95,13 +96,13 @@ MiB CPython.
 
 ## Current experiment
 
-None in flight. Forty-two ledger entries, the account is empty,
+None in flight. Forty-three ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 42, done |
-| slug          | minimal-initrd-modules |
+| experiment id | 43, done |
+| slug          | no-sudo |
 | step          | logged |
 | branch        | main |
 
@@ -240,20 +241,19 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## Next three planned experiments
 
-`FLOOR.md` is now written and says what the honest next moves are.
+`FLOOR.md` now drives this. Its "traced, with a decision still owed" table
+is nine paths and 57.57 MiB, and each one has to end up accepted, rejected
+or `needs-upstream` before criteria 2 and 3 can be met.
 
-1. The ten unexplained paths in `FLOOR.md`, 63.25 MiB between them. `file`,
-   `gcc-lib`, a second `util-linux-minimal`, `linux-headers-static`,
-   `sqlite`, `sudo` and two Berkeley DBs. None has a reason yet, so under
-   BRIEFING §9.3 none is a floor entry and criteria 2 and 3 both depend on
-   them.
-2. `s4`: xz the initrd, now the only lever left on it. The briefing's gotcha
-   applies: single-threaded with crc32, or the kernel's decoder silently
-   truncates it and panics at root mount.
-3. `s7`: C.UTF-8 only. Worth 2.93 MiB, which is honest about its size.
+1. The two untraced entries, `elfutils` and the second Berkeley DB, then a
+   decision on `file`, `util-linux-minimal` and `sqlite`.
+2. `db-5.3.28` is there for `arpd` in `iproute2`, which nothing calls.
+   An `iproute2` override is 4.24 MiB.
+3. `s4`: xz the initrd, the only lever left on it, with the briefing's
+   single-threaded crc32 gotcha.
 
-The move worth more than all of those together is the upstream change for
-`s6`, at 127.53 MiB.
+The move worth more than all of those together is still the upstream change
+for `s6`, at 127.53 MiB.
 
 ## Stop criteria, where they stand
 
@@ -265,13 +265,22 @@ named. Fifteen backlog items are still `todo`, three of them new this
 session.
 
 Criterion 3: `FLOOR.md` is written. 63 paths are over 1 MiB; the 30 largest
-are classified, and **ten of them, 63.25 MiB, have no justification yet**, so
-the criterion is not met.
+are classified, and **nine of them, 57.57 MiB, have no justification yet**,
+so the criterion is not met.
 
 ## Checkpoints
 
 Write one every 5 experiments.
 
+- 2026-10-11, after experiment 43: **1516.25 to 483.26 MiB, 68.1% off, and
+  the raw VHD 2598.64 to 592.16 MiB, 77.2%.** Eighteen accepted. This block
+  added noNix (the appliance track had carried Nix for 25 experiments),
+  minimalSystemPackages (57 packages to 16), slimSystemd, emptyHwdb,
+  coreutils and noSudo. `FLOOR.md` is written and is now what drives the
+  queue. Two findings matter more than the numbers: one nixpkgs change is
+  worth 127.53 MiB, and `lab/experiment.sh` had a silent hole where
+  refining an already-accepted module put an ungated change into the tree
+  with a measured delta of zero.
 - 2026-10-11, after experiment 25: **the raw VHD went from 1400.35 to
   856.21 MiB, 544.14 MiB off, with the closure unchanged by a single byte**,
   and boot time fell from 36.4s to 14.3s. It came from reading

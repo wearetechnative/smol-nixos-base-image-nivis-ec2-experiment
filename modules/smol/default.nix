@@ -21,6 +21,7 @@
     ./no-amazon-init.nix
     ./no-installer-tools.nix
     ./slim-systemd.nix
+    ./no-sudo.nix
     ./no-ssm-agent.nix
     ./no-switch-to-configuration.nix
   ];

@@ -15,7 +15,7 @@ just measure accepted | jq -r '.top_paths[] | "\(.bytes)\t\(.path)"'
 
 ## Appliance track
 
-Closure 489.07 MiB at ledger #41, from a 1516.25 MiB baseline. 63 paths are
+Closure 483.26 MiB at ledger #43, from a 1516.25 MiB baseline. 63 paths are
 over 1 MiB; the 30 largest are listed, which is 374 MiB of the 489.
 
 ### Blocked behind one upstream change, not floor
@@ -53,27 +53,28 @@ worth **127.53 MiB, 26% of the closure**.
 | 3.70  | `ncurses-6.6` | terminfo for an interactive SSH session |
 | 3.43  | `gawk-5.4.1` | `lab/verify.sh` uses `awk` in checks 3 and 9 |
 
-### Not yet justified, therefore backlog
+### Traced, with a decision still owed
 
-Under BRIEFING §9.3 these are backlog items rather than floor entries,
-because "it is there" is not a reason.
+`nix why-depends` run on each, 2026-10-11. Knowing the holder is not the
+same as having a reason to keep it, so these stay out of the floor until
+each is accepted, rejected or marked `needs-upstream`.
 
-| MiB   | path | what is known |
-| ----- | ---- | ------------- |
-| 10.54 | `file-5.48` | on `fetch-ec2-metadata.service`'s PATH, which is the service that makes contract check 1 pass. Whether it is actually called is unknown |
-| 10.31 | `gcc-16.2.0-lib` | libstdc++ and libgcc. Which consumer needs C++ is unknown |
-| 8.72  | `util-linux-minimal-2.42.3-bin` | a second util-linux build, like the systemd duplicate. Holder not traced |
-| 7.20  | `linux-headers-static-7.2` | kernel headers in a runtime closure is suspicious |
-| 5.90  | `sqlite-3.53.3` | survived `smol.noLastlog` (#19), reached through `lslogins`. Holder not fully traced |
-| 5.68  | `sudo-1.9.17p2` | `security.sudo.enable` defaults on. A single-user appliance reached as root may not need it |
-| 4.24  | `db-5.3.28` | Berkeley DB, two versions of it |
-| 4.12  | `elfutils-0.195` | unexamined |
-| 3.61  | `db-4.8.30` | the second Berkeley DB |
-| 2.93  | `glibc-locales-2.44-25` | siraben's `s7` would cut this to C.UTF-8 only |
+| MiB   | path | holder | verdict |
+| ----- | ---- | ------ | ------- |
+| 10.54 | `file-5.48` | on `fetch-ec2-metadata.service`'s PATH | that service makes contract check 1 pass; whether it calls `file` is still unknown |
+| 10.31 | `gcc-16.2.0-lib` | `perl-5.42.3-env` | leaves with perl, so blocked behind `s6` |
+| 8.72  | `util-linux-minimal-2.42.3-bin` | `systemd-generator-environment.json` | a second util-linux build, like the systemd duplicate. Not yet attacked |
+| 7.20  | `linux-headers-static-7.2` | `suid-sgid-wrappers.service` | the wrapper builder. `security.wrappers` must stay: pam_unix needs `unix_chkpwd` or login loops |
+| 5.90  | `sqlite-3.53.3` | `lslogins` in `util-linux-bin` | survived `smol.noLastlog` (#19). Needs util-linux built without it |
+| 4.24  | `db-5.3.28` | `arpd` in `iproute2` | iproute2 is kept for `ip`; `arpd` is not used |
+| 4.12  | `elfutils-0.195` | not traced | |
+| 3.61  | `db-4.8.30` | not traced | the second Berkeley DB |
+| 2.93  | `glibc-locales-2.44-25` | locale support | siraben's `s7` would cut this to C.UTF-8 only |
 
-Ten unexplained paths, 63.25 MiB between them. **Stop criterion 3 is not
-met**, and criterion 2 cannot be met until each of these is accepted,
-rejected or marked `needs-upstream`.
+57.57 MiB across nine paths, after `sudo` was removed in experiment #43.
+One is blocked upstream, two are untraced and the rest have a holder but no
+decision. **Stop criteria 2 and 3 are both not met**, and this table is the
+reason.
 
 ## Mutable track
 

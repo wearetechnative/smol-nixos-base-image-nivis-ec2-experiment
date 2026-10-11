@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **489 MiB** | 67.7% |
-| **raw VHD** | 2599 MiB | **600 MiB** | 76.9% |
-| **boot time** | 40.8s | **13.0s** | 68.1% |
+| **closure** | 1516 MiB | **483 MiB** | 68.1% |
+| **raw VHD** | 2599 MiB | **592 MiB** | 77.2% |
+| **boot time** | 40.8s | **12.3s** | 69.8% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 37 | `no-perl` | -0.3 | +2.0 | undecided: gate 2 skipped |
 | 38 | `empty-hwdb` | n/a | n/a | rejected: build failed |
 | 39 | `empty-hwdb` | +13.2 | +16.0 | **accepted** |
 | 40 | `minimal-coreutils` | +0.0 | +0.0 | rejected: neither closure nor image is smaller than accepted |
 | 41 | `minimal-coreutils` | +12.7 | +14.0 | **accepted** |
 | 42 | `minimal-initrd-modules` | +1.4 | +4.0 | rejected: gate 1 failed |
+| 43 | `no-sudo` | +5.8 | +8.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).
