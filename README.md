@@ -55,7 +55,13 @@ out how much higher is the point.
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
 
-![size per accepted experiment](docs/progress.svg)
+![size and boot time per accepted experiment](docs/progress.svg)
+
+Boot time is on its own panel rather than a second axis on the size plot,
+because it does not track size. Experiment 10 looked like a downward trend
+and experiment 11 broke it; experiment 25 moved boot time by 22 seconds
+without changing the closure by a single byte. Why it moved is
+[backlog item `e15`](BACKLOG.md) and not yet answered.
 
 ### Backlog
 

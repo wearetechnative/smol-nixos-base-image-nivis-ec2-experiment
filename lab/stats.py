@@ -41,24 +41,38 @@ def accepted(rows):
 
 
 def svg(points):
-    w, h = 760, 300
-    ml, mr, mt, mb = 56, 16, 28, 40
-    pw, ph = w - ml - mr, h - mt - mb
+    """Two stacked panels sharing one x-axis, not one panel with two y-axes.
+
+    Boot time does not track size: experiment 11 broke the trend 10 looked
+    like it had, and 25 moved boot time by 22s while the closure did not
+    change at all. Overlaying the two on a shared plot with independent
+    scales would let a reader see a correlation that the ledger denies.
+    """
+    w, h = 760, 420
+    ml, mr = 56, 16
+    pw = w - ml - mr
+
+    top, toph = 28, 206
+    bot, both = 294, 70
 
     ids = [p["id"] for p in points]
     ymax = max(max(p["image"] for p in points), max(p["closure"] for p in points))
     ymax = int((ymax + 299) // 300 * 300)
+    bmax = int((max(p["boot"] for p in points) + 9) // 10 * 10)
 
     def x(i):
         lo, hi = min(ids), max(ids)
         return ml + (pw if hi == lo else pw * (i - lo) / (hi - lo))
 
     def y(v):
-        return mt + ph - ph * v / ymax
+        return top + toph - toph * v / ymax
 
-    def path(key):
+    def yb(v):
+        return bot + both - both * v / bmax
+
+    def path(key, fy):
         return " ".join(
-            ("M" if n == 0 else "L") + f"{x(p['id']):.1f},{y(p[key]):.1f}"
+            ("M" if n == 0 else "L") + f"{x(p['id']):.1f},{fy(p[key]):.1f}"
             for n, p in enumerate(points)
         )
 
@@ -79,6 +93,28 @@ def svg(points):
             f'<text x="{ml - 8}" y="{y(v) + 4:.1f}" fill="{INK}" font-size="11" '
             f'text-anchor="end">{v}</text>'
         )
+    parts.append(
+        f'<text x="14" y="{top + toph / 2:.1f}" fill="{INK}" font-size="10" '
+        f'text-anchor="middle" transform="rotate(-90 14 {top + toph / 2:.1f})">MiB</text>'
+    )
+
+    for v in (0, bmax // 2, bmax):
+        parts.append(
+            f'<line x1="{ml}" y1="{yb(v):.1f}" x2="{ml + pw}" y2="{yb(v):.1f}" '
+            f'stroke="{GRID}" stroke-width="1"/>'
+        )
+        parts.append(
+            f'<text x="{ml - 8}" y="{yb(v) + 4:.1f}" fill="{INK}" font-size="11" '
+            f'text-anchor="end">{v}</text>'
+        )
+    parts.append(
+        f'<text x="14" y="{bot + both / 2:.1f}" fill="{INK}" font-size="10" '
+        f'text-anchor="middle" transform="rotate(-90 14 {bot + both / 2:.1f})">sec</text>'
+    )
+    parts.append(
+        f'<text x="{ml}" y="{bot - 8}" fill="{INK}" font-size="10">'
+        f'boot time, measured on the guest. It does not track size: see ledger 11 and 25.</text>'
+    )
 
     for p in points:
         parts.append(
@@ -89,35 +125,34 @@ def svg(points):
         f'<text x="{ml + pw / 2:.1f}" y="{h - 3}" fill="{INK}" font-size="10" '
         f'text-anchor="middle">ledger entry</text>'
     )
-    parts.append(
-        f'<text x="14" y="{mt + ph / 2:.1f}" fill="{INK}" font-size="10" '
-        f'text-anchor="middle" transform="rotate(-90 14 {mt + ph / 2:.1f})">MiB</text>'
-    )
 
-    for key, colour in (("image", IMAGE), ("closure", CLOSURE)):
+    series = (
+        ("image", IMAGE, y, "raw VHD", "{:.0f}"),
+        ("closure", CLOSURE, y, "closure", "{:.0f}"),
+        ("boot", BOOT, yb, "boot", "{:.1f}s"),
+    )
+    for key, colour, fy, _, _ in series:
         parts.append(
-            f'<path d="{path(key)}" fill="none" stroke="{colour}" stroke-width="2.5" '
+            f'<path d="{path(key, fy)}" fill="none" stroke="{colour}" stroke-width="2.5" '
             f'stroke-linejoin="round" stroke-linecap="round"/>'
         )
         for p in points:
             parts.append(
-                f'<circle cx="{x(p["id"]):.1f}" cy="{y(p[key]):.1f}" r="3" '
+                f'<circle cx="{x(p["id"]):.1f}" cy="{fy(p[key]):.1f}" r="3" '
                 f'fill="{colour}"/>'
             )
 
     first, last = points[0], points[-1]
-    for key, colour, label in (
-        ("image", IMAGE, "raw VHD"),
-        ("closure", CLOSURE, "closure"),
-    ):
+    for key, colour, fy, label, fmt in series:
         parts.append(
-            f'<text x="{x(last["id"]) - 6:.1f}" y="{y(last[key]) - 10:.1f}" '
+            f'<text x="{x(last["id"]) - 6:.1f}" y="{fy(last[key]) - 10:.1f}" '
             f'fill="{colour}" font-size="12" font-weight="600" text-anchor="end">'
-            f'{label} {last[key]}</text>'
+            f'{label} {fmt.format(last[key])}</text>'
         )
         parts.append(
-            f'<text x="{x(first["id"]) + 6:.1f}" y="{y(first[key]) - 10:.1f}" '
-            f'fill="{colour}" font-size="11" text-anchor="start">{first[key]}</text>'
+            f'<text x="{x(first["id"]) + 6:.1f}" y="{fy(first[key]) - 10:.1f}" '
+            f'fill="{colour}" font-size="11" text-anchor="start">'
+            f'{fmt.format(first[key])}</text>'
         )
 
     parts.append("</svg>")
@@ -156,6 +191,7 @@ def main():
             "id": r["id"],
             "closure": round(r["closure_after"] / MIB),
             "image": round(r.get("image_bytes", 0) / MIB),
+            "boot": r.get("boot_seconds") or 0,
         }
         for r in acc
     ]
@@ -215,7 +251,13 @@ def main():
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
 
-![size per accepted experiment](docs/progress.svg)
+![size and boot time per accepted experiment](docs/progress.svg)
+
+Boot time is on its own panel rather than a second axis on the size plot,
+because it does not track size. Experiment 10 looked like a downward trend
+and experiment 11 broke it; experiment 25 moved boot time by 22 seconds
+without changing the closure by a single byte. Why it moved is
+[backlog item `e15`](BACKLOG.md) and not yet answered.
 
 ### Backlog
 
