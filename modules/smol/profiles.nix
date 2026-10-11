@@ -10,6 +10,10 @@ let
   #   noDocumentation = [ "safe" "aggressive" ];
   #   noNix           = [ "aggressive" ];
   strategies = {
+    leanImage = [
+      "safe"
+      "aggressive"
+    ];
     noDefaultPackages = [ "aggressive" ];
     noDocumentation = [
       "safe"

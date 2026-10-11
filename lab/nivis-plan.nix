@@ -45,6 +45,16 @@ let
     sshPublicKey = {
       type = "str";
     };
+    # The root volume is sized at launch rather than by the image. An image
+    # built with diskSize = "auto" is only as large as its contents, and the
+    # EBS volume created from its snapshot inherits that size, so growpart
+    # has nothing to grow into and the contract's check 9 fails. Sizing the
+    # volume here is how a production AMI works anyway: the image stays
+    # small and the instance gets whatever disk it needs.
+    rootVolumeGb = {
+      type = "int";
+      default = 8;
+    };
     system = {
       type = "str";
       default = "x86_64-linux";
@@ -167,6 +177,13 @@ let
       instance_type = vars.instanceType;
       key_name = keyPair.refAttr "key_name";
       vpc_security_group_ids = [ (securityGroup.refAttr "id") ];
+      root_block_device = [
+        {
+          volume_size = vars.rootVolumeGb;
+          volume_type = "gp3";
+          delete_on_termination = true;
+        }
+      ];
       tags = {
         Name = name;
       };

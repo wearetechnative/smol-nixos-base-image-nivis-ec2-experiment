@@ -42,6 +42,7 @@ reason=""
 closure_before=0
 closure_after=0
 image_bytes=0
+image_before=0
 boot_seconds=null
 
 finish() {
@@ -58,6 +59,7 @@ finish() {
     --argjson cb "$closure_before" \
     --argjson ca "$closure_after" \
     --argjson ib "$image_bytes" \
+    --argjson ibefore "$image_before" \
     --arg g1 "$gate1" \
     --arg g2 "$gate2" \
     --argjson bs "$boot_seconds" \
@@ -67,7 +69,7 @@ finish() {
     '{id:$id, ts:$ts, slug:$slug, track:$track, contract:$contract,
       hypothesis:$hypothesis, module:$module, source:$source, git:$git,
       closure_before:$cb, closure_after:$ca,
-      image_bytes:$ib, image_compressed_bytes:0,
+      image_before:$ibefore, image_bytes:$ib, image_compressed_bytes:0,
       gate1:$g1, gate2:$g2, boot_seconds:$bs,
       decision:$decision, reason:$reason, notes:$notes}' >>"$repo/ledger.jsonl"
 
@@ -98,19 +100,34 @@ img=$(nix build --no-link --print-out-paths \
   ".#packages.${SYSTEM}.image-candidate" 2>>"$LOG_DIR/${NNN}-build.log" | tail -1)
 vhd=$(find "$img" -name '*.vhd' 2>/dev/null | head -1)
 
-acc=$(./lab/measure.sh accepted "$SYSTEM" 2>/dev/null)
+# The accepted image too, so a strategy that only changes how the image is
+# built can be measured. The closure is not the image: experiment 022 took
+# 771 MiB off the artefact that gets uploaded without moving the closure by
+# a single byte.
+accimg=$(nix build --no-link --print-out-paths \
+  ".#packages.${SYSTEM}.image-accepted" 2>>"$LOG_DIR/${NNN}-build.log" | tail -1)
+accvhd=$(find "$accimg" -name '*.vhd' 2>/dev/null | head -1)
+
+acc=$(SMOL_IMAGE="$accvhd" ./lab/measure.sh accepted "$SYSTEM" 2>/dev/null)
 cand=$(SMOL_IMAGE="$vhd" ./lab/measure.sh candidate "$SYSTEM" 2>/dev/null)
 closure_before=$(printf '%s' "$acc" | jq '.closure_bytes')
 closure_after=$(printf '%s' "$cand" | jq '.closure_bytes')
+image_before=$(printf '%s' "$acc" | jq '.image_bytes')
 image_bytes=$(printf '%s' "$cand" | jq '.image_bytes')
 printf '%s' "$cand" >"$LOG_DIR/${NNN}-measure.json"
 
 delta=$((closure_before - closure_after))
 pct=$(awk -v d="$delta" -v b="$closure_before" 'BEGIN{printf "%.2f", (b?d*100/b:0)}')
+idelta=$((image_before - image_bytes))
+ipct=$(awk -v d="$idelta" -v b="$image_before" 'BEGIN{printf "%.2f", (b?d*100/b:0)}')
 note "closure $((closure_before / 1048576)) MiB -> $((closure_after / 1048576)) MiB ($((delta / 1048576)) MiB, ${pct}%)"
+note "image   $((image_before / 1048576)) MiB -> $((image_bytes / 1048576)) MiB ($((idelta / 1048576)) MiB, ${ipct}%)"
 
-if [ "$delta" -le 0 ] && [ "${SMOL_ENABLING_REFACTOR:-0}" != 1 ]; then
-  reason="not smaller than accepted"
+# Either measure shrinking is a result. An image-level strategy moves the
+# second and not the first; both are real, and the image is what the upload
+# and the EBS snapshot are billed for.
+if [ "$delta" -le 0 ] && [ "$idelta" -le 0 ] && [ "${SMOL_ENABLING_REFACTOR:-0}" != 1 ]; then
+  reason="neither closure nor image is smaller than accepted"
   note "$reason; set SMOL_ENABLING_REFACTOR=1 if that is the point"
   finish
   exit 1
@@ -155,6 +172,6 @@ fi
 
 # --- 5. decide -------------------------------------------------------------
 decision=accepted
-say "ACCEPTED: $((delta / 1048576)) MiB (${pct}%), both gates pass"
+say "ACCEPTED: closure $((delta / 1048576)) MiB (${pct}%), image $((idelta / 1048576)) MiB (${ipct}%), both gates pass"
 note "now enable it in systems/accepted, put the numbers in the option description, and reset systems/candidate"
 finish

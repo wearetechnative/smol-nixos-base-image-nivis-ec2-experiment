@@ -11,8 +11,17 @@ so that came first.
 
 ## Where the appliance track stands
 
-**1516.25 to 698.13 MiB, 54.0% off the baseline**, eleven accepted
-strategies.
+Two numbers now, because they are not the same thing and this lab spent
+twenty-one experiments assuming they tracked each other.
+
+| measure | baseline | now | off |
+| ------- | -------- | --- | --- |
+| closure | 1516.25 MiB | 698.13 MiB | 54.0% |
+| raw VHD | 2598.64 MiB | 856.21 MiB | 67.1% |
+| boot time | 40.8s | 14.3s | 65% |
+
+Twelve accepted strategies. The image is what gets uploaded, imported as a
+snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
 | --- | -------- | ------------- | ----- |
@@ -37,6 +46,10 @@ strategies.
 | 19  | `noLastlog` | 698.13 MiB | 3344 bytes; sqlite stays |
 | 20  | `noDuplicateSystemd` | rejected, guard failed | two more holders of systemd-minimal |
 | 21  | `noSwitchToConfiguration` | rejected, gate 2 failed | **needs-upstream**: the amazon image builder calls it |
+| 22  | `leanImage` | rejected by the protocol | it only compared closures; fixed |
+| 23  | `leanImage` | rejected, gate 2 failed | auto-sized image left growpart nothing to grow into |
+| 24  | `leanImage` | rejected, nix eval | my error: declaration missing, use present |
+| 25  | `leanImage` | **image 1400.35 to 856.21 MiB** | 544.14, 38.9%, closure unchanged |
 
 Boot time has moved between 36.2s and 41.9s with no clear relationship to
 closure size.
@@ -63,13 +76,13 @@ The overlay-based siraben items are now unblocked by the
 
 ## Current experiment
 
-None in flight. Twenty-one ledger entries, the account is empty,
+None in flight. Twenty-five ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 21, done |
-| slug          | no-switch-to-configuration |
+| experiment id | 25, done |
+| slug          | lean-image |
 | step          | logged |
 | branch        | main |
 
@@ -208,37 +221,41 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## Next three planned experiments
 
-The systemd cluster is 85.28 MiB and the largest target left, but the obvious
-route into it is blocked. What is left:
-
-1. `e13`: build systemd with `withFido2 = false`. One of the three holders of
-   the duplicate `systemd-minimal`, and an appliance has no security key.
-2. `e14`: find out why `dbus` links `systemd-minimal` rather than the systemd
-   already in the closure. The last holder before `e5` can be retried.
-3. `s1`: slim systemd proper, once the duplicate question is settled. Doing
-   it the other way round risks measuring a saving on one build while the
-   other stays full size.
-
-Then `e10` and `e11`: `icu4c` at 39.69 MiB and `grub` at 36.30 MiB still have
-no explanation, which under BRIEFING §9.3 makes them backlog items rather
-than floor entries.
+1. `e16`: read the rest of `make-disk-image.nix` for other defaults nothing
+   overrides. One read of that file produced 544 MiB; it has not been read to
+   the end.
+2. `e15`: find out why boot time fell from 36.4s to 14.3s when the channel
+   left the image. Not a size item, but it is the largest unexplained effect
+   in the lab and it was not predicted.
+3. `e13` and `e14`: the two remaining holders of the duplicate systemd,
+   `libfido2` and `dbus`, which is the way into the 85.28 MiB systemd
+   cluster now that `s6` is blocked upstream.
 
 ## Stop criteria, where they stand
 
-BRIEFING §9, criterion 1: "the last 8 accepted experiments each saved < 1% or
-< 2 MiB". Not met. Of the last eight accepted, two saved more than that
-(`noKernelModules` at 152.93 MiB, `noDocumentation` at 93.87 MiB), so the
-lab is not near its floor.
+Criterion 1, "the last 8 accepted experiments each saved < 1% or < 2 MiB":
+not met, and experiment 25 moved it further away.
 
-Criterion 2: one item has reached `needs-upstream` with a concrete nixpkgs
-change named. Thirteen backlog items are still `todo`.
+Criterion 2: one item is `needs-upstream` with a concrete nixpkgs change
+named. Fifteen backlog items are still `todo`, three of them new this
+session.
 
-Criterion 3: `FLOOR.md` is still empty.
+Criterion 3: `FLOOR.md` is still empty, and two paths in the closure,
+`icu4c` at 39.69 MiB and `grub` at 36.30 MiB, still have no explanation.
 
 ## Checkpoints
 
 Write one every 5 experiments.
 
+- 2026-10-11, after experiment 25: **the raw VHD went from 1400.35 to
+  856.21 MiB, 544.14 MiB off, with the closure unchanged by a single byte**,
+  and boot time fell from 36.4s to 14.3s. It came from reading
+  `nixos/lib/make-disk-image.nix` rather than the closure: `copyChannel`
+  defaults to true and puts a full nixpkgs source tree in the image, where no
+  closure measurement can see it. The protocol had the same blind spot and
+  rejected the strategy outright until `lab/experiment.sh` was taught to
+  measure the image too. Twenty-one experiments had assumed the closure and
+  the image tracked each other.
 - 2026-10-10, after experiment 21: eleven accepted, still 698.13 MiB. Four
   experiments spent on the systemd duplicate and `switch-to-configuration`
   with nothing to show in the closure, but the ground is mapped:

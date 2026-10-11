@@ -177,3 +177,23 @@ reads this file before it writes a module.
   loadable `af_packet` passes all ten checks locally and fails to get a
   network on EC2. That boundary is the reason gate 2 exists, and it is worth
   stating when gate 1 passes a change that touches hardware support.
+- **The closure is not the image.** `nixos/lib/make-disk-image.nix` defaults
+  `copyChannel` to `true`, which puts a complete copy of the nixpkgs source
+  tree into the image as a nix channel. It goes into the image's own store
+  through `basePaths`, so it never appears in
+  `system.build.toplevel` and no closure measurement can see it. It was 544
+  MiB here. Measure the artefact that gets uploaded, not only the one
+  `nix path-info` can report on.
+- **`maintainers/scripts/ec2/amazon-image.nix` forces `diskSize` to 4096
+  MiB** where make-disk-image's own default is `"auto"`. Overriding it means
+  the EBS volume created from the snapshot is only as large as the image, so
+  `growpart` has nothing to grow into. Size the root volume at launch with
+  `root_block_device` instead, which is how a production AMI works anyway.
+- **`image.modules.<name>` is an `attrsOf deferredModule`**, so a definition
+  there merges with nixpkgs' own and applies only inside that image's
+  evaluation. It is the right place to override an image builder without
+  touching the system configuration.
+- **Assert that a search-and-replace matched.** An unasserted replace in
+  `lab/nivis-plan.nix` silently did nothing after the file had been
+  reformatted, landing a variable's use without its declaration. It cost an
+  experiment.

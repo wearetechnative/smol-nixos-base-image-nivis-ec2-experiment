@@ -69,6 +69,8 @@ of the lab's savings.
 | e4 | dropbear instead of openssh | unknown | todo |
 | e5 | remove the duplicate systemd builds | 22.26 MiB | rejected #18 and #20, blocked behind s6; a different route is written up in experiments/018 |
 | e6 | image compression at AMI registration time | unknown | todo |
+| e15 | why boot time fell from 36.4s to 14.3s when the channel left the image | not a size item, but the largest unexplained effect in the lab | todo |
+| e16 | read the rest of `make-disk-image.nix` for other defaults nothing overrides, now that `copyChannel` turned up 544 MiB | unknown | todo |
 | e7 | filesystem choice for the root volume | unknown | todo |
 | e8 | drop every Python script, so CPython leaves the image | 136.55 MiB | accepted #9, 136.87 MiB |
 | e9 | `nix.enable = false` on the appliance track, plus the `register-nix-paths` override | unknown | todo |
@@ -86,6 +88,18 @@ was held by four separate consumers, two of them EC2-specific, and it took
 experiments 5, 7, 8 and 9 to get rid of it. `e10` and `e11` are the two
 largest remaining paths with no explanation at all, which under BRIEFING §9.3
 makes them backlog items rather than floor entries.
+
+## Found by reading the image builder
+
+The closure is not the image. These came from reading
+`nixos/lib/make-disk-image.nix` rather than from `nix why-depends`, and none
+of them are visible in a closure measurement.
+
+| # | hypothesis | measured | status |
+| - | ---------- | -------- | ------ |
+| i1 | `copyChannel = false`: the image ships a full nixpkgs source tree as a nix channel | part of 544.14 MiB | accepted #25 |
+| i2 | `diskSize = "auto"` with the root volume sized at launch instead | part of 544.14 MiB | accepted #25 |
+| i3 | `configFile = null`: the image carries a `configuration.nix` nothing can rebuild from | part of 544.14 MiB | accepted #25 |
 
 ## needs-upstream
 

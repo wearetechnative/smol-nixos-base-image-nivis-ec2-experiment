@@ -3,6 +3,7 @@
   imports = [
     ./profiles.nix
     # One file per strategy (BRIEFING §5). Append here when a strategy is added.
+    ./lean-image.nix
     ./nitro-kernel.nix
     ./no-default-packages.nix
     ./no-kernel-modules.nix
