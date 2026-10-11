@@ -5,8 +5,17 @@
 # Everything forced here is something gate 1 cannot prove; gate 2 on EC2 is
 # what covers it (BRIEFING §8). Keep this list short and justified: every
 # entry is a hole in the local gate.
-{ config, lib, ... }:
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+{
+  # `wait_for_open_port` runs `nc` on the target. The appliance has no use
+  # for it, and smol.minimalSystemPackages removes it; the test driver does.
+  smol.minimalSystemPackages.extra = [ pkgs.netcat ];
+
   # The test driver supplies its own root device and bootloader.
   fileSystems = lib.mkForce { };
   boot.loader.grub.enable = lib.mkForce false;

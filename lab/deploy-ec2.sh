@@ -136,12 +136,30 @@ fi
 #
 # The same lab/verify.sh gate 1 runs. The image ships no curl, so push a
 # static one first.
-curl_path=$(nix build --no-link --print-out-paths \
-  "$repo#packages.${SYSTEM}.static-curl" 2>>"$LOG")
+# static-curl is multi-output, so --print-out-paths prints several lines and
+# a bare assignment produces a path that does not exist. Pick the output that
+# actually holds the binary.
+curl_path=""
+while read -r out; do
+  if [ -x "$out/bin/curl" ]; then
+    curl_path="$out"
+    break
+  fi
+done <<<"$(nix build --no-link --print-out-paths "$repo#packages.${SYSTEM}.static-curl" 2>>"$LOG")"
+
+[ -n "$curl_path" ] || {
+  note "could not find a static curl to push"
+  exit 1
+}
 
 run_contract() {
   local label="$1"
-  "${SCP[@]}" "$curl_path/bin/curl" "root@$ip:/tmp/smol-curl" >>"$LOG" 2>&1
+  if ! "${SCP[@]}" "$curl_path/bin/curl" "root@$ip:/tmp/smol-curl" >>"$LOG" 2>&1; then
+    note "could not push the static curl; the contract would report it as a"
+    note "missing HTTPS client, which would be a lie about the candidate"
+    tail -3 "$LOG" >&2
+    return 1
+  fi
   say "verification contract ($label)"
   if "${SSH[@]}" "VERIFY_ENV=ec2 VERIFY_TRACK=${SMOL_TRACK:-appliance} sh -s" \
     <"$here/verify.sh" >&2; then

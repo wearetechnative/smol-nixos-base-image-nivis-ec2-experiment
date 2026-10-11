@@ -17,9 +17,9 @@ Source: <https://natkr.com/2026-06-19-nixos-but-smol/> (ISO 458 → 183 MiB)
 | - | ---------- | --------------- | ------ |
 | n1 | `documentation.enable = false` | part of the ISO 458 to 183 MiB | accepted #10, 93.87 MiB |
 | n2 | `environment.defaultPackages = [ ]` | part of the ISO 458 to 183 MiB | accepted #11, only 3.39 MiB |
-| n3 | `nix.enable = false`, plus overriding `register-nix-paths` | part of 458 → 183 MiB | todo |
+| n3 | `nix.enable = false`, plus overriding `register-nix-paths` | part of the ISO 458 to 183 MiB | accepted #26, 87.54 MiB; `register-nix-paths` needed no override once the registry was gone |
 | n4 | `programs.ssh` option stub + `disabledModules` on `programs/ssh.nix` | part of 458 → 183 MiB | todo |
-| n5 | trim `environment.systemPackages` to what the contract needs | part of 458 → 183 MiB | todo |
+| n5 | trim `environment.systemPackages` to what the contract needs | part of the ISO 458 to 183 MiB | accepted #31, 57.32 MiB; 57 packages down to 16 |
 | n6 | trim `system.extraDependencies` | part of 458 → 183 MiB | todo |
 | n7 | remove `$out/kernel-modules` from the system closure | part of the ISO 458 to 183 MiB | accepted #17, 152.93 MiB, after three attempts |
 | n8 | `system.etc.overlay` + `services.userborn` to drop Perl | part of 458 → 183 MiB | todo |
@@ -74,8 +74,8 @@ of the lab's savings.
 | e7 | filesystem choice for the root volume | unknown | todo |
 | e8 | drop every Python script, so CPython leaves the image | 136.55 MiB | accepted #9, 136.87 MiB |
 | e9 | `nix.enable = false` on the appliance track, plus the `register-nix-paths` override | unknown | todo |
-| e10 | `icu4c-78.3`, 39.69 MiB; nothing known yet about what pulls it in | unknown | todo |
-| e11 | `grub-2.14`, 36.30 MiB. An EC2 image boots from a snapshot, so does a bootloader belong in the closure at all? | unknown | todo |
+| e10 | `icu4c-78.3`, 39.69 MiB; nothing known yet about what pulls it in | explained | accepted #26: it came from Nix itself |
+| e11 | `grub-2.14`, 36.30 MiB. An EC2 image boots from a snapshot, so does a bootloader belong in the closure at all? | explained and removed | accepted #31: `grub-bios-setup` was on the system path so the running system could reinstall its own bootloader |
 
 `n8`, `system.etc.overlay` plus `services.userborn`, is now the priority
 among the natkr items: `perl-5.42.3` is 55.18 MiB and the third largest path

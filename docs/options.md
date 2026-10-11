@@ -65,6 +65,94 @@ true
 
 
 
+## smol\.minimalSystemPackages\.enable
+
+
+
+Whether to enable replacing ` environment.systemPackages ` with an explicit list of what this
+appliance actually runs\. A stock EC2 NixOS has 57 packages on the system
+path, among them ` man-db `, ` bind `, ` nano `, ` shared-mime-info `,
+` hicolor-icon-theme `, ` sound-theme-freedesktop `, ` fontconfig `,
+` cryptsetup `, ` lvm2 `, ` bcache-tools `, ` kexec-tools ` and GRUB’s install
+tools\. None of them has a caller on a headless machine that is replaced
+rather than reconfigured\.
+
+This is ` mkForce ` on the whole list rather than a set of options, which
+BRIEFING §5 asks to avoid\. The reason is that the contributions come from
+a dozen modules with no common switch, and filtering the list in place
+is self-referential and makes the module system recurse\. The explicit
+list is also the honest form: it says what the appliance needs rather
+than what it happens not to have removed\.
+
+Services are unaffected\. ` sshd `, ` dhcpcd ` and ` dbus ` reference their own
+packages from their unit definitions, so they keep working whether or not
+the package is on anyone’s PATH\.
+
+Measured saving (appliance track, EC2): 57\.32 MiB closure, 86\.03 MiB
+raw image, ledger \#31\. 57 packages down to 16\.
+Trade-offs: no ` man `, no editor, no ` host ` or ` dig `, no LVM, LUKS or
+bcache tooling, and the bootloader cannot be reinstalled from the running
+system\. Anything that shells out to one of these breaks, which on this
+image means checking the EC2 boot path and the verification contract,
+both of which gate 1 covers\.
+Requires: nothing\.
+Source: [https://natkr\.com/2026-06-19-nixos-but-smol/](https://natkr\.com/2026-06-19-nixos-but-smol/), backlog item ` n5 `
+\.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+
+```nix
+false
+```
+
+
+
+*Example:*
+
+```nix
+true
+```
+
+*Declared by:*
+ - [modules/smol/minimal-system-packages\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/minimal-system-packages.nix)
+
+
+
+## smol\.minimalSystemPackages\.extra
+
+
+
+Packages to keep on the system path alongside the minimal set\. The
+list is installed with ` mkForce `, so nothing can be added to it the
+ordinary way; this is the seam for the things that genuinely have to
+be added back\. ` lab/test-support/qemu.nix ` uses it for ` netcat `, which
+the NixOS test driver needs and the appliance does not\.
+
+
+
+*Type:*
+list of package
+
+
+
+*Default:*
+
+```nix
+[ ]
+```
+
+*Declared by:*
+ - [modules/smol/minimal-system-packages\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/minimal-system-packages.nix)
+
+
+
 ## smol\.nitroKernel\.enable
 
 
@@ -571,6 +659,64 @@ true
 
 *Declared by:*
  - [modules/smol/no-lastlog\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-lastlog.nix)
+
+
+
+## smol\.noNix\.enable
+
+
+
+Whether to enable removing Nix itself through ` nix.enable = false `\. The appliance track is
+defined by having no Nix on the target, and until now it had 162\.9 MiB
+of it: ` nix-2.34.8 ` and its closure, including the 39\.69 MiB ` icu4c `
+that experiment 25 left unexplained\.
+
+` nix why-depends ` finds it behind a tmpfiles fragment:
+
+```
+etc/tmpfiles.d/00-nixos.conf
+  -> tmpfiles.d/nix-daemon.conf
+    -> nix-2.34.8
+```
+
+Nothing on an appliance reads the store through Nix\. The store is still
+there and still mounted; what goes is the daemon, the CLI and everything
+they link\.
+
+Measured saving (appliance track, EC2): 87\.54 MiB closure, 94\.02 MiB
+raw image, ledger \#26\. Less than the 162\.9 MiB ` nix ` closure, because
+much of what Nix links is shared with the rest of the system\.
+Trade-offs: no ` nix ` command, no nix-daemon, no garbage collection, and
+nothing can be built or substituted on the target\. The store becomes a
+read-only artefact of the image\. This is the appliance track taken
+literally, and it is the single clearest line between the two tracks\.
+Requires: the appliance track\. Asserts against ` smol.track = "mutable" `\.
+Source: [https://natkr\.com/2026-06-19-nixos-but-smol/](https://natkr\.com/2026-06-19-nixos-but-smol/), backlog item ` n3 `
+\.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+
+```nix
+false
+```
+
+
+
+*Example:*
+
+```nix
+true
+```
+
+*Declared by:*
+ - [modules/smol/no-nix\.nix](https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/modules/smol/no-nix.nix)
 
 
 

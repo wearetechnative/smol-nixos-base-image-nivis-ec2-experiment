@@ -197,3 +197,10 @@ reads this file before it writes a module.
   `lab/nivis-plan.nix` silently did nothing after the file had been
   reformatted, landing a variable's use without its declaration. It cost an
   experiment.
+- **`nix build --print-out-paths` prints every output**, so a bare
+  `path=$(nix build --print-out-paths ...)` on a multi-output package yields
+  several lines and a path that does not exist. `lab/deploy-ec2.sh` pushed a
+  static curl that way and it worked until the `man` output happened to get
+  built, at which point gate 2 reported "no curl on PATH" and blamed the
+  candidate. Pick the output that holds the binary, and fail loudly if the
+  push fails rather than letting the contract report a missing client.

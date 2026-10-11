@@ -4,10 +4,12 @@
     ./profiles.nix
     # One file per strategy (BRIEFING §5). Append here when a strategy is added.
     ./lean-image.nix
+    ./minimal-system-packages.nix
     ./nitro-kernel.nix
     ./no-default-packages.nix
     ./no-kernel-modules.nix
     ./no-lastlog.nix
+    ./no-nix.nix
     ./no-documentation.nix
     ./no-python.nix
     ./no-duplicate-systemd.nix

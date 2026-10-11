@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 698.13 MiB | 54.0% |
-| raw VHD | 2598.64 MiB | 856.21 MiB | 67.1% |
-| boot time | 40.8s | 14.3s | 65% |
+| closure | 1516.25 MiB | 553.27 MiB | 63.5% |
+| raw VHD | 2598.64 MiB | 676.16 MiB | 74.0% |
+| boot time | 40.8s | 13.6s | 66.6% |
 
-Twelve accepted strategies. The image is what gets uploaded, imported as a
+Fourteen accepted strategies. The image is what gets uploaded, imported as a
 snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -50,6 +50,9 @@ snapshot and stored as an AMI, so it is the number that costs money.
 | 23  | `leanImage` | rejected, gate 2 failed | auto-sized image left growpart nothing to grow into |
 | 24  | `leanImage` | rejected, nix eval | my error: declaration missing, use present |
 | 25  | `leanImage` | **image 1400.35 to 856.21 MiB** | 544.14, 38.9%, closure unchanged |
+| 26  | `noNix` | 610.59 MiB | 87.54, 12.5%; the appliance track still had Nix |
+| 27 to 30 | `minimalSystemPackages` | rejected | three lab defects, one real |
+| 31  | `minimalSystemPackages` | 553.27 MiB | 57.32, 9.4%; 57 packages down to 16 |
 
 Boot time has moved between 36.2s and 41.9s with no clear relationship to
 closure size.
@@ -63,26 +66,25 @@ by default rather than from either prior-art list.
 | ----- | ---- | ------ |
 | 63.02 | `systemd-261.3` | siraben `s1`, needs an overlay |
 | 55.18 | `perl-5.42.3` | natkr `n8`, `system.etc.overlay` plus userborn |
-| 39.69 | `icu4c-78.3` | backlog `e10`, unexplained |
-| 36.30 | `grub-2.14` | backlog `e11`, unexplained |
 | 33.93 | `glibc-2.44-25` | irreducible |
 | 28.52 | `initrd-linux-6.18.55` | siraben `s4` and `s5` |
-| 22.26 | `systemd-minimal-261.3` | siraben `s1`, the duplicate build |
+| 22.26 | `systemd-minimal-261.3` | the duplicate, blocked behind `s6` |
 | 21.97 | `linux-6.18.55` | the bzImage itself |
 
-The overlay-based siraben items are now unblocked by the
-`node.pkgsReadOnly` fix from experiment 008, and `systemd` plus its duplicate
-`systemd-minimal` are 85.28 MiB between them, the largest remaining target.
+systemd plus its duplicate is 85.28 MiB and still the largest target. The
+image is now 676.16 MiB against a 553.27 MiB closure, so 122.89 MiB is
+filesystem overhead and the 128M of `additionalSpace` the lean image asks
+for.
 
 ## Current experiment
 
-None in flight. Twenty-five ledger entries, the account is empty,
+None in flight. Thirty-one ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 25, done |
-| slug          | lean-image |
+| experiment id | 31, done |
+| slug          | minimal-system-packages |
 | step          | logged |
 | branch        | main |
 
