@@ -42,3 +42,47 @@ EC2 deployment needs the one-time AWS setup in `docs/SETUP-AWS.md`.
 Both targeted an ISO with a local root shell. This lab needs networking, DHCP,
 sshd, EC2 metadata and the Nitro drivers, so the floor here is higher. Finding
 out how much higher is the point.
+
+<!-- STATS:BEGIN -->
+## Progress
+
+| | baseline | now | off |
+| --- | --- | --- | --- |
+| **closure** | 1516 MiB | **698 MiB** | 54.0% |
+| **raw VHD** | 2599 MiB | **856 MiB** | 67.1% |
+| **boot time** | 40.8s | **14.3s** | 64.8% |
+
+The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
+an AMI. It is the number that costs money, and it is not the closure.
+
+![size per accepted experiment](docs/progress.svg)
+
+### Backlog
+
+| state | n | |
+| --- | --- | --- |
+| accepted | 12 | `█████████···················` |
+| rejected | 2 | `██··························` |
+| needs-upstream | 1 | `█···························` |
+| todo | 22 | `█████████████████···········` |
+
+### Stop criteria (BRIEFING section 9)
+
+- [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (4 of 8)
+- [ ] every backlog item accepted, rejected or needs-upstream (22 still todo)
+- [ ] `FLOOR.md` justifies every remaining path over 1 MiB
+
+### Last six ledger entries
+
+| id | strategy | closure MiB | image MiB | decision |
+| --- | --- | --- | --- | --- |
+| 20 | `no-duplicate-systemd` | n/a | n/a | rejected: build failed |
+| 21 | `no-switch-to-configuration` | +13.8 | n/a | rejected: gate 2 failed |
+| 22 | `lean-image` | +0.0 | n/a | rejected: not smaller than accepted |
+| 23 | `lean-image` | +0.0 | +544.1 | rejected: gate 2 failed |
+| 24 | `lean-image` | +0.0 | +544.1 | rejected: gate 2 failed |
+| 25 | `lean-image` | +0.0 | +544.1 | **accepted** |
+
+Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
+[`experiments/`](experiments/).
+<!-- STATS:END -->

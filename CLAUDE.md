@@ -48,12 +48,36 @@ a `## Summary of Changes` section.
 - Commit as Pim Snel. No `Co-authored-by`, no `Generated with`, no Claude or
   Anthropic attribution anywhere in a commit message.
 
-Commit after every `openspec archive`, not in batches:
+## When to push
+
+Pim watches progress on GitHub, so work that is only on this machine is work
+he cannot see. Push at every one of these, not in batches at the end:
+
+1. After every accepted experiment, once it is promoted to
+   `systems/accepted` and its note is written.
+2. After every rejected experiment whose note says something worth keeping,
+   which is most of them.
+3. After every `openspec archive`.
+4. At every phase boundary in BRIEFING §9, and before stopping for any
+   reason: a question for Pim, a budget limit, the end of a session.
+
+**Always run `just stats` first**, and include what it changes in the same
+commit:
 
 ```sh
+just stats          # regenerates docs/progress.svg and the README block
 jj commit -m "<what changed>"
-jj git push
+jj bookmark set main -r @-
+jj git push --bookmark main
 ```
+
+`just stats` reads `ledger.jsonl` and `BACKLOG.md` and rewrites everything
+between the `STATS` markers in `README.md`. Nothing in that block is
+hand-maintained, so the README cannot drift from the ledger and a number that
+is not in the ledger cannot appear in the README (BRIEFING §12).
+
+Never hand-edit between those markers. If the README should say something the
+generator does not produce, change `lab/stats.py`.
 
 An experiment additionally commits its own ledger line and experiment note
 (BRIEFING §8.6).

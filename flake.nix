@@ -164,6 +164,7 @@
           default = pkgs.mkShellNoCC {
             packages = [
               pkgs.just
+              pkgs.python3
               pkgs.jq
               pkgs.awscli2
               pkgs.shellcheck

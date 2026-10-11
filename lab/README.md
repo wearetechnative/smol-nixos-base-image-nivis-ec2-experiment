@@ -12,6 +12,7 @@ EC2 gate cannot drift apart.
 | `measure.sh`          | closure, image and compressed sizes, top 20 paths, as JSON | done |
 | `config.env`          | the non-secret lab settings: region, tags, instance type | done |
 | `experiment.sh`       | the pipeline of BRIEFING §8, appends a ledger line on every path | to write |
+| `stats.py`            | regenerates `docs/progress.svg` and the README stats block from `ledger.jsonl` | done |
 | `aws-env.sh`          | sourced by the AWS scripts: the lab's own `AWS_CONFIG_FILE` and profiles | done |
 | `aws-key.sh`          | create the access key and wire up both profiles, without printing the secret | done |
 | `aws-check.sh`        | prove the assumed role works, pass or fail only | done |

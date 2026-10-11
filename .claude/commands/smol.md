@@ -12,8 +12,12 @@ where anything else contradicts it, the briefing wins.
 4. Check the stop criteria (BRIEFING §9). If they are met for a track, write
    `REPORT.md` for that track and stop.
 5. Otherwise run the next experiment via the `smol-experimenter` subagent,
-   then log it, update `STATE.md`, and commit. Repeat. Write a checkpoint in
-   `STATE.md` every 5 experiments.
+   then log it, update `STATE.md`, run `just stats`, commit and **push**.
+   Repeat. Write a checkpoint in `STATE.md` every 5 experiments.
+
+   Push after every experiment, not in batches. Pim follows progress on
+   GitHub, so unpushed work is invisible to him, and `just stats` is what
+   makes the README show it. See CLAUDE.md, "When to push".
 6. Stop and ask Pim only for: contract changes, nivis gaps, budget limits, or
    decisions the briefing says are his.
 

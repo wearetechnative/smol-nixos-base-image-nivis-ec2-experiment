@@ -21,6 +21,10 @@ fmt:
     nix develop -c shfmt -w -i 2 lab/*.sh
     nix develop -c shellcheck -x -P lab lab/*.sh
 
+# Regenerate docs/progress.svg and the README stats block from ledger.jsonl.
+stats:
+    python3 ./lab/stats.py
+
 # Regenerate docs/options.md from the smol.* option descriptions.
 docs:
     jj st > /dev/null

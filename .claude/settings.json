@@ -16,6 +16,7 @@
       "Bash(beans:*)",
       "Bash(openspec:*)",
       "Bash(jq:*)",
+      "Bash(python3:*)",
       "Edit(modules/**)",
       "Edit(systems/**)",
       "Edit(lab/**)",
