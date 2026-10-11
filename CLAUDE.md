@@ -91,6 +91,11 @@ An experiment additionally commits its own ledger line and experiment note
   comes in prebuilt. Pass `nixpkgs.hostPlatform` as a module instead.
 - `systems/baseline` is frozen after phase 0. Every measurement in
   `ledger.jsonl` is relative to it.
+- A candidate must differ from `systems/accepted` by something `accepted`
+  does not already have. Editing a module that `accepted` enables changes
+  both systems at once, the measured delta is zero, and the saving lands in
+  the tree with no ledger line behind it. Add an option and flip it in the
+  candidate instead. See `GOTCHAS.md`.
 - One strategy per file in `modules/smol/`, one `smol.<name>.enable` option,
   written exactly as BRIEFING §5 prescribes.
 - `nix fmt` before committing.

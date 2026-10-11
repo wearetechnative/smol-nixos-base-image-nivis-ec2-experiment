@@ -232,3 +232,10 @@ reads this file before it writes a module.
   separate lines of attack ended there. It cannot be removed because
   `system.build.images.amazon` calls it to install the bootloader, which is
   the lab's one `needs-upstream` item.
+- **Refining a module `systems/accepted` already enables moves both sides of
+  the comparison.** `lab/experiment.sh` measures the candidate against the
+  accepted system, and both read the same module file, so the delta reads as
+  exactly zero and the experiment is rejected while the saving is real but
+  untracked and ungated. Experiment 40 hit this: `systems/accepted` quietly
+  went from 501.82 to 489 MiB with nothing in the ledger to say so. Add an
+  option and flip it in the candidate, so the two systems genuinely differ.

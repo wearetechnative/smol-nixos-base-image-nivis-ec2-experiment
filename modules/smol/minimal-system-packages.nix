@@ -29,7 +29,8 @@ in
     the package is on anyone's PATH.
 
     Measured saving (appliance track, EC2): 57.32 MiB closure, 86.03 MiB
-    raw image, ledger #31. 57 packages down to 16.
+    raw image, ledger #31. 57 packages down to 16. `smol.minimalSystemPackages.fullCoreutils = false` takes a further 12
+    MiB, ledger #41.
     Trade-offs: no `man`, no editor, no `host` or `dig`, no LVM, LUKS or
     bcache tooling, and the bootloader cannot be reinstalled from the running
     system. Anything that shells out to one of these breaks, which on this
@@ -38,6 +39,22 @@ in
     Requires: nothing.
     Source: <https://natkr.com/2026-06-19-nixos-but-smol/>, backlog item `n5`
   '';
+
+  options.smol.minimalSystemPackages.fullCoreutils = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = ''
+      Whether to install `coreutils-full` rather than plain `coreutils`.
+      Both are already in the closure, because other things depend on the
+      plain build, so the full one costs 12 MiB for utilities nothing on
+      this image calls.
+
+      It is an option rather than a straight change to the package list so
+      that the two can be measured against each other. Refining a module
+      `systems/accepted` already enables moves both sides of the comparison
+      at once, and `lab/experiment.sh` correctly reports a delta of zero.
+    '';
+  };
 
   options.smol.minimalSystemPackages.extra = lib.mkOption {
     type = lib.types.listOf lib.types.package;
@@ -57,7 +74,7 @@ in
       ++ [
         config.systemd.package
         pkgs.util-linux
-        pkgs.coreutils-full
+        (if cfg.fullCoreutils then pkgs.coreutils-full else pkgs.coreutils)
         pkgs.bashInteractive
         pkgs.gnused
         pkgs.gnugrep

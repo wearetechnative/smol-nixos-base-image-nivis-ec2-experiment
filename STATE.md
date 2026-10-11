@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 501.82 MiB | 66.9% |
-| raw VHD | 2598.64 MiB | 614.16 MiB | 76.4% |
-| boot time | 40.8s | 12.4s | 69.5% |
+| closure | 1516.25 MiB | 489.07 MiB | 67.7% |
+| raw VHD | 2598.64 MiB | 600.16 MiB | 76.9% |
+| boot time | 40.8s | 13.0s | 68.1% |
 
-Sixteen accepted strategies. The image is what gets uploaded, imported as a
+Seventeen accepted strategies. The image is what gets uploaded, imported as a
 snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -58,6 +58,8 @@ snapshot and stored as an AMI, so it is the number that costs money.
 | 37  | `noPerl` | rejected | **needs-upstream**: perl is held by `install-grub.pl` |
 | 38  | `emptyHwdb` | rejected, build failed | `systemd-hwdb` writes nothing from no input |
 | 39  | `emptyHwdb` | 501.82 MiB | 13.21, 2.6% |
+| 40  | `minimalCoreutils` | rejected | protocol trap: both sides of the comparison moved |
+| 41  | `minimalCoreutils` | 489.07 MiB | 12.75, 2.5% |
 
 Boot time has moved between 36.2s and 41.9s with no clear relationship to
 closure size.
@@ -83,7 +85,6 @@ separate lines of attack ended there: `n8`, `e11`, `e5` and `s6` itself.
 | 22.26 | `systemd-minimal-261.3` | blocked behind `s6` |
 | 21.97 | `linux-6.18.55` | the bzImage |
 | 13.98 | `util-linux-2.42.3-lib` | unexamined |
-| 12.00 | `coreutils-full-9.11` | `coreutils` rather than `-full` may do |
 | 10.54 | `file-5.48` | unexamined, pulled by a systemd unit |
 
 Switching to systemd-boot to escape `install-grub.pl` was checked and
@@ -93,13 +94,13 @@ MiB CPython.
 
 ## Current experiment
 
-None in flight. Thirty-nine ledger entries, the account is empty,
+None in flight. Forty-one ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 39, done |
-| slug          | empty-hwdb |
+| experiment id | 41, done |
+| slug          | minimal-coreutils |
 | step          | logged |
 | branch        | main |
 
