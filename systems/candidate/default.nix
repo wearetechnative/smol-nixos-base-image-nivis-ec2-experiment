@@ -5,4 +5,6 @@
 { ... }:
 {
   imports = [ ../accepted ];
+
+  smol.noSwitchToConfiguration.enable = true;
 }

@@ -49,30 +49,62 @@ in
       }:
       {
         system.build.amazonImage = lib.mkForce (
-          import (pkgs.path + "/nixos/lib/make-disk-image.nix") {
-            inherit lib config pkgs;
+          import
+            (
+              # nixpkgs' make-disk-image installs the bootloader by chrooting
+              # into the new root and running
+              # /nix/var/nix/profiles/system/bin/switch-to-configuration, so
+              # an image can only be built from a system that carries that
+              # program. It is needed at image-build time and never at run
+              # time, and carrying it costs 127.53 MiB: it is the sole
+              # remaining holder of perl, GRUB, systemd-minimal and
+              # btrfs-progs. Experiments 18, 20, 21 and 37 each ended here.
+              #
+              # The builder VM already has the full build closure at
+              # /nix/store, which is a superset of what the image contains.
+              # Bind-mounting it over the image's store for the duration of
+              # the bootloader step makes the installer reachable inside the
+              # chroot without copying anything into the image, so nothing
+              # is added to the runtime closure.
+              #
+              # Patched rather than vendored: the substitution is the whole
+              # diff, it is checked with --replace-fail so a nixpkgs change
+              # breaks the build loudly rather than silently reverting to
+              # the old behaviour, and the other 800 lines stay upstream's.
+              pkgs.runCommand "make-disk-image-bootloader-without-stc.nix" { } ''
+                      substitute ${pkgs.path}/nixos/lib/make-disk-image.nix $out \
+                        --replace-fail \
+                          'NIXOS_INSTALL_BOOTLOADER=1 nixos-enter --root $mountPoint -- /nix/var/nix/profiles/system/bin/switch-to-configuration boot' \
+                          'mkdir -p $mountPoint/nix/store
+                mount --bind /nix/store $mountPoint/nix/store
+                NIXOS_INSTALL_BOOTLOADER=1 nixos-enter --root $mountPoint -- ''${config.system.build.installBootLoader} ''${config.system.build.toplevel}
+                umount $mountPoint/nix/store'
+              ''
+            )
+            {
+              inherit lib config pkgs;
 
-            name = config.image.baseName;
-            inherit (config.image) baseName;
+              name = config.image.baseName;
+              inherit (config.image) baseName;
 
-            format = "vpc";
-            fsType = "ext4";
-            partitionTableType = if config.ec2.efi then "efi" else "legacy+gpt";
+              format = "vpc";
+              fsType = "ext4";
+              partitionTableType = if config.ec2.efi then "efi" else "legacy+gpt";
 
-            # The two changes this strategy exists for.
-            copyChannel = false;
-            diskSize = "auto";
-            additionalSpace = "128M";
+              # The two changes this strategy exists for.
+              copyChannel = false;
+              diskSize = "auto";
+              additionalSpace = "128M";
 
-            # The stock builder writes a configuration.nix into the image so
-            # someone can rebuild from it. Nothing on the appliance track can.
-            configFile = null;
+              # The stock builder writes a configuration.nix into the image so
+              # someone can rebuild from it. Nothing on the appliance track can.
+              configFile = null;
 
-            postVM = ''
-              mkdir -p $out/nix-support
-              echo "file vpc $diskImage" >> $out/nix-support/hydra-build-products
-            '';
-          }
+              postVM = ''
+                mkdir -p $out/nix-support
+                echo "file vpc $diskImage" >> $out/nix-support/hydra-build-products
+              '';
+            }
         );
       };
   };

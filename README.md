@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 38 | `empty-hwdb` | n/a | n/a | rejected: build failed |
 | 39 | `empty-hwdb` | +13.2 | +16.0 | **accepted** |
 | 40 | `minimal-coreutils` | +0.0 | +0.0 | rejected: neither closure nor image is smaller than accepted |
 | 41 | `minimal-coreutils` | +12.7 | +14.0 | **accepted** |
 | 42 | `minimal-initrd-modules` | +1.4 | +4.0 | rejected: gate 1 failed |
 | 43 | `no-sudo` | +5.8 | +8.0 | **accepted** |
+| 44 | `no-switch-to-configuration` | +54.7 | n/a | rejected: gate 2 failed |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

@@ -94,6 +94,36 @@ rejected without running it: NixOS installs systemd-boot with
 `systemd-boot-builder.py`, so it trades 91 MiB of perl and GRUB for a 136
 MiB CPython.
 
+## Blocked on disk, 2026-10-11 20:00
+
+**The machine is full.** 216 GB, 84 MB free at the worst point, now 538 MB.
+88 image derivations from this lab occupy 33 GB of the nix store, and
+`nix store delete` on them reports every one as still alive with no GC root
+and no referrer, which is not yet explained.
+
+Nothing can be built until this is resolved, and a general
+`nix-collect-garbage` is Pim's call: it would also drop build products from
+his other projects, which cost time to rebuild.
+
+AWS is verified empty: no instances, AMIs, snapshots or bucket objects.
+
+## Where experiment 44 got to
+
+`s6` is **no longer blocked upstream**. `smol.leanImage` owns the
+`make-disk-image` call, so the bootloader step was patched to bind-mount the
+builder's store over the image's store for the duration of the install. The
+installer becomes reachable inside the chroot without anything being copied
+into the image.
+
+Gate 1 passed and the closure fell 54.65 MiB, 11.3%, to 428.60 MiB. Gate 2
+could not judge it because the image build hit the full disk, so the ledger
+records a gate 2 failure whose cause is the machine rather than the
+candidate.
+
+Next, once there is disk: rerun 44, then 45 with `smol.noPerl` alongside,
+which should take most of the remaining 70 MiB of the 127.53 MiB that four
+earlier experiments each ended at.
+
 ## Current experiment
 
 None in flight. Forty-three ledger entries, the account is empty,
