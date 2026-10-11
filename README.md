@@ -68,26 +68,26 @@ without changing the closure by a single byte. Why it moved is
 | state | n | |
 | --- | --- | --- |
 | accepted | 16 | `████████████················` |
-| rejected | 2 | `██··························` |
+| rejected | 3 | `██··························` |
 | needs-upstream | 2 | `██··························` |
-| todo | 16 | `████████████················` |
+| todo | 15 | `████████████················` |
 
 ### Stop criteria (BRIEFING section 9)
 
 - [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (2 of 8)
-- [ ] every backlog item accepted, rejected or needs-upstream (16 still todo)
-- [ ] `FLOOR.md` justifies every remaining path over 1 MiB
+- [ ] every backlog item accepted, rejected or needs-upstream (15 still todo)
+- [x] `FLOOR.md` justifies every remaining path over 1 MiB
 
 ### Last six ledger entries
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 36 | `slim-systemd` | +38.0 | +46.0 | **accepted** |
 | 37 | `no-perl` | -0.3 | +2.0 | undecided: gate 2 skipped |
 | 38 | `empty-hwdb` | n/a | n/a | rejected: build failed |
 | 39 | `empty-hwdb` | +13.2 | +16.0 | **accepted** |
 | 40 | `minimal-coreutils` | +0.0 | +0.0 | rejected: neither closure nor image is smaller than accepted |
 | 41 | `minimal-coreutils` | +12.7 | +14.0 | **accepted** |
+| 42 | `minimal-initrd-modules` | +1.4 | +4.0 | rejected: gate 1 failed |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

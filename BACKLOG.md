@@ -39,8 +39,8 @@ Source: <https://gist.github.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6>
 | s1 | slim systemd as a nixpkgs overlay | large | todo |
 | s2 | minimal util-linux as a nixpkgs overlay | large | todo |
 | s3 | dbus without X11, reusing the slim systemd | medium | todo |
-| s4 | xz compression for squashfs, initrd and kernel (`-9 -e --check=crc32`) | medium | todo |
-| s5 | trim the initrd module set | medium | todo |
+| s4 | xz compression for squashfs, initrd and kernel (`-9 -e --check=crc32`) | medium | todo, now the only initrd lever left |
+| s5 | trim the initrd module set | medium | rejected #42: the modules are 2.7 MiB of a 24.77 MiB initrd, and gate 1 needs the virtio and 9p ones |
 | s6 | `system.switch.enable = false` (appliance track only) | 13.79 MiB measured | **needs-upstream**, see below |
 | s7 | C.UTF-8 only, no locale archive | medium | low value here: `glibc-locales` is 2.93 MiB after `n5`, todo |
 | s8 | lastlog off, which drops sqlite | small | accepted #19, but only 3344 bytes: sqlite stays |

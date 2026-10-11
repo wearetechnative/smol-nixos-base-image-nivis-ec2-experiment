@@ -60,6 +60,7 @@ snapshot and stored as an AMI, so it is the number that costs money.
 | 39  | `emptyHwdb` | 501.82 MiB | 13.21, 2.6% |
 | 40  | `minimalCoreutils` | rejected | protocol trap: both sides of the comparison moved |
 | 41  | `minimalCoreutils` | 489.07 MiB | 12.75, 2.5% |
+| 42  | `minimalInitrdModules` | rejected, gate 1 panicked | 1.41 MiB; the initrd is userland, not modules |
 
 Boot time has moved between 36.2s and 41.9s with no clear relationship to
 closure size.
@@ -81,7 +82,7 @@ separate lines of attack ended there: `n8`, `e11`, `e5` and `s6` itself.
 | 52.04 | `systemd-261.3` | already slimmed in #36 |
 | 36.30 | `grub-2.14` | blocked behind `s6` |
 | 33.93 | `glibc-2.44-25` | irreducible |
-| 24.77 | `initrd-linux-6.18.55` | siraben `s4` and `s5`, not yet tried |
+| 24.77 | `initrd-linux-6.18.55` | mostly a systemd userland; `s5` rejected in #42, `s4` is the lever left |
 | 22.26 | `systemd-minimal-261.3` | blocked behind `s6` |
 | 21.97 | `linux-6.18.55` | the bzImage |
 | 13.98 | `util-linux-2.42.3-lib` | unexamined |
@@ -94,13 +95,13 @@ MiB CPython.
 
 ## Current experiment
 
-None in flight. Forty-one ledger entries, the account is empty,
+None in flight. Forty-two ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 41, done |
-| slug          | minimal-coreutils |
+| experiment id | 42, done |
+| slug          | minimal-initrd-modules |
 | step          | logged |
 | branch        | main |
 
@@ -239,16 +240,20 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## Next three planned experiments
 
-1. `s4` and `s5`: xz the initrd and trim its module set, 24.77 MiB. The
-   briefing's xz gotcha applies: single-threaded with crc32, or the kernel's
-   decoder silently truncates it and panics at root mount.
-2. `coreutils` instead of `coreutils-full`, and find what pulls `file-5.48`.
-3. Write `FLOOR.md`, which is stop criterion 3 and still empty. Most of the
-   top ten now has an explanation, so it is mostly transcription.
+`FLOOR.md` is now written and says what the honest next moves are.
 
-The honest next move after those is not another experiment: it is the
-upstream change for `s6`, which is worth more than everything left on the
-list combined.
+1. The ten unexplained paths in `FLOOR.md`, 63.25 MiB between them. `file`,
+   `gcc-lib`, a second `util-linux-minimal`, `linux-headers-static`,
+   `sqlite`, `sudo` and two Berkeley DBs. None has a reason yet, so under
+   BRIEFING §9.3 none is a floor entry and criteria 2 and 3 both depend on
+   them.
+2. `s4`: xz the initrd, now the only lever left on it. The briefing's gotcha
+   applies: single-threaded with crc32, or the kernel's decoder silently
+   truncates it and panics at root mount.
+3. `s7`: C.UTF-8 only. Worth 2.93 MiB, which is honest about its size.
+
+The move worth more than all of those together is the upstream change for
+`s6`, at 127.53 MiB.
 
 ## Stop criteria, where they stand
 
@@ -259,8 +264,9 @@ Criterion 2: one item is `needs-upstream` with a concrete nixpkgs change
 named. Fifteen backlog items are still `todo`, three of them new this
 session.
 
-Criterion 3: `FLOOR.md` is still empty, and two paths in the closure,
-`icu4c` at 39.69 MiB and `grub` at 36.30 MiB, still have no explanation.
+Criterion 3: `FLOOR.md` is written. 63 paths are over 1 MiB; the 30 largest
+are classified, and **ten of them, 63.25 MiB, have no justification yet**, so
+the criterion is not met.
 
 ## Checkpoints
 

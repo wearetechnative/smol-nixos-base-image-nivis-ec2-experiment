@@ -5,6 +5,7 @@
     # One file per strategy (BRIEFING §5). Append here when a strategy is added.
     ./empty-hwdb.nix
     ./lean-image.nix
+    ./minimal-initrd-modules.nix
     ./minimal-system-packages.nix
     ./nitro-kernel.nix
     ./no-default-packages.nix
