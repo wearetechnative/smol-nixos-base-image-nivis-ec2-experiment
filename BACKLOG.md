@@ -36,7 +36,7 @@ Source: <https://gist.github.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6>
 
 | # | hypothesis | reported saving | status |
 | - | ---------- | --------------- | ------ |
-| s1 | slim systemd as a nixpkgs overlay | large | todo |
+| s1 | slim systemd as a nixpkgs overlay | large | accepted #36, 38.24 MiB; 20 features off |
 | s2 | minimal util-linux as a nixpkgs overlay | large | todo |
 | s3 | dbus without X11, reusing the slim systemd | medium | todo |
 | s4 | xz compression for squashfs, initrd and kernel (`-9 -e --check=crc32`) | medium | todo, now the only initrd lever left |
@@ -73,7 +73,7 @@ of the lab's savings.
 | e16 | read the rest of `make-disk-image.nix` for other defaults nothing overrides, now that `copyChannel` turned up 544 MiB | unknown | todo |
 | e7 | filesystem choice for the root volume | unknown | todo |
 | e8 | drop every Python script, so CPython leaves the image | 136.55 MiB | accepted #9, 136.87 MiB |
-| e9 | `nix.enable = false` on the appliance track, plus the `register-nix-paths` override | unknown | todo |
+| e9 | `nix.enable = false` on the appliance track | duplicate of `n3` | accepted #26, 87.54 MiB |
 | e10 | `icu4c-78.3`, 39.69 MiB; nothing known yet about what pulls it in | explained | accepted #26: it came from Nix itself |
 | e11 | `grub-2.14`, 36.30 MiB. An EC2 image boots from a snapshot, so does a bootloader belong in the closure at all? | explained, **not removed** | two holders: the system path, removed by #31, and `switch-to-configuration` through `install-grub.sh` and `grub-config.xml`, which is blocked behind `s6` |
 

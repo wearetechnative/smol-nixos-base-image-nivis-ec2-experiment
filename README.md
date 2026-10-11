@@ -67,15 +67,15 @@ without changing the closure by a single byte. Why it moved is
 
 | state | n | |
 | --- | --- | --- |
-| accepted | 16 | `████████████················` |
+| accepted | 18 | `██████████████··············` |
 | rejected | 3 | `██··························` |
 | needs-upstream | 2 | `██··························` |
-| todo | 15 | `████████████················` |
+| todo | 13 | `██████████··················` |
 
 ### Stop criteria (BRIEFING section 9)
 
 - [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (2 of 8)
-- [ ] every backlog item accepted, rejected or needs-upstream (15 still todo)
+- [ ] every backlog item accepted, rejected or needs-upstream (13 still todo)
 - [x] `FLOOR.md` justifies every remaining path over 1 MiB
 
 ### Last six ledger entries
