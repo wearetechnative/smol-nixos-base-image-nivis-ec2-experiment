@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **553 MiB** | 63.5% |
-| **raw VHD** | 2599 MiB | **676 MiB** | 74.0% |
-| **boot time** | 40.8s | **13.6s** | 66.5% |
+| **closure** | 1516 MiB | **515 MiB** | 66.0% |
+| **raw VHD** | 2599 MiB | **630 MiB** | 75.8% |
+| **boot time** | 40.8s | **13.5s** | 66.9% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -67,7 +67,7 @@ without changing the closure by a single byte. Why it moved is
 
 | state | n | |
 | --- | --- | --- |
-| accepted | 16 | `████████████················` |
+| accepted | 15 | `████████████················` |
 | rejected | 2 | `██··························` |
 | needs-upstream | 1 | `█···························` |
 | todo | 18 | `██████████████··············` |
@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 26 | `no-nix` | +87.5 | +94.0 | **accepted** |
-| 27 | `minimal-system-packages` | +57.6 | +88.0 | rejected: gate 1 failed |
-| 28 | `minimal-system-packages` | +57.6 | +88.0 | rejected: gate 1 failed |
-| 29 | `minimal-system-packages` | +57.6 | +86.0 | rejected: gate 1 failed |
-| 30 | `minimal-system-packages` | +57.6 | +86.0 | rejected: gate 2 failed |
 | 31 | `minimal-system-packages` | +57.6 | +86.0 | **accepted** |
+| 32 | `slim-systemd` | n/a | n/a | rejected: build failed |
+| 33 | `slim-systemd` | n/a | n/a | rejected: build failed |
+| 34 | `slim-systemd` | n/a | n/a | rejected: build failed |
+| 35 | `slim-systemd` | +38.0 | +46.0 | undecided: gate 2 skipped |
+| 36 | `slim-systemd` | +38.0 | +46.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

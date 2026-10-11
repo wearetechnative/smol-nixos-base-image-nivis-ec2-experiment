@@ -32,6 +32,7 @@ let
     noInstallerTools = [ "aggressive" ];
     noPython = [ "aggressive" ];
     noSsmAgent = [ "aggressive" ];
+    slimSystemd = [ "aggressive" ];
   };
 in
 {

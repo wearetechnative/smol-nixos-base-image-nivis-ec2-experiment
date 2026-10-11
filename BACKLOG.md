@@ -75,7 +75,7 @@ of the lab's savings.
 | e8 | drop every Python script, so CPython leaves the image | 136.55 MiB | accepted #9, 136.87 MiB |
 | e9 | `nix.enable = false` on the appliance track, plus the `register-nix-paths` override | unknown | todo |
 | e10 | `icu4c-78.3`, 39.69 MiB; nothing known yet about what pulls it in | explained | accepted #26: it came from Nix itself |
-| e11 | `grub-2.14`, 36.30 MiB. An EC2 image boots from a snapshot, so does a bootloader belong in the closure at all? | explained and removed | accepted #31: `grub-bios-setup` was on the system path so the running system could reinstall its own bootloader |
+| e11 | `grub-2.14`, 36.30 MiB. An EC2 image boots from a snapshot, so does a bootloader belong in the closure at all? | explained, **not removed** | two holders: the system path, removed by #31, and `switch-to-configuration` through `install-grub.sh` and `grub-config.xml`, which is blocked behind `s6` |
 
 `n8`, `system.etc.overlay` plus `services.userborn`, is now the priority
 among the natkr items: `perl-5.42.3` is 55.18 MiB and the third largest path

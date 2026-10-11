@@ -16,10 +16,12 @@ A stock EC2 NixOS has 57 packages on the system path. Among them: `man-db`,
 install tools. None has a caller on a headless machine that is replaced
 rather than reconfigured.
 
-This also closes backlog item `e11`: `grub-2.14` was in the closure because
-`boot/loader/grub/grub.nix` does `environment.systemPackages = mkIf (grub != null) [ grub ]`,
-so the running system can reinstall its own bootloader. The appliance never
-does.
+This was also expected to close backlog item `e11`: `grub-2.14` is in the
+closure because `boot/loader/grub/grub.nix` does
+`environment.systemPackages = mkIf (grub != null) [ grub ]`, so the running
+system can reinstall its own bootloader.
+
+**It did not.** See the correction at the end of this note.
 
 ## What changed
 
@@ -103,3 +105,31 @@ That ratio is worth watching. A protocol that reports "rejected" for its own
 bugs still works, because the notes say which was which, but it means the
 rejection count in the README is not a measure of how wrong the hypotheses
 were.
+
+
+## Correction, after experiment 36
+
+This note originally said experiment 31 closed backlog item `e11` by
+removing GRUB from the closure. That is wrong, and listing the top paths
+after experiment 36 is what showed it: `grub-2.14` is still there at 36.30
+MiB.
+
+GRUB had two holders. The system path was one, and this experiment removed
+it. The other is `switch-to-configuration`:
+
+```
+nixos-system
+└── bin/switch-to-configuration: INSTALL_BOOTLOADER='.../install-grub.sh'
+    └── install-grub.pl .../grub-config.xml
+        └── <string value=".../grub-2.14/share/grub/unicode.pf2"/>
+```
+
+`switch-to-configuration` cannot be removed: experiment 21 established that
+the amazon image builder calls it, and that is the lab's `needs-upstream`
+item. So `e11` is blocked behind `s6` and is not closed.
+
+The irony is not lost: this note's own "Surprises" section describes the
+multiple-holder trap, and the claim was written without re-checking the
+closure afterwards. The rule from experiment 9 is **run `why-depends` again
+on the result**, and I did not. `BACKLOG.md` now says `explained, not
+removed`.

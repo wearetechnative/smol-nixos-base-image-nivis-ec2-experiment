@@ -17,6 +17,7 @@
     ./no-flake-registry.nix
     ./no-amazon-init.nix
     ./no-installer-tools.nix
+    ./slim-systemd.nix
     ./no-ssm-agent.nix
     ./no-switch-to-configuration.nix
   ];

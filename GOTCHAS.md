@@ -204,3 +204,21 @@ reads this file before it writes a module.
   built, at which point gate 2 reported "no curl on PATH" and blamed the
   candidate. Pick the output that holds the binary, and fail loudly if the
   push fails rather than letting the contract report a missing client.
+- **Turning a systemd feature off in the package is half the job.** NixOS
+  still references what the feature would have installed, and the error is
+  always a build failure naming a missing file under `${systemd}`. Some have
+  a NixOS option (`systemd.coredump.enable`, `systemd.oomd.enable`); the ones
+  in `upstreamSystemUnits` do not, and `systemd.suppressedSystemUnits` is the
+  lever, because `enabledUpstreamSystemUnits` filters by it before copying.
+- **`withQrencode` is not optional on a headless server.** It gates
+  `systemd-bsod.service`, which NixOS puts in the initrd's unit list
+  unconditionally. The most obviously useless feature in the list is the one
+  that cannot be removed.
+- **An overlay on `systemd` does not touch `systemdMinimal`.** They are
+  separate nixpkgs attributes, so slimming one leaves the duplicate at full
+  size.
+- **Re-list the closure after an experiment that claimed to remove a path.**
+  Experiment 31's note said it had removed GRUB; experiment 36's top-paths
+  listing showed GRUB still there at 36.30 MiB, held by
+  `switch-to-configuration` as well as by the system path. The rule from
+  experiment 9 exists for this and was not followed.

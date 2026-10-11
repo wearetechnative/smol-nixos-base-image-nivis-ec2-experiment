@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 553.27 MiB | 63.5% |
-| raw VHD | 2598.64 MiB | 676.16 MiB | 74.0% |
-| boot time | 40.8s | 13.6s | 66.6% |
+| closure | 1516.25 MiB | 515.03 MiB | 66.0% |
+| raw VHD | 2598.64 MiB | 630.16 MiB | 75.7% |
+| boot time | 40.8s | 13.5s | 66.9% |
 
-Fourteen accepted strategies. The image is what gets uploaded, imported as a
+Fifteen accepted strategies. The image is what gets uploaded, imported as a
 snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -53,6 +53,8 @@ snapshot and stored as an AMI, so it is the number that costs money.
 | 26  | `noNix` | 610.59 MiB | 87.54, 12.5%; the appliance track still had Nix |
 | 27 to 30 | `minimalSystemPackages` | rejected | three lab defects, one real |
 | 31  | `minimalSystemPackages` | 553.27 MiB | 57.32, 9.4%; 57 packages down to 16 |
+| 32 to 35 | `slimSystemd` | rejected | four builds, each naming one missing systemd file |
+| 36  | `slimSystemd` | 515.03 MiB | 38.24, 6.9%; systemd 63.02 to 52.04 MiB |
 
 Boot time has moved between 36.2s and 41.9s with no clear relationship to
 closure size.
@@ -64,27 +66,27 @@ by default rather than from either prior-art list.
 
 | MiB   | path | status |
 | ----- | ---- | ------ |
-| 63.02 | `systemd-261.3` | siraben `s1`, needs an overlay |
-| 55.18 | `perl-5.42.3` | natkr `n8`, `system.etc.overlay` plus userborn |
+| 55.18 | `perl-5.42.3` | natkr `n8`, `system.etc.overlay` plus userborn. The largest target left |
+| 52.04 | `systemd-261.3` | already slimmed in #36; further cuts need the duplicate settled first |
+| 36.30 | `grub-2.14` | `e11`, held by `switch-to-configuration`, blocked behind `s6` |
 | 33.93 | `glibc-2.44-25` | irreducible |
-| 28.52 | `initrd-linux-6.18.55` | siraben `s4` and `s5` |
-| 22.26 | `systemd-minimal-261.3` | the duplicate, blocked behind `s6` |
+| 24.77 | `initrd-linux-6.18.55` | siraben `s4` and `s5` |
+| 22.26 | `systemd-minimal-261.3` | `e5`, blocked behind `s6` |
 | 21.97 | `linux-6.18.55` | the bzImage itself |
+| 13.98 | `util-linux-2.42.3-lib` | unexamined |
 
-systemd plus its duplicate is 85.28 MiB and still the largest target. The
-image is now 676.16 MiB against a 553.27 MiB closure, so 122.89 MiB is
-filesystem overhead and the 128M of `additionalSpace` the lean image asks
-for.
+Two of the eight are blocked behind the same `needs-upstream` item, `s6`,
+which is 58.56 MiB sitting behind one nixpkgs change.
 
 ## Current experiment
 
-None in flight. Thirty-one ledger entries, the account is empty,
+None in flight. Thirty-six ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 31, done |
-| slug          | minimal-system-packages |
+| experiment id | 36, done |
+| slug          | slim-systemd |
 | step          | logged |
 | branch        | main |
 
@@ -223,15 +225,12 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## Next three planned experiments
 
-1. `e16`: read the rest of `make-disk-image.nix` for other defaults nothing
-   overrides. One read of that file produced 544 MiB; it has not been read to
-   the end.
-2. `e15`: find out why boot time fell from 36.4s to 14.3s when the channel
-   left the image. Not a size item, but it is the largest unexplained effect
-   in the lab and it was not predicted.
-3. `e13` and `e14`: the two remaining holders of the duplicate systemd,
-   `libfido2` and `dbus`, which is the way into the 85.28 MiB systemd
-   cluster now that `s6` is blocked upstream.
+1. `n8`: `system.etc.overlay` plus `services.userborn`, for `perl` at 55.18
+   MiB. Now the largest single path, and the last big natkr item.
+2. `s4` and `s5`: xz the initrd and trim its module set, 24.77 MiB. The xz
+   gotcha from the briefing applies: single-threaded with crc32, or the
+   kernel's decoder silently truncates it.
+3. `s7`: C.UTF-8 only, no locale archive.
 
 ## Stop criteria, where they stand
 
