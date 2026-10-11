@@ -20,6 +20,7 @@ let
       "safe"
       "aggressive"
     ];
+    noDuplicateSystemd = [ "aggressive" ];
     noFirewall = [ "aggressive" ];
     noKernelModules = [ "aggressive" ];
     noLastlog = [ "aggressive" ];
@@ -31,8 +32,10 @@ let
     ];
     noAmazonInit = [ "aggressive" ];
     noInstallerTools = [ "aggressive" ];
+    noPerl = [ "aggressive" ];
     noPython = [ "aggressive" ];
     noSudo = [ "aggressive" ];
+    noSwitchToConfiguration = [ "aggressive" ];
     noSsmAgent = [ "aggressive" ];
     slimSystemd = [ "aggressive" ];
   };

@@ -13,14 +13,13 @@ in
     it with a script, and `services.userborn` does users and groups in a
     small C program.
 
-    Measured saving (appliance track, EC2): **none, blocked upstream**.
-    Ledger #37 measured 0.05% *more* closure and 2 MiB less image, and
-    gate 1 passed. Perl does not leave: `install-grub.pl` is Perl too, and
-    `switch-to-configuration` holds it. That is the same `needs-upstream`
-    item as `e5` and `e11`, recorded in BACKLOG.md as `s6`.
-    Not enabled in any profile, because on its own it costs a little and
-    saves nothing. It is kept so that the day `s6` is unblocked, the perl
-    removal is one toggle rather than a rediscovery.
+    Measured saving (appliance track, EC2): 58.00 MiB closure, 68.00 MiB raw
+    image, ledger #46.
+
+    Experiment 37 ran this and saved nothing, because `install-grub.pl` is
+    Perl too and `switch-to-configuration` held it. Experiment 45 removed
+    that holder, and the same module then took the whole 58 MiB without a
+    line of it changing.
 
     Trade-offs: `/etc` becomes an overlay mount, which is what the appliance
     track wants anyway, and users are created by userborn rather than the

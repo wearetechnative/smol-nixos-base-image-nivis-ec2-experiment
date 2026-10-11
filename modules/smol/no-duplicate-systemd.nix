@@ -16,16 +16,14 @@ in
     Pointing `util-linux` at the full systemd would close that cycle and is
     not an option. Dropping the support removes the second build outright.
 
-    Measured saving (appliance track, EC2): not yet accepted. Experiments
-    #18 and #20 both failed. Removing `agetty`'s reference is not enough:
-    `libfido2` and `dbus-lib` each hold a copy too, and both reach the
-    closure through `switch-to-configuration`. Retry after
-    `smol.noSwitchToConfiguration`.
-    Trade-offs: `agetty` no longer talks to systemd, and util-linux stops
-    shipping its own systemd units, tmpfiles and sysusers fragments. On a
-    machine reached over SSH rather than a console that is cheap, but it is
-    the kind of change whose breakage shows up as a failed unit rather than
-    an error, which is what the contract's check 3 is for.
+    Measured saving (appliance track, EC2): 22.11 MiB closure, 24.00 MiB
+    raw image, ledger #48.
+
+    Experiments #18, #20 and #47 each found another holder. `agetty` was
+    only the first; `libfido2` and `dbus-lib` came through
+    `switch-to-configuration` and left with it in #45, and `dbus` itself and
+    `pam_timestamp_check` turned up after that.
+
     Requires: `smol.noLastlog`. util-linux ships its systemd units,
     tmpfiles and sysusers fragments in its `lastlog` output, and NixOS adds
     that output to `systemd.tmpfiles.packages` whenever PAM's lastlog is on.
@@ -53,9 +51,20 @@ in
     nixpkgs.overlays = [
       (final: prev: {
         util-linux = prev.util-linux.override { systemdSupport = false; };
+
+        # dbus links libsystemd and nixpkgs builds it against systemdMinimal
+        # to avoid a cycle. There is no cycle here: systemd takes `pam` as an
+        # input but not `dbus`, so dbus can use the real systemd, which is
+        # already in the closure.
+        dbus = prev.dbus.override { systemdMinimal = final.systemd; };
       })
     ];
 
-    system.forbiddenDependenciesRegexes = [ "systemd-minimal" ];
+    # Matches systemd-minimal-261.3 and deliberately not
+    # systemd-minimal-libs-261.3. That one is held by pam_timestamp_check in
+    # linux-pam, and systemd takes `pam` as a build input, so pointing
+    # linux-pam at the real systemd is a genuine cycle. 4.45 MiB of floor
+    # with a reason, rather than a target.
+    system.forbiddenDependenciesRegexes = [ "systemd-minimal-[0-9]" ];
   };
 }

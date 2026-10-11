@@ -14,16 +14,17 @@ in
     of those drag a second systemd build back into the closure. Experiments
     18 and 20 could not remove that duplicate while this was present.
 
-    Measured saving (appliance track, EC2): **blocked upstream**, not
-    accepted. 19.56 MiB measured and gate 1 green, but the image cannot be
-    built: `system.build.images.amazon` runs
-    `/nix/var/nix/profiles/system/bin/switch-to-configuration` inside a
-    chroot to install the bootloader, and panics without it. See ledger #21
-    and `experiments/021-no-switch-to-configuration.md`.
-    Trade-offs: the system cannot be switched to another generation at all,
-    including rolling back to the previous one from the bootloader menu
-    entry. On the appliance track that is already true in spirit; this makes
-    it true in fact.
+    Measured saving (appliance track, EC2): 54.65 MiB closure, 56.00 MiB raw
+    image, ledger #45. GRUB, `systemd-minimal` and `btrfs-progs` leave
+    together. Perl leaves too once `smol.noPerl` is on, which it could not
+    be before this.
+
+    This was `needs-upstream` after experiment 21 and is not any more.
+    `smol.leanImage` owns the `make-disk-image` call, so the bootloader step
+    is patched to bind-mount the builder's store over the image's store for
+    the duration of the install. The installer becomes reachable inside the
+    chroot without anything being copied into the image.
+
     Requires: the appliance track. Asserts against `smol.track = "mutable"`.
     Source: <https://gist.github.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6>,
     backlog item `s6`

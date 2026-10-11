@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **483 MiB** | 68.1% |
-| **raw VHD** | 2599 MiB | **592 MiB** | 77.2% |
-| **boot time** | 40.8s | **12.3s** | 69.8% |
+| **closure** | 1516 MiB | **347 MiB** | 77.1% |
+| **raw VHD** | 2599 MiB | **482 MiB** | 81.4% |
+| **boot time** | 40.8s | **14.1s** | 65.3% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -67,14 +67,14 @@ without changing the closure by a single byte. Why it moved is
 
 | state | n | |
 | --- | --- | --- |
-| accepted | 18 | `██████████████··············` |
+| accepted | 20 | `████████████████············` |
 | rejected | 3 | `██··························` |
-| needs-upstream | 2 | `██··························` |
+| needs-upstream | 0 | `····························` |
 | todo | 13 | `██████████··················` |
 
 ### Stop criteria (BRIEFING section 9)
 
-- [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (2 of 8)
+- [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (0 of 8)
 - [ ] every backlog item accepted, rejected or needs-upstream (13 still todo)
 - [x] `FLOOR.md` justifies every remaining path over 1 MiB
 
@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 39 | `empty-hwdb` | +13.2 | +16.0 | **accepted** |
-| 40 | `minimal-coreutils` | +0.0 | +0.0 | rejected: neither closure nor image is smaller than accepted |
-| 41 | `minimal-coreutils` | +12.7 | +14.0 | **accepted** |
-| 42 | `minimal-initrd-modules` | +1.4 | +4.0 | rejected: gate 1 failed |
 | 43 | `no-sudo` | +5.8 | +8.0 | **accepted** |
 | 44 | `no-switch-to-configuration` | +54.7 | n/a | rejected: gate 2 failed |
+| 45 | `no-switch-to-configuration` | +54.7 | +56.0 | **accepted** |
+| 46 | `no-perl` | +58.7 | +68.0 | **accepted** |
+| 47 | `no-duplicate-systemd` | n/a | n/a | rejected: build failed |
+| 48 | `no-duplicate-systemd` | +22.4 | +24.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

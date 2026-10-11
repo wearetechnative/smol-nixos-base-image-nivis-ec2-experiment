@@ -507,16 +507,14 @@ dependency cycle: systemd needs util-linux for libmount and libblkid\.
 Pointing ` util-linux ` at the full systemd would close that cycle and is
 not an option\. Dropping the support removes the second build outright\.
 
-Measured saving (appliance track, EC2): not yet accepted\. Experiments
-\#18 and \#20 both failed\. Removing ` agetty `’s reference is not enough:
-` libfido2 ` and ` dbus-lib ` each hold a copy too, and both reach the
-closure through ` switch-to-configuration `\. Retry after
-` smol.noSwitchToConfiguration `\.
-Trade-offs: ` agetty ` no longer talks to systemd, and util-linux stops
-shipping its own systemd units, tmpfiles and sysusers fragments\. On a
-machine reached over SSH rather than a console that is cheap, but it is
-the kind of change whose breakage shows up as a failed unit rather than
-an error, which is what the contract’s check 3 is for\.
+Measured saving (appliance track, EC2): 22\.11 MiB closure, 24\.00 MiB
+raw image, ledger \#48\.
+
+Experiments \#18, \#20 and \#47 each found another holder\. ` agetty ` was
+only the first; ` libfido2 ` and ` dbus-lib ` came through
+` switch-to-configuration ` and left with it in \#45, and ` dbus ` itself and
+` pam_timestamp_check ` turned up after that\.
+
 Requires: ` smol.noLastlog `\. util-linux ships its systemd units,
 tmpfiles and sysusers fragments in its ` lastlog ` output, and NixOS adds
 that output to ` systemd.tmpfiles.packages ` whenever PAM’s lastlog is on\.
@@ -881,14 +879,13 @@ NixOS carries a 55\.18 MiB Perl\.
 it with a script, and ` services.userborn ` does users and groups in a
 small C program\.
 
-Measured saving (appliance track, EC2): **none, blocked upstream**\.
-Ledger \#37 measured 0\.05% *more* closure and 2 MiB less image, and
-gate 1 passed\. Perl does not leave: ` install-grub.pl ` is Perl too, and
-` switch-to-configuration ` holds it\. That is the same ` needs-upstream `
-item as ` e5 ` and ` e11 `, recorded in BACKLOG\.md as ` s6 `\.
-Not enabled in any profile, because on its own it costs a little and
-saves nothing\. It is kept so that the day ` s6 ` is unblocked, the perl
-removal is one toggle rather than a rediscovery\.
+Measured saving (appliance track, EC2): 58\.00 MiB closure, 68\.00 MiB raw
+image, ledger \#46\.
+
+Experiment 37 ran this and saved nothing, because ` install-grub.pl ` is
+Perl too and ` switch-to-configuration ` held it\. Experiment 45 removed
+that holder, and the same module then took the whole 58 MiB without a
+line of it changing\.
 
 Trade-offs: ` /etc ` becomes an overlay mount, which is what the appliance
 track wants anyway, and users are created by userborn rather than the
@@ -1087,16 +1084,17 @@ through the systemd it is built against it reaches ` libfido2 `, and both
 of those drag a second systemd build back into the closure\. Experiments
 18 and 20 could not remove that duplicate while this was present\.
 
-Measured saving (appliance track, EC2): **blocked upstream**, not
-accepted\. 19\.56 MiB measured and gate 1 green, but the image cannot be
-built: ` system.build.images.amazon ` runs
-` /nix/var/nix/profiles/system/bin/switch-to-configuration ` inside a
-chroot to install the bootloader, and panics without it\. See ledger \#21
-and ` experiments/021-no-switch-to-configuration.md `\.
-Trade-offs: the system cannot be switched to another generation at all,
-including rolling back to the previous one from the bootloader menu
-entry\. On the appliance track that is already true in spirit; this makes
-it true in fact\.
+Measured saving (appliance track, EC2): 54\.65 MiB closure, 56\.00 MiB raw
+image, ledger \#45\. GRUB, ` systemd-minimal ` and ` btrfs-progs ` leave
+together\. Perl leaves too once ` smol.noPerl ` is on, which it could not
+be before this\.
+
+This was ` needs-upstream ` after experiment 21 and is not any more\.
+` smol.leanImage ` owns the ` make-disk-image ` call, so the bootloader step
+is patched to bind-mount the builder’s store over the image’s store for
+the duration of the install\. The installer becomes reachable inside the
+chroot without anything being copied into the image\.
+
 Requires: the appliance track\. Asserts against ` smol.track = "mutable" `\.
 Source: [https://gist\.github\.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6](https://gist\.github\.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6),
 backlog item ` s6 `

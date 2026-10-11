@@ -15,29 +15,34 @@ just measure accepted | jq -r '.top_paths[] | "\(.bytes)\t\(.path)"'
 
 ## Appliance track
 
-Closure 483.26 MiB at ledger #43, from a 1516.25 MiB baseline. 63 paths are
+Closure 364.27 MiB at ledger #48, from a 1516.25 MiB baseline. 63 paths are
 over 1 MiB; the 30 largest are listed, which is 374 MiB of the 489.
 
-### Blocked behind one upstream change, not floor
+### Previously blocked, now removed
 
-`switch-to-configuration` is the sole remaining holder of all four. It
-cannot be removed because `system.build.images.amazon` calls it to install
-the bootloader. This is the lab's single `needs-upstream` item and it is
-worth **127.53 MiB, 26% of the closure**.
+Six paths and 127.53 MiB were held by `switch-to-configuration`, which
+could not be removed because the amazon image builder calls it. That is
+fixed: `smol.leanImage` patches `make-disk-image` to bind-mount the
+builder's store over the image's store for the bootloader step, so the
+installer is reachable in the chroot without entering the runtime closure.
 
-| MiB   | path | held through |
-| ----- | ---- | ------------ |
-| 55.18 | `perl-5.42.3` | `install-grub.pl` |
-| 36.30 | `grub-2.14` | `grub-config.xml` |
-| 22.26 | `systemd-minimal-261.3` | `dbus-lib` and `libfido2` |
-| 6.62  | `btrfs-progs-7.1` | `install-grub.pl` |
-| 4.45  | `systemd-minimal-libs-261.3` | `agetty` in `util-linux-bin` |
-| 3.64  | `perl-5.42.3-man` | with perl |
+| MiB   | path | removed by |
+| ----- | ---- | ---------- |
+| 55.18 | `perl-5.42.3` | #46 |
+| 36.30 | `grub-2.14` | #45 |
+| 22.26 | `systemd-minimal-261.3` | #48, after two more holders |
+| 6.62  | `btrfs-progs-7.1` | #45 |
+| 3.64  | `perl-5.42.3-man` | #46 |
 
-### Genuine floor
+`systemd-minimal-libs` at 4.45 MiB stays and is listed under floor below:
+`pam_timestamp_check` in linux-pam holds it, and systemd takes `pam` as a
+build input, so pointing pam at the real systemd is a genuine cycle.
+
+### Genuine floor### Genuine floor
 
 | MiB   | path | why it stays |
 | ----- | ---- | ------------ |
+| 4.45  | `systemd-minimal-libs-261.3` | `pam_timestamp_check` in linux-pam. systemd takes `pam` as a build input, so pointing pam at the real systemd is a cycle |
 | 52.04 | `systemd-261.3` | already built with 20 features off (#36). It is PID 1, journald, logind, udev and timesyncd, and contract checks 2, 3 and 6 are about things it does |
 | 33.93 | `glibc-2.44-25` | the C library |
 | 24.77 | `initrd-linux-6.18.55` | the initrd must carry a systemd userland, because `smol.noKernelModules` force-loads `ena`, `af_packet`, `fuse` and `configfs` there |
@@ -62,7 +67,7 @@ each is accepted, rejected or marked `needs-upstream`.
 | MiB   | path | holder | verdict |
 | ----- | ---- | ------ | ------- |
 | 10.54 | `file-5.48` | on `fetch-ec2-metadata.service`'s PATH | that service makes contract check 1 pass; whether it calls `file` is still unknown |
-| 10.31 | `gcc-16.2.0-lib` | `perl-5.42.3-env` | leaves with perl, so blocked behind `s6` |
+| 10.31 | `gcc-16.2.0-lib` | was `perl-5.42.3-env`; perl is gone and this is not, so the holder has changed | retrace |
 | 8.72  | `util-linux-minimal-2.42.3-bin` | `systemd-generator-environment.json` | a second util-linux build, like the systemd duplicate. Not yet attacked |
 | 7.20  | `linux-headers-static-7.2` | `suid-sgid-wrappers.service` | the wrapper builder. `security.wrappers` must stay: pam_unix needs `unix_chkpwd` or login loops |
 | 5.90  | `sqlite-3.53.3` | `lslogins` in `util-linux-bin` | survived `smol.noLastlog` (#19). Needs util-linux built without it |

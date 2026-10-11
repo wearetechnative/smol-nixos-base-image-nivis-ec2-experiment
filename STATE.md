@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 483.26 MiB | 68.1% |
-| raw VHD | 2598.64 MiB | 592.16 MiB | 77.2% |
-| boot time | 40.8s | 12.3s | 69.9% |
+| closure | 1516.25 MiB | 364.27 MiB | 76.0% |
+| raw VHD | 2598.64 MiB | 482.13 MiB | 81.4% |
+| boot time | 40.8s | 14.1s | 65.4% |
 
-Eighteen accepted strategies. The image is what gets uploaded, imported as a
+Twenty-one accepted strategies. The image is what gets uploaded, imported as a
 snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -62,77 +62,78 @@ snapshot and stored as an AMI, so it is the number that costs money.
 | 41  | `minimalCoreutils` | 489.07 MiB | 12.75, 2.5% |
 | 42  | `minimalInitrdModules` | rejected, gate 1 panicked | 1.41 MiB; the initrd is userland, not modules |
 | 43  | `noSudo` | 483.26 MiB | 5.81, 1.2%; found by writing `FLOOR.md` |
+| 44  | `noSwitchToConfiguration` | rejected, disk full | gate 1 passed; the machine, not the candidate |
+| 45  | `noSwitchToConfiguration` | 428.60 MiB | 54.65, 11.3%; the blocker removed |
+| 46  | `noPerl` | 386.38 MiB | 58.00, 13.7%; the same module that saved nothing in #37 |
+| 47  | `noDuplicateSystemd` | rejected, guard | two more holders: dbus and pam |
+| 48  | `noDuplicateSystemd` | 364.27 MiB | 22.11, 6.1% |
 
-Boot time has moved between 36.2s and 41.9s with no clear relationship to
+Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.
 
-Seven of the ten accepted came from auditing what the EC2 platform turns on
-by default rather than from either prior-art list.
+## The blocker is gone
 
-## What is left
+`s6` was `needs-upstream` from experiment 21 and held 127.53 MiB, a quarter
+of the closure, behind one line of nixpkgs' image builder.
+`smol.leanImage` has owned the `make-disk-image` call since experiment 25,
+so the fix was always ours: the bootloader step now bind-mounts the builder's
+store over the image's store, which makes the installer reachable inside the
+chroot without anything entering the runtime closure.
 
-**127.53 MiB of it, a quarter of the closure, is behind one nixpkgs change.**
-`switch-to-configuration` is the sole remaining holder of perl, GRUB and
-`systemd-minimal`, and it cannot be removed because
-`system.build.images.amazon` calls it to install the bootloader. Four
-separate lines of attack ended there: `n8`, `e11`, `e5` and `s6` itself.
+| # | strategy | closure saving |
+| - | -------- | -------------- |
+| 45 | `noSwitchToConfiguration` | 54.65 MiB |
+| 46 | `noPerl`, unchanged since it measured zero in #37 | 58.00 MiB |
+| 48 | `noDuplicateSystemd`, after two more holders turned up | 22.11 MiB |
 
-| MiB   | path | status |
-| ----- | ---- | ------ |
-| 55.18 | `perl-5.42.3` | blocked behind `s6`, module written, gate 1 green |
-| 52.04 | `systemd-261.3` | already slimmed in #36 |
-| 36.30 | `grub-2.14` | blocked behind `s6` |
-| 33.93 | `glibc-2.44-25` | irreducible |
-| 24.77 | `initrd-linux-6.18.55` | mostly a systemd userland; `s5` rejected in #42, `s4` is the lever left |
-| 22.26 | `systemd-minimal-261.3` | blocked behind `s6` |
-| 21.97 | `linux-6.18.55` | the bzImage |
-| 13.98 | `util-linux-2.42.3-lib` | unexamined |
-| 10.54 | `file-5.48` | unexamined, pulled by a systemd unit |
+134.76 MiB against the 127.53 MiB predicted.
+
+Still worth proposing upstream, because every NixOS EC2 image pays it, but
+it belongs in `REPORT.md`'s recommendations rather than on the backlog.
 
 Switching to systemd-boot to escape `install-grub.pl` was checked and
 rejected without running it: NixOS installs systemd-boot with
-`systemd-boot-builder.py`, so it trades 91 MiB of perl and GRUB for a 136
-MiB CPython.
+`systemd-boot-builder.py`, so it would have traded 91 MiB of perl and GRUB
+for a 136 MiB CPython.
 
-## Blocked on disk, 2026-10-11 20:00
+## What is left
 
-**The machine is full.** 216 GB, 84 MB free at the worst point, now 538 MB.
-88 image derivations from this lab occupy 33 GB of the nix store, and
-`nix store delete` on them reports every one as still alive with no GC root
-and no referrer, which is not yet explained.
+| MiB   | path | status |
+| ----- | ---- | ------ |
+| 52.04 | `systemd-261.3` | slimmed in #36; further cuts hit NixOS's unit list |
+| 33.93 | `glibc-2.44-25` | the C library |
+| 24.77 | `initrd-linux-6.18.55` | mostly a systemd userland this lab put there in #17 |
+| 21.97 | `linux-6.18.55` | the bzImage |
+| 13.98 | `util-linux-2.42.3-lib` | libmount, libblkid, libuuid |
+| 10.54 | `file-5.48` | on `fetch-ec2-metadata.service`'s PATH |
+| 10.31 | `gcc-16.2.0-lib` | held perl before; the holder has changed and needs retracing |
+| 9.60  | `util-linux-2.42.3-bin` | `findmnt` is contract check 7 |
+| 9.00  | `openssl-3.5.8` | sshd and TLS trust |
+| 8.78  | `openssh-10.5p1` | the only way in |
+| 8.72  | `util-linux-minimal-2.42.3-bin` | a second util-linux, the same shape as the systemd duplicate just removed |
+| 7.20  | `linux-headers-static-7.2` | the wrapper builder |
 
-Nothing can be built until this is resolved, and a general
-`nix-collect-garbage` is Pim's call: it would also drop build products from
-his other projects, which cost time to rebuild.
+The top four are 132.71 MiB and are the system itself.
 
-AWS is verified empty: no instances, AMIs, snapshots or bucket objects.
+## Disk
 
-## Where experiment 44 got to
+The machine filled up during experiment 44: 216 GB, 84 MB free. 88 image
+derivations from this lab were holding 33 GB, all of them dead, and
+deleting just those freed 32.8 GiB. **Each gate 2 run leaves a 500 MiB image
+behind**, so this needs doing periodically.
 
-`s6` is **no longer blocked upstream**. `smol.leanImage` owns the
-`make-disk-image` call, so the bootloader step was patched to bind-mount the
-builder's store over the image's store for the duration of the install. The
-installer becomes reachable inside the chroot without anything being copied
-into the image.
-
-Gate 1 passed and the closure fell 54.65 MiB, 11.3%, to 428.60 MiB. Gate 2
-could not judge it because the image build hit the full disk, so the ledger
-records a gate 2 failure whose cause is the machine rather than the
-candidate.
-
-Next, once there is disk: rerun 44, then 45 with `smol.noPerl` alongside,
-which should take most of the remaining 70 MiB of the 127.53 MiB that four
-earlier experiments each ended at.
+A general `nix-collect-garbage` would free far more, 17877 paths, and is
+Pim's call, since it also drops his other projects' build products.
 
 ## Current experiment
 
-None in flight. Forty-three ledger entries, the account is empty,
+None in flight. Forty-eight ledger entries, the account is empty,
 `systems/candidate` is reset to `systems/accepted`.
 
 | field         | value |
 | ------------- | ----- |
-| experiment id | 43, done |
-| slug          | no-sudo |
+| experiment id | 48, done |
+| slug          | no-duplicate-systemd |
 | step          | logged |
 | branch        | main |
 
@@ -271,19 +272,13 @@ on 22. That key pair is what makes contract check 1 real.
 
 ## Next three planned experiments
 
-`FLOOR.md` now drives this. Its "traced, with a decision still owed" table
-is nine paths and 57.57 MiB, and each one has to end up accepted, rejected
-or `needs-upstream` before criteria 2 and 3 can be met.
-
-1. The two untraced entries, `elfutils` and the second Berkeley DB, then a
-   decision on `file`, `util-linux-minimal` and `sqlite`.
-2. `db-5.3.28` is there for `arpd` in `iproute2`, which nothing calls.
-   An `iproute2` override is 4.24 MiB.
+1. `util-linux-minimal` at 8.72 MiB, a second util-linux build reached
+   through `systemd-generator-environment.json`. The same shape as the
+   systemd duplicate that experiment 48 removed.
+2. Retrace `gcc-16.2.0-lib` and `file` in `FLOOR.md`, and settle `elfutils`
+   and the second Berkeley DB, which are still untraced.
 3. `s4`: xz the initrd, the only lever left on it, with the briefing's
    single-threaded crc32 gotcha.
-
-The move worth more than all of those together is still the upstream change
-for `s6`, at 127.53 MiB.
 
 ## Stop criteria, where they stand
 
@@ -294,14 +289,22 @@ Criterion 2: one item is `needs-upstream` with a concrete nixpkgs change
 named. Fifteen backlog items are still `todo`, three of them new this
 session.
 
-Criterion 3: `FLOOR.md` is written. 63 paths are over 1 MiB; the 30 largest
-are classified, and **nine of them, 57.57 MiB, have no justification yet**,
-so the criterion is not met.
+Criterion 3: `FLOOR.md` is written and needs a pass after experiments 45 to
+48, which removed five of the paths it listed. Several entries still have no
+justification, so the criterion is not met.
 
 ## Checkpoints
 
 Write one every 5 experiments.
 
+- 2026-10-11, after experiment 48: **1516.25 to 364.27 MiB, 76.0% off, and
+  the raw VHD 2598.64 to 482.13 MiB, 81.4%.** The `needs-upstream` blocker
+  turned out to be removable here, because `smol.leanImage` already owned
+  the `make-disk-image` call. That unlocked 134.76 MiB across three
+  experiments, one of which was a module written in #37, measured zero, and
+  kept unchanged for exactly this moment. The lesson is about
+  classification: `needs-upstream` was recorded honestly and closed the
+  question too early.
 - 2026-10-11, after experiment 43: **1516.25 to 483.26 MiB, 68.1% off, and
   the raw VHD 2598.64 to 592.16 MiB, 77.2%.** Eighteen accepted. This block
   added noNix (the appliance track had carried Nix for 25 experiments),
