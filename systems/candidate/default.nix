@@ -6,4 +6,6 @@
 {
   imports = [ ../accepted ];
 
+  smol.slimCurl.enable = true;
+
 }

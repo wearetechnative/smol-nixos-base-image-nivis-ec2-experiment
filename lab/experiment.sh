@@ -116,6 +116,18 @@ image_before=$(printf '%s' "$acc" | jq '.image_bytes')
 image_bytes=$(printf '%s' "$cand" | jq '.image_bytes')
 printf '%s' "$cand" >"$LOG_DIR/${NNN}-measure.json"
 
+# measure.sh reports 0 for an image it could not build, which is
+# indistinguishable here from an image that shrank to nothing. Experiment 56
+# hit it: the image build failed on a flaky test while the machine was busy,
+# the line was logged as a 100% image saving, and the number had to be
+# corrected by hand afterwards. Backlog e16.
+if [ "$image_before" -eq 0 ] || [ "$image_bytes" -eq 0 ]; then
+  reason="image did not build, so it was not measured"
+  note "$reason, see experiments/logs/${NNN}-build.log"
+  finish
+  exit 1
+fi
+
 delta=$((closure_before - closure_after))
 pct=$(awk -v d="$delta" -v b="$closure_before" 'BEGIN{printf "%.2f", (b?d*100/b:0)}')
 idelta=$((image_before - image_bytes))

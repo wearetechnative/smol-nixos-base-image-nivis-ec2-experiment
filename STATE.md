@@ -79,6 +79,35 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.
 
+## Stopped: the machine is out of disk
+
+Experiment 57 (`smol.slimCurl`, backlog `e23`) was killed during its build
+and logged nothing. Nothing was deployed, `just reap` finds no AWS
+resources, and `systems/candidate` still has the module enabled, ready to
+re-run.
+
+`/` has 5.3 GiB free of 216 GiB. An overlay on a package as deep as `curl`
+or `util-linux` rebuilds everything downstream of it, QEMU included, and
+that chain needs more than is left.
+
+Two things hold the space, and both need Pim, because the lab account
+cannot touch either:
+
+| what | size | why I cannot clear it |
+| ---- | ---- | --------------------- |
+| `/nix/var/nix/builds` | 8.6 GiB | `keep-failed = true` in `/etc/nix/nix.conf` keeps the build directory of every failed build. They are owned by `nixbld`, and `sudo` is on the deny list |
+| dead store paths | unknown | `keep-outputs = true` and `keep-derivations = true` keep every image this lab has built alive as long as its `.drv` is reachable, so `nix store delete` refuses them. A general `nix-collect-garbage` is Pim's call (BRIEFING §7) |
+
+Suggested, in Pim's shell:
+
+```sh
+sudo rm -rf /nix/var/nix/builds/*
+sudo nix-collect-garbage --delete-older-than 7d
+```
+
+The lab's own images are rebuilt from the flake whenever they are needed,
+so nothing in `ledger.jsonl` depends on them still being in the store.
+
 ## The blocker is gone
 
 `s6` was `needs-upstream` from experiment 21 and held 127.53 MiB, a quarter

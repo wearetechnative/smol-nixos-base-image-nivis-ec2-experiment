@@ -67,4 +67,5 @@ so.
 Two things follow. `lab/measure.sh` returns 0 for an image it could not
 build, which is indistinguishable from an image that shrank to nothing, and
 `lab/experiment.sh` accepted a 100% image saving without blinking. That is
-a protocol defect, and it is in `BACKLOG.md` as `e16`.
+a protocol defect, and it is in `BACKLOG.md` as `e22`, fixed the same day: the protocol now
+stops when either image measures 0.
