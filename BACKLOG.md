@@ -18,9 +18,9 @@ Source: <https://natkr.com/2026-06-19-nixos-but-smol/> (ISO 458 → 183 MiB)
 | n1 | `documentation.enable = false` | part of the ISO 458 to 183 MiB | accepted #10, 93.87 MiB |
 | n2 | `environment.defaultPackages = [ ]` | part of the ISO 458 to 183 MiB | accepted #11, only 3.39 MiB |
 | n3 | `nix.enable = false`, plus overriding `register-nix-paths` | part of the ISO 458 to 183 MiB | accepted #26, 87.54 MiB; `register-nix-paths` needed no override once the registry was gone |
-| n4 | `programs.ssh` option stub + `disabledModules` on `programs/ssh.nix` | part of 458 → 183 MiB | todo |
+| n4 | `programs.ssh` option stub + `disabledModules` on `programs/ssh.nix` | 0 | closed without an experiment: `/etc/ssh/ssh_config` and `ssh_known_hosts` are 0 MiB, and the client shares openssh with sshd, which has to stay |
 | n5 | trim `environment.systemPackages` to what the contract needs | part of the ISO 458 to 183 MiB | accepted #31, 57.32 MiB; 57 packages down to 16 |
-| n6 | trim `system.extraDependencies` | part of 458 → 183 MiB | todo |
+| n6 | trim `system.extraDependencies` | 0 | closed without an experiment: `nix eval` says it is already `[ ]` |
 | n7 | remove `$out/kernel-modules` from the system closure | part of the ISO 458 to 183 MiB | accepted #17, 152.93 MiB, after three attempts |
 | n8 | `system.etc.overlay` + `services.userborn` to drop Perl | part of the ISO 458 to 183 MiB | accepted #46, 58.00 MiB; saved nothing in #37 until `s6` landed |
 
@@ -64,11 +64,12 @@ of the lab's savings.
 | # | hypothesis | expected saving | status |
 | - | ---------- | --------------- | ------ |
 | e1 | custom Nitro kernel config: ENA and NVMe built in, unused subsystems off | the module tree is already gone via n7; what is left is the 21.97 MiB bzImage and the 28.52 MiB initrd | rejected #12, kconfig dialogue derails; revisit with a different technique |
-| e2 | networkd instead of dhcpcd | unknown | todo |
+| e2 | networkd instead of dhcpcd | 0.48 MiB | closed without an experiment: `dhcpcd-10.3.2` is 0.48 MiB and `systemd-minimal-libs`, its other claim, is shared with `linux-pam`. Not worth a contract change to the one thing that brings the network up |
 | e3 | erofs or squashfs compressed store | unknown | todo |
 | e4 | dropbear instead of openssh | unknown | todo |
 | e5 | remove the duplicate systemd builds | 22.26 MiB | rejected #18 and #20, blocked behind s6; a different route is written up in experiments/018 |
 | e6 | image compression at AMI registration time | unknown | todo |
+| e28 | `pkgs.bashNonInteractive` as the system shell | 7.10 MiB | **needs-upstream**: in nixpkgs `pkgs.bash` *is* `bashInteractive`. Probed on 2026-10-13: setting `environment.binsh`, `users.defaultUserShell`, `environment.shells`, the system path and `amazon-ec2-utils` leaves two referrers, and both are hardcoded, `prepare-root` (stage 2's shebang) and `networking.localCommands` |
 | e15 | why boot time fell from 36.4s to 14.3s when the channel left the image | not a size item, but the largest unexplained effect in the lab | todo |
 | e16 | ~~read the rest of `make-disk-image.nix` for other defaults nothing overrides~~ | 2.00 MiB | done #68 to #71: the automatic sizing only has to be large enough, the VHD is sparse, and the image is its contents |
 | e7 | filesystem choice for the root volume | unknown | todo |
