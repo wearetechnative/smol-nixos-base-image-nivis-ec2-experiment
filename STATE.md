@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 297.26 MiB | 80.4% |
-| raw VHD | 2598.64 MiB | 424.11 MiB | 83.7% |
+| closure | 1516.25 MiB | 295.88 MiB | 80.5% |
+| raw VHD | 2598.64 MiB | 422.11 MiB | 83.8% |
 | boot time | 40.8s | 15.1s | 62.9% |
 
-30 accepted experiments covering 27 strategies. The image is what gets
+31 accepted experiments covering 28 strategies. The image is what gets
 uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -80,6 +80,7 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 59  | `leanImage.pristineBuilderVm` | closure unchanged | **image 2.00 MiB**, and overlays stop rebuilding QEMU |
 | 60  | `noLvm` | 298.51 MiB | 5.88, 1.9%; more than FLOOR.md predicted |
 | 61  | `noBashCompletion` | 297.26 MiB | 1.25, 0.4%; the image rounded 2 MiB the other way |
+| 62  | `slimOpenssh` | 295.88 MiB | 1.38, 0.5%; libfido2, back since #36 |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.

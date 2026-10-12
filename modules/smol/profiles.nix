@@ -43,6 +43,7 @@ let
     noUserDataDecompression = [ "aggressive" ];
     noSsmAgent = [ "aggressive" ];
     slimCurl = [ "aggressive" ];
+    slimOpenssh = [ "aggressive" ];
     slimIproute2 = [ "aggressive" ];
     slimSystemd = [ "aggressive" ];
   };

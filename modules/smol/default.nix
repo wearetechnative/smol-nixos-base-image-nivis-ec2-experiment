@@ -27,6 +27,7 @@
     ./no-sudo.nix
     ./no-x11.nix
     ./slim-iproute2.nix
+    ./slim-openssh.nix
     ./slim-curl.nix
     ./no-user-data-decompression.nix
     ./no-ssm-agent.nix
