@@ -10,6 +10,7 @@ let
   #   noDocumentation = [ "safe" "aggressive" ];
   #   noNix           = [ "aggressive" ];
   strategies = {
+    cLocaleOnly = [ "aggressive" ];
     emptyHwdb = [ "aggressive" ];
     leanImage = [
       "safe"

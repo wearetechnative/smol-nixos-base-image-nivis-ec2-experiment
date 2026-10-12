@@ -42,7 +42,7 @@ Source: <https://gist.github.com/siraben/a8fce9912891d85e1ec3cf74081ba4f6>
 | s4 | xz compression for squashfs, initrd and kernel (`-9 -e --check=crc32`) | medium | accepted #72 for the initrd, 4.23 MiB closure and 12.00 MiB image, at 2.5s of boot. The kernel is still zstd |
 | s5 | trim the initrd module set | medium | rejected #42: the modules are 2.7 MiB of a 24.77 MiB initrd, and gate 1 needs the virtio and 9p ones |
 | s6 | `system.switch.enable = false` (appliance track only) | 13.79 MiB predicted | accepted #45, 54.65 MiB, after patching the image builder |
-| s7 | C.UTF-8 only, no locale archive | medium | low value here: `glibc-locales` is 2.93 MiB after `n5`, todo |
+| s7 | ~~C.UTF-8 only, no locale archive~~ | medium | accepted #73, 2.46 MiB |
 | s8 | lastlog off, which drops sqlite | small | accepted #19, but only 3344 bytes: sqlite stays |
 | s9 | empty hwdb | small | accepted #39, 13.21 MiB |
 

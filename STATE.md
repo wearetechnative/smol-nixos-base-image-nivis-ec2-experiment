@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 274.27 MiB | 81.9% |
-| raw VHD | 2598.64 MiB | 386.10 MiB | 85.1% |
+| closure | 1516.25 MiB | 271.81 MiB | 82.1% |
+| raw VHD | 2598.64 MiB | 392.10 MiB | 84.9% |
 | boot time | 40.8s | 15.2s | 62.6% |
 
-36 accepted experiments covering 32 strategies. The image is what gets
+37 accepted experiments covering 33 strategies. The image is what gets
 uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -89,6 +89,7 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 68  | `leanImage.additionalSpace` | closure unchanged | **image 2.00 MiB**, not the 96 the arithmetic suggested |
 | 69 to 71 | image sizing | rejected | the VHD is sparse and CHS-rounded: the image is its contents |
 | 72  | `xzInitrd` | 274.27 MiB | 4.23, 1.5%; image 12.00 MiB, boot 2.5s slower |
+| 73  | `cLocaleOnly` | 271.81 MiB | 2.46, 0.9%; the image rounded 6 MiB the other way |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.

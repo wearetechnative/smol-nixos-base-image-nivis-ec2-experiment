@@ -3,6 +3,7 @@
   imports = [
     ./profiles.nix
     # One file per strategy (BRIEFING §5). Append here when a strategy is added.
+    ./c-locale-only.nix
     ./empty-hwdb.nix
     ./lean-image.nix
     ./minimal-initrd-modules.nix
