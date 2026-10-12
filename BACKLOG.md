@@ -70,7 +70,7 @@ of the lab's savings.
 | e5 | remove the duplicate systemd builds | 22.26 MiB | rejected #18 and #20, blocked behind s6; a different route is written up in experiments/018 |
 | e6 | image compression at AMI registration time | unknown | todo |
 | e15 | why boot time fell from 36.4s to 14.3s when the channel left the image | not a size item, but the largest unexplained effect in the lab | todo |
-| e16 | read the rest of `make-disk-image.nix` for other defaults nothing overrides, now that `copyChannel` turned up 544 MiB | unknown | todo |
+| e16 | ~~read the rest of `make-disk-image.nix` for other defaults nothing overrides~~ | 2.00 MiB | done #68 to #71: the automatic sizing only has to be large enough, the VHD is sparse, and the image is its contents |
 | e7 | filesystem choice for the root volume | unknown | todo |
 | e8 | drop every Python script, so CPython leaves the image | 136.55 MiB | accepted #9, 136.87 MiB |
 | e9 | `nix.enable = false` on the appliance track | duplicate of `n3` | accepted #26, 87.54 MiB |

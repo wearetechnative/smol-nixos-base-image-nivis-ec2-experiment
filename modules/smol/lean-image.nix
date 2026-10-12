@@ -39,6 +39,31 @@ in
     the closure
   '';
 
+  options.smol.leanImage.additionalSpace = lib.mkOption {
+    type = lib.types.str;
+    default = "32M";
+    description = ''
+      Free space `make-disk-image` leaves in the filesystem on top of its
+      contents, with `diskSize = "auto"`.
+
+      It is slack inside the artefact that gets uploaded to S3 and imported
+      as an EBS snapshot, and it is not what the instance runs on: the root
+      volume is sized at launch by `rootVolumeGb` in `lab/nivis-plan.nix`,
+      8 GiB by default, and `growpart` with `resize2fs` expands the
+      filesystem into it on first boot. That is contract check 9, so every
+      gate 2 run proves the expansion still happens.
+
+      make-disk-image's own default is `512M`; `smol.leanImage` used `128M`
+      from #25 and `32M` since #68, which measured 2.00 MiB rather than the
+      96 MiB the arithmetic suggests. Experiments 69 to 71 went looking for
+      the rest and found that there is nothing there to win: the automatic
+      sizing only has to be large enough, `qemu-img convert -O vpc` writes
+      a sparse VHD, and the bytes that exist are the bytes the filesystem
+      actually holds. Cutting the inode allowance in half moved the
+      allocated size of the image by 64 KiB. The image is its contents.
+    '';
+  };
+
   options.smol.leanImage.pristineBuilderVm = lib.mkOption {
     type = lib.types.bool;
     default = true;
@@ -129,7 +154,7 @@ in
               # The two changes this strategy exists for.
               copyChannel = false;
               diskSize = "auto";
-              additionalSpace = "128M";
+              inherit (cfg) additionalSpace;
 
               # The stock builder writes a configuration.nix into the image so
               # someone can rebuild from it. Nothing on the appliance track can.

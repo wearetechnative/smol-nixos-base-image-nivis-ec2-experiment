@@ -341,3 +341,24 @@ reports `infinite recursion encountered` with a trace through
 When a package is only reachable through a *string* in `/etc`, change the
 string. That experiment took 8.72 MiB without touching a derivation.
 
+## The image is its contents, and the VHD is sparse
+
+`make-disk-image` sizes the filesystem with an estimate: apparent file
+sizes, plus two blocks per inode, plus 5.2% fudge, plus `additionalSpace`.
+It is tempting to read that formula as the image size and tune it. It is
+not. `qemu-img convert -O vpc` writes a **sparse** VHD and the format
+rounds the virtual size to a CHS geometry, so:
+
+- the apparent size moves in steps of about 2 MiB, which is why #58 took
+  2.84 MiB of closure with a byte-identical image and #61 shrank the
+  closure while the image grew;
+- the bytes that exist are the bytes the filesystem holds;
+- the estimate only has to be *large enough*. Experiments 69 to 71 cut it
+  three ways: one did not build, one ran out of space inside
+  `grub-install`, and halving the inode allowance moved the allocated
+  size by 64 KiB.
+
+Measure allocated size with `du --block-size=1`, not `stat -c %s`, when
+the question is how much data there is. To make the image smaller, take
+something out of the closure.
+
