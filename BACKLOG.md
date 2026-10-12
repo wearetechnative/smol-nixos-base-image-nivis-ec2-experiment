@@ -132,13 +132,19 @@ cost: `make-disk-image` should install the bootloader without requiring
 blocker here, so it belongs in `REPORT.md`'s recommendations rather than on
 this list.
 
-### New loose ends### New loose ends
+### New loose ends
 
 | # | what | why it matters |
 | - | ---- | -------------- |
-| e12 | find what holds `sqlite` after PAM's lastlog is off | siraben's `s8` reports sqlite leaving with lastlog; here it stays, and experiment 19 saved 3344 bytes instead |
-| e13 | build systemd with `withFido2 = false` | `libfido2` is one of three holders of the duplicate `systemd-minimal`; an appliance has no security key |
-| e14 | find out why `dbus` links `systemd-minimal` rather than the systemd already in the closure | the third holder, and the last one before `e5` can be retried |
+| e12 | ~~find what holds `sqlite` after PAM's lastlog is off~~ | answered in #56: the util-linux build, not PAM. `withLastlog = false` removed it |
+| e13 | ~~build systemd with `withFido2 = false`~~ | done in #36; `libfido2` came back through openssh, which is `e20` |
+| e14 | ~~find out why `dbus` links `systemd-minimal`~~ | answered in #48: nixpkgs builds it against `systemdMinimal` to avoid a cycle that does not exist here |
+| e16 | make `lab/measure.sh` distinguish an image it could not build from an image of size zero | experiment 56 logged a 100% image saving because the image build failed under load; `lab/experiment.sh` accepted it |
+| e17 | build `curl` without GSSAPI and without IDN | `krb5-1.22.2-lib` at 2.80 MiB and `libunistring` at 1.99 MiB are referenced by curl alone, and nothing here authenticates to Kerberos or resolves an internationalised name |
+| e18 | `services.lvm.enable = false` | `lvm2-2.03.41-bin` at 2.61 MiB is referenced by `system-units` and `tmpfiles.d`; the root filesystem is a plain partition |
+| e19 | `programs.bash.completion.enable = false` | `bash-completion-2.18.0` at 1.21 MiB is referenced by `etc-bashrc` |
+| e20 | build `openssh` with `withFIDO = false` | `libfido2-1.17.0` at 1.15 MiB; the lab authenticates with a plain ed25519 key |
+| e21 | find whether `nsncd` can go | 1.46 MiB on `nscd.service`. NixOS runs it as the NSS cache and contract check 4 is `getent`, so this needs gate 1 to answer rather than a guess |
 
 Phase 2 items are seeded from BRIEFING §9. New ones come from
 `nix why-depends` and `nix path-info -rS` on the largest remaining paths of

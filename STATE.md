@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 313.04 MiB | 79.4% |
-| raw VHD | 2598.64 MiB | 440.11 MiB | 83.1% |
-| boot time | 40.8s | 14.1s | 65.5% |
+| closure | 1516.25 MiB | 307.24 MiB | 79.7% |
+| raw VHD | 2598.64 MiB | 432.11 MiB | 83.4% |
+| boot time | 40.8s | 14.9s | 63.3% |
 
-25 accepted experiments covering 24 strategies. The image is what gets
+26 accepted experiments covering 24 strategies. The image is what gets
 uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -74,6 +74,7 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 53  | `slimIproute2` | 326.62 MiB | 6.89, 2.1%; `db` and `iptables` leave |
 | 54  | `slimSystemd.withLibBPF` | 319.99 MiB | 6.64, 2.0%; `libbpf` and `elfutils` leave |
 | 55  | `noX11` | 313.04 MiB | 6.94, 2.2%; xauth, six libX and fontconfig |
+| 56  | `noLastlog.withLastlog2` | 307.24 MiB | 5.80, 1.9%; sqlite, four experiments late |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.

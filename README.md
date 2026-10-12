@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **313 MiB** | 79.4% |
-| **raw VHD** | 2599 MiB | **440 MiB** | 83.1% |
-| **boot time** | 40.8s | **14.1s** | 65.5% |
+| **closure** | 1516 MiB | **307 MiB** | 79.7% |
+| **raw VHD** | 2599 MiB | **432 MiB** | 83.4% |
+| **boot time** | 40.8s | **14.9s** | 63.3% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -67,7 +67,7 @@ without changing the closure by a single byte. Why it moved is
 
 | state | n | |
 | --- | --- | --- |
-| accepted | 20 | `████████████████············` |
+| accepted | 21 | `████████████████············` |
 | rejected | 3 | `██··························` |
 | needs-upstream | 0 | `····························` |
 | todo | 13 | `██████████··················` |
@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 50 | `no-user-data-decompression` | +11.4 | +12.0 | rejected: gate 2 failed |
 | 51 | `no-user-data-decompression` | +11.4 | +8.0 | **accepted** |
 | 52 | `slim-iproute2` | n/a | n/a | rejected: build failed |
 | 53 | `slim-iproute2` | +6.9 | +10.0 | **accepted** |
 | 54 | `slim-systemd-no-libbpf` | +6.6 | +8.0 | **accepted** |
 | 55 | `no-x11` | +6.9 | +12.0 | **accepted** |
+| 56 | `no-lastlog2` | +5.8 | +8.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

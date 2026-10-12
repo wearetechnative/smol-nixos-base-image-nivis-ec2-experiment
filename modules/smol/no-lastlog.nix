@@ -26,7 +26,7 @@ in
 
   options.smol.noLastlog.withLastlog2 = lib.mkOption {
     type = lib.types.bool;
-    default = true;
+    default = false;
     description = ''
       Whether util-linux is built with liblastlog2 and `pam_lastlog2.so`.
 
@@ -39,9 +39,10 @@ in
       With this false, util-linux configures with `--disable-liblastlog2`
       and `--disable-pam-lastlog2`, and sqlite has no runtime referrer left.
 
-      It is a separate option from `enable` so that it can be measured
-      against an `accepted` that still has it, which experiment 40 is the
-      reason for.
+      It is a separate option from `enable` so that it could be measured
+      against an `accepted` that still had it, which experiment 40 is the
+      reason for. The default is `false` since ledger #56: 5.80 MiB closure
+      and 8.00 MiB raw image, which is the saving #19 was supposed to find.
     '';
   };
 

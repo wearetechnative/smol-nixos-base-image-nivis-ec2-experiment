@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 313.04 MiB at ledger #55, from a 1516.25 MiB baseline, 79.4% off.
-40 paths are over 1 MiB.
+Closure 307.24 MiB at ledger #56, from a 1516.25 MiB baseline, 79.7% off.
+39 paths are over 1 MiB.
 
 ### Genuine floor
 
@@ -59,7 +59,6 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 10.31 | `gcc-16.2.0-lib` | `db-4.8`, `db-5.3`, `gmp`, `gptfdisk`, `make-initrd-ng`, `nixos-init`, `nsncd` | seven referrers, so it follows the others rather than leading |
 | 8.72  | `util-linux-minimal-2.42.3-bin` | `etc-systemd-system.conf`, `lvm2-scripts`, `systemd-generator-environment.json` | a second util-linux build. The `lvm2` referrer goes with `services.lvm.enable = false` |
 | 7.20  | `linux-headers-static-7.2` | every `security-wrapper-*` | `security.wrappers` must stay: pam_unix needs `unix_chkpwd` or login loops. The seven wrappers that are not `unix_chkpwd`, `mount` or `umount` could go, but the derivation stays either way |
-| 5.90  | `sqlite-3.53.3` | `util-linux-bin`, `util-linux-lib`, `util-linux-lastlog` | survived `smol.noLastlog` (#19). Needs util-linux built without lastlog2 |
 | 4.36  | `iproute2-7.1.0` | `ip` on the DHCP path | floor since #53, which cut the four packages it dragged behind it |
 | 3.61  | `db-4.8.30` | `linux-pam` | pam's own Berkeley DB backend |
 | 2.93  | `glibc-2.44-25-bin` | activation script, `shadow`, `system-path` | `smol.minimalSystemPackages` puts `glibc` on the path for `getent` |
@@ -81,7 +80,7 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 1.08  | `make-initrd-ng-0.1.0` | the initrd build | floor |
 
 `db-5.3.28`, `iptables-lib`, `libbpf` and `elfutils` left in #53 and #54,
-12.72 MiB between them. `xauth` and its five `libX*`, plus `fontconfig`, left in #55. Roughly 42
+12.72 MiB between them. `xauth` and its five `libX*`, plus `fontconfig`, left in #55. Roughly 36
 MiB sits in rows that still have a named next move. **Stop criteria 2
 and 3 are both not met**, and this table is the reason.
 
