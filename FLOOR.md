@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 278.50 MiB at ledger #67, from a 1516.25 MiB baseline, 81.6% off.
-Raw VHD 400.10 MiB.
+Closure 274.27 MiB at ledger #72, from a 1516.25 MiB baseline, 81.9% off.
+Raw VHD 386.10 MiB.
 38 paths are over 1 MiB.
 
 ### Genuine floor
@@ -31,7 +31,7 @@ Raw VHD 400.10 MiB.
 | ----- | ---- | ------------ |
 | 52.04 | `systemd-261.3` | already built with 20 features off (#36). It is PID 1, journald, logind, udev and timesyncd, and contract checks 2, 3 and 6 are about things it does |
 | 33.93 | `glibc-2.44-25` | the C library |
-| 24.77 | `initrd-linux-6.18.55` | the initrd must carry a systemd userland, because `smol.noKernelModules` force-loads `ena`, `af_packet`, `fuse` and `configfs` there |
+| 17.64 | `initrd-linux-6.18.55` | the initrd must carry a systemd userland, because `smol.noKernelModules` force-loads `ena`, `af_packet`, `fuse` and `configfs` there |
 | 21.97 | `linux-6.18.55` | the kernel image. A trimmed config was tried in #12 and derails nixpkgs' `make config` dialogue |
 | 13.98 | `util-linux-2.42.3-lib` | libmount, libblkid and libuuid, which systemd links |
 | 9.60  | `util-linux-2.42.3-bin` | `findmnt` is contract check 7, `agetty` is the console |

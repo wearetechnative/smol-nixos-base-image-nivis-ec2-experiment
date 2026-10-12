@@ -26,6 +26,7 @@
     ./no-bash-completion.nix
     ./no-installer-tools.nix
     ./slim-systemd.nix
+    ./xz-initrd.nix
     ./no-sudo.nix
     ./no-x11.nix
     ./slim-iproute2.nix

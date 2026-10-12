@@ -48,6 +48,7 @@ let
     slimOpenssh = [ "aggressive" ];
     slimIproute2 = [ "aggressive" ];
     slimSystemd = [ "aggressive" ];
+    xzInitrd = [ "aggressive" ];
   };
 in
 {
