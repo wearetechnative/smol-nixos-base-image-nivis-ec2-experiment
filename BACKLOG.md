@@ -144,7 +144,7 @@ this list.
 | e24 | ~~`services.lvm.enable = false`~~ accepted #60, 5.88 MiB | `lvm2-2.03.41-bin` at 2.61 MiB is referenced by `system-units` and `tmpfiles.d`; the root filesystem is a plain partition |
 | e25 | ~~`programs.bash.completion.enable = false`~~ accepted #61, 1.25 MiB | `bash-completion-2.18.0` at 1.21 MiB is referenced by `etc-bashrc` |
 | e26 | ~~build `openssh` with `withFIDO = false`~~ accepted #62, 1.38 MiB | `libfido2-1.17.0` at 1.15 MiB; the lab authenticates with a plain ed25519 key |
-| e27 | find whether `nsncd` can go | 1.46 MiB on `nscd.service`. NixOS runs it as the NSS cache and contract check 4 is `getent`, so this needs gate 1 to answer rather than a guess |
+| e27 | ~~find whether `nsncd` can go~~ accepted #64, 1.46 MiB; it can, with systemd's NSS plugins | 1.46 MiB on `nscd.service`. NixOS runs it as the NSS cache and contract check 4 is `getent`, so this needs gate 1 to answer rather than a guess |
 
 Phase 2 items are seeded from BRIEFING §9. New ones come from
 `nix why-depends` and `nix path-info -rS` on the largest remaining paths of

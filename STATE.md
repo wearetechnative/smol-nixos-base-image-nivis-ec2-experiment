@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 295.88 MiB | 80.5% |
-| raw VHD | 2598.64 MiB | 422.11 MiB | 83.8% |
-| boot time | 40.8s | 15.1s | 62.9% |
+| closure | 1516.25 MiB | 294.42 MiB | 80.6% |
+| raw VHD | 2598.64 MiB | 418.11 MiB | 83.9% |
+| boot time | 40.8s | 14.0s | 65.6% |
 
-31 accepted experiments covering 28 strategies. The image is what gets
+32 accepted experiments covering 29 strategies. The image is what gets
 uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -81,6 +81,8 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 60  | `noLvm` | 298.51 MiB | 5.88, 1.9%; more than FLOOR.md predicted |
 | 61  | `noBashCompletion` | 297.26 MiB | 1.25, 0.4%; the image rounded 2 MiB the other way |
 | 62  | `slimOpenssh` | 295.88 MiB | 1.38, 0.5%; libfido2, back since #36 |
+| 63  | `noNscd` | rejected, assertion | NSS modules require nscd, and NixOS names the way out |
+| 64  | `noNscd` | 294.42 MiB | 1.46, 0.5%; nsncd and systemd's NSS plugins |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.

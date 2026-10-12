@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 295.88 MiB at ledger #62, from a 1516.25 MiB baseline, 80.5% off.
-Raw VHD 422.11 MiB.
+Closure 294.42 MiB at ledger #64, from a 1516.25 MiB baseline, 80.6% off.
+Raw VHD 418.11 MiB.
 38 paths are over 1 MiB.
 
 ### Genuine floor
@@ -69,7 +69,6 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 2.07  | `util-linux-minimal-2.42.3-lib` | the minimal bin above | follows it |
 | 2.02  | `pcre2-10.48` | `gnugrep` | `grep -P`. Contract checks use plain patterns |
 | 1.99  | `libunistring-1.4.2` | `libidn2`, which **glibc** references for IDN in `getaddrinfo` | floor. #58 proved it is not curl's: it stays with curl's `idnSupport` off |
-| 1.46  | `nsncd-1.5.3` | `nscd.service` | NixOS runs nsncd as its NSS cache. Whether `getent` (contract check 4) still works without it is untested |
 | 1.46  | `libxml2-2.15.4` | `libarchive` | and libarchive is held by systemd |
 | 1.42  | `e2fsprogs-1.47.4-bin` | the e2fsprogs above | follows it |
 | 1.26  | `curl-8.22.0` | `fetch-ec2-metadata.service` | contract check 1 depends on it |

@@ -27,6 +27,7 @@ let
     noKernelModules = [ "aggressive" ];
     noLastlog = [ "aggressive" ];
     minimalSystemPackages = [ "aggressive" ];
+    noNscd = [ "aggressive" ];
     noNix = [ "aggressive" ];
     noFlakeRegistry = [
       "safe"

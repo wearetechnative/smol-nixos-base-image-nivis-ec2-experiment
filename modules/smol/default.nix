@@ -12,6 +12,7 @@
     ./no-kernel-modules.nix
     ./no-lastlog.nix
     ./no-lvm.nix
+    ./no-nscd.nix
     ./no-nix.nix
     ./no-perl.nix
     ./no-documentation.nix
