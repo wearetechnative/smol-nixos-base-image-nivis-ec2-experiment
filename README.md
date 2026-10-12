@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **307 MiB** | 79.7% |
+| **closure** | 1516 MiB | **304 MiB** | 79.9% |
 | **raw VHD** | 2599 MiB | **432 MiB** | 83.4% |
-| **boot time** | 40.8s | **14.9s** | 63.3% |
+| **boot time** | 40.8s | **13.6s** | 66.6% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -67,14 +67,14 @@ without changing the closure by a single byte. Why it moved is
 
 | state | n | |
 | --- | --- | --- |
-| accepted | 21 | `████████████████············` |
+| accepted | 20 | `████████████████············` |
 | rejected | 3 | `██··························` |
 | needs-upstream | 0 | `····························` |
 | todo | 13 | `██████████··················` |
 
 ### Stop criteria (BRIEFING section 9)
 
-- [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (1 of 8)
+- [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (2 of 8)
 - [ ] every backlog item accepted, rejected or needs-upstream (13 still todo)
 - [x] `FLOOR.md` justifies every remaining path over 1 MiB
 
@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 51 | `no-user-data-decompression` | +11.4 | +8.0 | **accepted** |
-| 52 | `slim-iproute2` | n/a | n/a | rejected: build failed |
 | 53 | `slim-iproute2` | +6.9 | +10.0 | **accepted** |
 | 54 | `slim-systemd-no-libbpf` | +6.6 | +8.0 | **accepted** |
 | 55 | `no-x11` | +6.9 | +12.0 | **accepted** |
 | 56 | `no-lastlog2` | +5.8 | +8.0 | **accepted** |
+| 57 | `slim-curl` | n/a | n/a | rejected: build failed |
+| 58 | `slim-curl` | +2.8 | +0.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

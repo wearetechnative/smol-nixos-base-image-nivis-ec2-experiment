@@ -265,3 +265,51 @@ definition of the same option. `lib.mkForce [ pkgs.curl ]` on
 Experiment 50 is the case: gate 1 passed, the EC2 instance never came up,
 and the serial console said `mkdir: command not found`. When forcing a
 service path, restate that list. Experiment 51 does.
+
+## The store fills up, and the lab account cannot empty it
+
+`/etc/nix/nix.conf` on this machine sets `keep-failed = true`,
+`keep-outputs = true` and `keep-derivations = true`. Together they mean:
+
+- every failed build leaves its build directory in `/nix/var/nix/builds`,
+  owned by `nixbld`. It reached 8.6 GiB by experiment 57.
+- every image this lab has ever built stays alive as long as its `.drv` is
+  reachable from a root, so `nix store delete` refuses it and
+  `nix-store --delete --ignore-liveness` is not permitted to a non-trusted
+  user.
+
+An overlay on a package as deep as `curl`, `util-linux` or `dbus` rebuilds
+everything downstream of it, QEMU included, and that chain wants more than
+10 GiB. When free space drops under about 15 GiB, stop and ask Pim for
+
+```sh
+sudo rm -rf /nix/var/nix/builds/*
+sudo nix-collect-garbage --delete-older-than 7d
+```
+
+rather than letting a forty-minute build die on ENOSPC. Nothing in
+`ledger.jsonl` depends on a store path still existing: every image is
+rebuilt from the flake when it is needed.
+
+## An overlay rebuilds the build world, not just the appliance
+
+`nixpkgs.overlays` is how every package strategy here is written, and it is
+right when the package sits deep in the appliance: systemd (#36), util-linux
+(#48, #56), dbus (#48, #55), iproute2 (#53). Each of those rebuilds a
+handful of things, or QEMU once.
+
+`curl` is different. LLVM links libcurl for debuginfod, so an overlay on
+curl rebuilds LLVM, clang, mesa and QEMU. Experiment 57 ran three hours and
+reached `clang-21.1.8` before it was killed, for an expected 4.8 MiB.
+
+Before overriding a package, ask what takes it as a *build* input, not only
+what references it at runtime:
+
+```sh
+nix why-depends --all .#nixosConfigurations.accepted-x86_64-linux.config.system.build.toplevel <path>   # runtime
+nix-store --query --referrers-closure $(nix eval --raw nixpkgs#curl.drvPath)                            # build
+```
+
+When the package is referenced from one place in the image, override it
+there instead. Experiment 58 does that and rebuilds one package.
+

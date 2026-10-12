@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 307.24 MiB at ledger #56, from a 1516.25 MiB baseline, 79.7% off.
-39 paths are over 1 MiB.
+Closure 304.39 MiB at ledger #58, from a 1516.25 MiB baseline, 79.9% off.
+38 paths are over 1 MiB.
 
 ### Genuine floor
 
@@ -63,13 +63,12 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 3.61  | `db-4.8.30` | `linux-pam` | pam's own Berkeley DB backend |
 | 2.93  | `glibc-2.44-25-bin` | activation script, `shadow`, `system-path` | `smol.minimalSystemPackages` puts `glibc` on the path for `getent` |
 | 2.93  | `glibc-locales-2.44-25` | locale support | siraben's `s7` would cut this to C.UTF-8 only |
-| 2.80  | `krb5-1.22.2-lib` | `curl` | curl built with GSSAPI. Nothing here authenticates to Kerberos |
 | 2.61  | `lvm2-2.03.41-bin` | `system-units`, `tmpfiles.d` | `services.lvm.enable = false`. The root filesystem is a plain partition |
 | 2.32  | `procps-4.0.7` | `system-path` | on the minimal package list. `ps` is a debugging convenience, not a contract check |
 | 2.12  | `libcap-2.78` | systemd | floor, pending a check that nothing else holds it |
 | 2.07  | `util-linux-minimal-2.42.3-lib` | the minimal bin above | follows it |
 | 2.02  | `pcre2-10.48` | `gnugrep` | `grep -P`. Contract checks use plain patterns |
-| 1.99  | `libunistring-1.4.2` | `libidn2`, through curl | IDN support in curl |
+| 1.99  | `libunistring-1.4.2` | `libidn2`, which **glibc** references for IDN in `getaddrinfo` | floor. #58 proved it is not curl's: it stays with curl's `idnSupport` off |
 | 1.46  | `nsncd-1.5.3` | `nscd.service` | NixOS runs nsncd as its NSS cache. Whether `getent` (contract check 4) still works without it is untested |
 | 1.46  | `libxml2-2.15.4` | `libarchive` | and libarchive is held by systemd |
 | 1.42  | `e2fsprogs-1.47.4-bin` | the e2fsprogs above | follows it |
@@ -80,7 +79,7 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 1.08  | `make-initrd-ng-0.1.0` | the initrd build | floor |
 
 `db-5.3.28`, `iptables-lib`, `libbpf` and `elfutils` left in #53 and #54,
-12.72 MiB between them. `xauth` and its five `libX*`, plus `fontconfig`, left in #55. Roughly 36
+12.72 MiB between them. `xauth` and its five `libX*`, plus `fontconfig`, left in #55. Roughly 33
 MiB sits in rows that still have a named next move. **Stop criteria 2
 and 3 are both not met**, and this table is the reason.
 

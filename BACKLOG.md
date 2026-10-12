@@ -140,7 +140,7 @@ this list.
 | e13 | ~~build systemd with `withFido2 = false`~~ | done in #36; `libfido2` came back through openssh, which is `e20` |
 | e14 | ~~find out why `dbus` links `systemd-minimal`~~ | answered in #48: nixpkgs builds it against `systemdMinimal` to avoid a cycle that does not exist here |
 | e22 | ~~make the protocol distinguish an image it could not build from an image of size zero~~ | done the same day: `lab/experiment.sh` now stops when either image measures 0, which is what experiment 56 needed |
-| e23 | build `curl` without GSSAPI and without IDN | `krb5-1.22.2-lib` at 2.80 MiB and `libunistring` at 1.99 MiB are referenced by curl alone, and nothing here authenticates to Kerberos or resolves an internationalised name |
+| e23 | ~~build `curl` without GSSAPI and without IDN~~ accepted #58, krb5 only | `krb5-1.22.2-lib` at 2.80 MiB and `libunistring` at 1.99 MiB are referenced by curl alone, and nothing here authenticates to Kerberos or resolves an internationalised name |
 | e24 | `services.lvm.enable = false` | `lvm2-2.03.41-bin` at 2.61 MiB is referenced by `system-units` and `tmpfiles.d`; the root filesystem is a plain partition |
 | e25 | `programs.bash.completion.enable = false` | `bash-completion-2.18.0` at 1.21 MiB is referenced by `etc-bashrc` |
 | e26 | build `openssh` with `withFIDO = false` | `libfido2-1.17.0` at 1.15 MiB; the lab authenticates with a plain ed25519 key |

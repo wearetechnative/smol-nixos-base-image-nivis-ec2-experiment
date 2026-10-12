@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 307.24 MiB | 79.7% |
+| closure | 1516.25 MiB | 304.39 MiB | 79.9% |
 | raw VHD | 2598.64 MiB | 432.11 MiB | 83.4% |
-| boot time | 40.8s | 14.9s | 63.3% |
+| boot time | 40.8s | 13.6s | 66.6% |
 
-26 accepted experiments covering 24 strategies. The image is what gets
+27 accepted experiments covering 25 strategies. The image is what gets
 uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -75,38 +75,11 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 54  | `slimSystemd.withLibBPF` | 319.99 MiB | 6.64, 2.0%; `libbpf` and `elfutils` leave |
 | 55  | `noX11` | 313.04 MiB | 6.94, 2.2%; xauth, six libX and fontconfig |
 | 56  | `noLastlog.withLastlog2` | 307.24 MiB | 5.80, 1.9%; sqlite, four experiments late |
+| 57  | `slimCurl` | rejected twice | an overlay on curl rebuilds LLVM; then the guard found two more curl referrers |
+| 58  | `slimCurl` | 304.39 MiB | 2.84, 0.9%; krb5 leaves, the image does not move |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.
-
-## Stopped: the machine is out of disk
-
-Experiment 57 (`smol.slimCurl`, backlog `e23`) was killed during its build
-and logged nothing. Nothing was deployed, `just reap` finds no AWS
-resources, and `systems/candidate` still has the module enabled, ready to
-re-run.
-
-`/` has 5.3 GiB free of 216 GiB. An overlay on a package as deep as `curl`
-or `util-linux` rebuilds everything downstream of it, QEMU included, and
-that chain needs more than is left.
-
-Two things hold the space, and both need Pim, because the lab account
-cannot touch either:
-
-| what | size | why I cannot clear it |
-| ---- | ---- | --------------------- |
-| `/nix/var/nix/builds` | 8.6 GiB | `keep-failed = true` in `/etc/nix/nix.conf` keeps the build directory of every failed build. They are owned by `nixbld`, and `sudo` is on the deny list |
-| dead store paths | unknown | `keep-outputs = true` and `keep-derivations = true` keep every image this lab has built alive as long as its `.drv` is reachable, so `nix store delete` refuses them. A general `nix-collect-garbage` is Pim's call (BRIEFING §7) |
-
-Suggested, in Pim's shell:
-
-```sh
-sudo rm -rf /nix/var/nix/builds/*
-sudo nix-collect-garbage --delete-older-than 7d
-```
-
-The lab's own images are rebuilt from the flake whenever they are needed,
-so nothing in `ledger.jsonl` depends on them still being in the store.
 
 ## The blocker is gone
 

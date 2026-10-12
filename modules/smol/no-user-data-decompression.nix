@@ -48,10 +48,26 @@ in
     `file`'s two holders
   '';
 
+  options.smol.noUserDataDecompression.curl = lib.mkOption {
+    type = lib.types.package;
+    default = pkgs.curl;
+    defaultText = lib.literalExpression "pkgs.curl";
+    description = ''
+      The curl that goes on `fetch-ec2-metadata.service`'s path.
+
+      It is an option because this module is the only place in the image
+      that references curl, so it is the only place a different build of it
+      can be installed. `smol.slimCurl` sets it to a curl without GSSAPI
+      and without IDN. Both modules forcing the path instead would merge
+      their two lists rather than conflict, and the unit would carry both
+      curls.
+    '';
+  };
+
   config = lib.mkIf cfg.enable {
     systemd.services.fetch-ec2-metadata = {
       path = lib.mkForce [
-        pkgs.curl
+        cfg.curl
         pkgs.coreutils
         pkgs.findutils
         pkgs.gnugrep

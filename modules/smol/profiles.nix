@@ -40,6 +40,7 @@ let
     noX11 = [ "aggressive" ];
     noUserDataDecompression = [ "aggressive" ];
     noSsmAgent = [ "aggressive" ];
+    slimCurl = [ "aggressive" ];
     slimIproute2 = [ "aggressive" ];
     slimSystemd = [ "aggressive" ];
   };
