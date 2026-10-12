@@ -22,6 +22,7 @@ let
       "aggressive"
     ];
     noDuplicateSystemd = [ "aggressive" ];
+    noDuplicateUtilLinux = [ "aggressive" ];
     noEditor = [ "aggressive" ];
     noFirewall = [ "aggressive" ];
     noKernelModules = [ "aggressive" ];

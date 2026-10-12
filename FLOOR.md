@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 294.42 MiB at ledger #64, from a 1516.25 MiB baseline, 80.6% off.
-Raw VHD 418.11 MiB.
+Closure 285.70 MiB at ledger #65, from a 1516.25 MiB baseline, 81.2% off.
+Raw VHD 412.11 MiB.
 38 paths are over 1 MiB.
 
 ### Genuine floor
@@ -58,7 +58,6 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | MiB   | path | referrers | next move |
 | ----- | ---- | --------- | --------- |
 | 10.31 | `gcc-16.2.0-lib` | `db-4.8`, `db-5.3`, `gmp`, `gptfdisk`, `make-initrd-ng`, `nixos-init`, `nsncd` | seven referrers, so it follows the others rather than leading |
-| 8.72  | `util-linux-minimal-2.42.3-bin` | `etc-systemd-system.conf`, `systemd-generator-environment.json` | a second util-linux build. The `lvm2-scripts` referrer left in #60 and it stayed; these two are what hold it |
 | 7.20  | `linux-headers-static-7.2` | every `security-wrapper-*` | `security.wrappers` must stay: pam_unix needs `unix_chkpwd` or login loops. The seven wrappers that are not `unix_chkpwd`, `mount` or `umount` could go, but the derivation stays either way |
 | 4.36  | `iproute2-7.1.0` | `ip` on the DHCP path | floor since #53, which cut the four packages it dragged behind it |
 | 3.61  | `db-4.8.30` | `linux-pam` | pam's own Berkeley DB backend |
@@ -66,7 +65,7 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 2.93  | `glibc-locales-2.44-25` | locale support | siraben's `s7` would cut this to C.UTF-8 only |
 | 2.32  | `procps-4.0.7` | `system-path` | on the minimal package list. `ps` is a debugging convenience, not a contract check |
 | 2.12  | `libcap-2.78` | systemd | floor, pending a check that nothing else holds it |
-| 2.07  | `util-linux-minimal-2.42.3-lib` | the minimal bin above | follows it |
+| 2.07  | `util-linux-minimal-2.42.3-lib` | `systemd` links it, and `sulogin`, `mount`, `swapon` are compiled into systemd from the same build's other outputs | floor until nixpkgs' systemd/util-linux/pam cycle can be broken. #65 removed the `bin` output, which was only a PATH entry; these are references from the binary |
 | 2.02  | `pcre2-10.48` | `gnugrep` | `grep -P`. Contract checks use plain patterns |
 | 1.99  | `libunistring-1.4.2` | `libidn2`, which **glibc** references for IDN in `getaddrinfo` | floor. #58 proved it is not curl's: it stays with curl's `idnSupport` off |
 | 1.46  | `libxml2-2.15.4` | `libarchive` | and libarchive is held by systemd |

@@ -18,6 +18,7 @@
     ./no-documentation.nix
     ./no-python.nix
     ./no-duplicate-systemd.nix
+    ./no-duplicate-util-linux.nix
     ./no-editor.nix
     ./no-firewall.nix
     ./no-flake-registry.nix

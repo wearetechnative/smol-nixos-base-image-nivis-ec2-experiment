@@ -318,3 +318,26 @@ nix-store --query --referrers-closure $(nix eval --raw nixpkgs#curl.drvPath)    
 When the package is referenced from one place in the image, override it
 there instead. Experiment 58 does that and rebuilds one package.
 
+## `prev.<attr>` does not escape an override you made in the same overlay
+
+nixpkgs resolves its own definitions against the *final* package set. So
+when an overlay does
+
+```nix
+systemd = prev.systemd.override { util-linux = final.util-linux; };
+```
+
+every attribute defined in terms of `systemd` picks the argument up, even
+`systemdMinimal` and `systemdLibs`, which exist precisely to avoid that.
+Writing `systemdMinimal = prev.systemdMinimal;` next to it changes
+nothing: the value comes from the previous layer, but its definition is
+still `self.systemd.override { ... }` with `self` the final set.
+
+In experiment 65 that made a real cycle, since `linux-pam` takes
+`systemd-minimal-libs` and a full util-linux takes `linux-pam`. Nix
+reports `infinite recursion encountered` with a trace through
+`sulogin-path`.
+
+When a package is only reachable through a *string* in `/etc`, change the
+string. That experiment took 8.72 MiB without touching a derivation.
+
