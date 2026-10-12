@@ -21,6 +21,7 @@
     ./no-firewall.nix
     ./no-flake-registry.nix
     ./no-amazon-init.nix
+    ./no-bash-completion.nix
     ./no-installer-tools.nix
     ./slim-systemd.nix
     ./no-sudo.nix

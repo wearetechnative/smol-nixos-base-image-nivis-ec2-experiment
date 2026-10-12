@@ -142,7 +142,7 @@ this list.
 | e22 | ~~make the protocol distinguish an image it could not build from an image of size zero~~ | done the same day: `lab/experiment.sh` now stops when either image measures 0, which is what experiment 56 needed |
 | e23 | ~~build `curl` without GSSAPI and without IDN~~ accepted #58, krb5 only | `krb5-1.22.2-lib` at 2.80 MiB and `libunistring` at 1.99 MiB are referenced by curl alone, and nothing here authenticates to Kerberos or resolves an internationalised name |
 | e24 | ~~`services.lvm.enable = false`~~ accepted #60, 5.88 MiB | `lvm2-2.03.41-bin` at 2.61 MiB is referenced by `system-units` and `tmpfiles.d`; the root filesystem is a plain partition |
-| e25 | `programs.bash.completion.enable = false` | `bash-completion-2.18.0` at 1.21 MiB is referenced by `etc-bashrc` |
+| e25 | ~~`programs.bash.completion.enable = false`~~ accepted #61, 1.25 MiB | `bash-completion-2.18.0` at 1.21 MiB is referenced by `etc-bashrc` |
 | e26 | build `openssh` with `withFIDO = false` | `libfido2-1.17.0` at 1.15 MiB; the lab authenticates with a plain ed25519 key |
 | e27 | find whether `nsncd` can go | 1.46 MiB on `nscd.service`. NixOS runs it as the NSS cache and contract check 4 is `getent`, so this needs gate 1 to answer rather than a guess |
 

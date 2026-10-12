@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 298.51 MiB at ledger #60, from a 1516.25 MiB baseline, 80.3% off.
-Raw VHD 422.11 MiB.
+Closure 297.26 MiB at ledger #61, from a 1516.25 MiB baseline, 80.4% off.
+Raw VHD 424.11 MiB.
 38 paths are over 1 MiB.
 
 ### Genuine floor
@@ -73,7 +73,6 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 1.46  | `libxml2-2.15.4` | `libarchive` | and libarchive is held by systemd |
 | 1.42  | `e2fsprogs-1.47.4-bin` | the e2fsprogs above | follows it |
 | 1.26  | `curl-8.22.0` | `fetch-ec2-metadata.service` | contract check 1 depends on it |
-| 1.21  | `bash-completion-2.18.0` | `etc-bashrc` | `programs.bash.completion.enable = false` |
 | 1.15  | `zstd-1.5.7` | systemd, for compressed journals | floor |
 | 1.15  | `libfido2-1.17.0` | `openssh` | hardware security keys. The lab authenticates with a plain ed25519 key |
 | 1.08  | `make-initrd-ng-0.1.0` | the initrd build | floor |

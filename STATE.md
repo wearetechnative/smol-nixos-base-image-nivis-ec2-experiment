@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 298.51 MiB | 80.3% |
-| raw VHD | 2598.64 MiB | 422.11 MiB | 83.8% |
+| closure | 1516.25 MiB | 297.26 MiB | 80.4% |
+| raw VHD | 2598.64 MiB | 424.11 MiB | 83.7% |
 | boot time | 40.8s | 15.1s | 62.9% |
 
-29 accepted experiments covering 26 strategies. The image is what gets
+30 accepted experiments covering 27 strategies. The image is what gets
 uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -79,6 +79,7 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 58  | `slimCurl` | 304.39 MiB | 2.84, 0.9%; krb5 leaves, the image does not move |
 | 59  | `leanImage.pristineBuilderVm` | closure unchanged | **image 2.00 MiB**, and overlays stop rebuilding QEMU |
 | 60  | `noLvm` | 298.51 MiB | 5.88, 1.9%; more than FLOOR.md predicted |
+| 61  | `noBashCompletion` | 297.26 MiB | 1.25, 0.4%; the image rounded 2 MiB the other way |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.

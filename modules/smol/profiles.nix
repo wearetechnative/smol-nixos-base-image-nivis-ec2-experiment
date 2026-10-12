@@ -16,6 +16,7 @@ let
       "aggressive"
     ];
     noDefaultPackages = [ "aggressive" ];
+    noBashCompletion = [ "aggressive" ];
     noDocumentation = [
       "safe"
       "aggressive"
