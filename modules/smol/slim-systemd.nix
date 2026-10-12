@@ -43,6 +43,26 @@ in
     backlog item `s1`
   '';
 
+  options.smol.slimSystemd.withLibBPF = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = ''
+      Whether systemd keeps its BPF framework. It is what pulls in
+      `libbpf-1.7.0` and, through it, `elfutils-0.195`.
+
+      systemd uses BPF for `RestrictNetworkInterfaces=`, `IPAddressDeny=`,
+      `RestrictFileSystems=` and device access control in units. Nothing on
+      this image sets any of them, and the two paths are 6.30 MiB.
+
+      It was added defaulting to `true`, the behaviour `accepted` had at the
+      time, so that turning it off could be measured against it. Experiment
+      40 is why: refining a module `systems/accepted` already enables moves
+      both sides of the comparison and `lab/experiment.sh` honestly reports
+      zero. The default is `false` since ledger #54, which measured 6.64 MiB
+      closure and 8.00 MiB raw image.
+    '';
+  };
+
   config = lib.mkIf cfg.enable {
     # Turning a feature off in the package is only half of it. NixOS still
     # references what the feature would have installed, and the failure is
@@ -67,6 +87,7 @@ in
     nixpkgs.overlays = [
       (final: prev: {
         systemd = prev.systemd.override {
+          inherit (cfg) withLibBPF;
           withApparmor = false;
           withAudit = false;
           withCoredump = false;

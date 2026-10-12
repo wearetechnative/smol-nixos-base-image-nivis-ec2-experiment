@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **334 MiB** | 78.0% |
-| **raw VHD** | 2599 MiB | **470 MiB** | 81.9% |
-| **boot time** | 40.8s | **13.1s** | 67.8% |
+| **closure** | 1516 MiB | **320 MiB** | 78.9% |
+| **raw VHD** | 2599 MiB | **452 MiB** | 82.6% |
+| **boot time** | 40.8s | **14.2s** | 65.1% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 46 | `no-perl` | +58.7 | +68.0 | **accepted** |
-| 47 | `no-duplicate-systemd` | n/a | n/a | rejected: build failed |
-| 48 | `no-duplicate-systemd` | +22.4 | +24.0 | **accepted** |
 | 49 | `no-editor` | +2.5 | +4.0 | **accepted** |
 | 50 | `no-user-data-decompression` | +11.4 | +12.0 | rejected: gate 2 failed |
 | 51 | `no-user-data-decompression` | +11.4 | +8.0 | **accepted** |
+| 52 | `slim-iproute2` | n/a | n/a | rejected: build failed |
+| 53 | `slim-iproute2` | +6.9 | +10.0 | **accepted** |
+| 54 | `slim-systemd-no-libbpf` | +6.6 | +8.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

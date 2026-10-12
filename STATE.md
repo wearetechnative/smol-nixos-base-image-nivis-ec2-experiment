@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 333.50 MiB | 78.0% |
-| raw VHD | 2598.64 MiB | 470.12 MiB | 81.9% |
-| boot time | 40.8s | 13.1s | 67.8% |
+| closure | 1516.25 MiB | 319.97 MiB | 78.9% |
+| raw VHD | 2598.64 MiB | 452.11 MiB | 82.6% |
+| boot time | 40.8s | 14.2s | 65.1% |
 
-22 accepted experiments covering 22 strategies. The image is what gets
+24 accepted experiments covering 23 strategies. The image is what gets
 uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -70,6 +70,9 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 49  | `noEditor` | 344.91 MiB | 2.50, 0.7%; `file` had a second holder |
 | 50  | `noUserDataDecompression` | rejected, gate 2 failed | `mkForce` on a service path dropped `coreutils` |
 | 51  | `noUserDataDecompression` | 333.50 MiB | 11.41, 3.3% |
+| 52  | `slimIproute2` | rejected, guard | elfutils had a third holder: systemd |
+| 53  | `slimIproute2` | 326.62 MiB | 6.89, 2.1%; `db` and `iptables` leave |
+| 54  | `slimSystemd.withLibBPF` | 319.99 MiB | 6.64, 2.0%; `libbpf` and `elfutils` leave |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.

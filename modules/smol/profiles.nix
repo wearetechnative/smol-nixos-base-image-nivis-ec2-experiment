@@ -39,6 +39,7 @@ let
     noSwitchToConfiguration = [ "aggressive" ];
     noUserDataDecompression = [ "aggressive" ];
     noSsmAgent = [ "aggressive" ];
+    slimIproute2 = [ "aggressive" ];
     slimSystemd = [ "aggressive" ];
   };
 in

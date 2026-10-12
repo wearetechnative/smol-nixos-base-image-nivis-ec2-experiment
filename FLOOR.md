@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 333.50 MiB at ledger #51, from a 1516.25 MiB baseline, 78.0% off. 51 paths are
-over 1 MiB, 305.8 MiB of the 333.5.
+Closure 319.97 MiB at ledger #54, from a 1516.25 MiB baseline, 78.9% off.
+47 paths are over 1 MiB.
 
 ### Genuine floor
 
@@ -60,9 +60,7 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 8.72  | `util-linux-minimal-2.42.3-bin` | `etc-systemd-system.conf`, `lvm2-scripts`, `systemd-generator-environment.json` | a second util-linux build. The `lvm2` referrer goes with `services.lvm.enable = false` |
 | 7.20  | `linux-headers-static-7.2` | every `security-wrapper-*` | `security.wrappers` must stay: pam_unix needs `unix_chkpwd` or login loops. The seven wrappers that are not `unix_chkpwd`, `mount` or `umount` could go, but the derivation stays either way |
 | 5.90  | `sqlite-3.53.3` | `util-linux-bin`, `util-linux-lib`, `util-linux-lastlog` | survived `smol.noLastlog` (#19). Needs util-linux built without lastlog2 |
-| 4.36  | `iproute2-7.1.0` | `ip` on the DHCP path | kept, but it drags four paths below |
-| 4.24  | `db-5.3.28` | `iproute2` | `arpd`, which nothing calls |
-| 4.12  | `elfutils-0.195` | `iproute2`, `libbpf` | `ip` does not need BPF here |
+| 4.36  | `iproute2-7.1.0` | `ip` on the DHCP path | floor since #53, which cut the four packages it dragged behind it |
 | 3.61  | `db-4.8.30` | `linux-pam` | pam's own Berkeley DB backend |
 | 2.93  | `glibc-2.44-25-bin` | activation script, `shadow`, `system-path` | `smol.minimalSystemPackages` puts `glibc` on the path for `getent` |
 | 2.93  | `glibc-locales-2.44-25` | locale support | siraben's `s7` would cut this to C.UTF-8 only |
@@ -70,8 +68,6 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 2.61  | `lvm2-2.03.41-bin` | `system-units`, `tmpfiles.d` | `services.lvm.enable = false`. The root filesystem is a plain partition |
 | 2.60  | `libx11-1.8.13` | `xauth`, and `xauth` through `dbus-lib` | dbus built with X11 support, on a headless image. `libxcb`, `libxext`, `libxmu` and `libxt` follow it |
 | 2.32  | `procps-4.0.7` | `system-path` | on the minimal package list. `ps` is a debugging convenience, not a contract check |
-| 2.18  | `iptables-1.8.13-lib` | `iproute2` | the firewall is already off (`smol.noFirewall`) and `ip` does not need it |
-| 2.18  | `libbpf-1.7.0` | `iproute2` | as above |
 | 2.12  | `libcap-2.78` | systemd | floor, pending a check that nothing else holds it |
 | 2.07  | `util-linux-minimal-2.42.3-lib` | the minimal bin above | follows it |
 | 2.02  | `pcre2-10.48` | `gnugrep` | `grep -P`. Contract checks use plain patterns |
@@ -87,7 +83,9 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 1.15  | `libfido2-1.17.0` | `openssh` | hardware security keys. The lab authenticates with a plain ed25519 key |
 | 1.08  | `make-initrd-ng-0.1.0` | the initrd build | floor |
 
-Roughly 62 MiB sits in rows that have a named next move. **Stop criteria 2
+`db-5.3.28`, `iptables-lib`, `libbpf` and `elfutils` left in #53 and #54,
+12.72 MiB between them. Roughly 49 MiB sits in rows that still have a
+named next move. **Stop criteria 2
 and 3 are both not met**, and this table is the reason.
 
 ## Mutable track
