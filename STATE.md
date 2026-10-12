@@ -16,11 +16,11 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 285.70 MiB | 81.2% |
-| raw VHD | 2598.64 MiB | 412.10 MiB | 84.1% |
-| boot time | 40.8s | 13.6s | 66.7% |
+| closure | 1516.25 MiB | 278.50 MiB | 81.6% |
+| raw VHD | 2598.64 MiB | 400.10 MiB | 84.6% |
+| boot time | 40.8s | 13.3s | 67.3% |
 
-33 accepted experiments covering 30 strategies. The image is what gets
+34 accepted experiments covering 31 strategies. The image is what gets
 uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -84,6 +84,8 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 63  | `noNscd` | rejected, assertion | NSS modules require nscd, and NixOS names the way out |
 | 64  | `noNscd` | 294.42 MiB | 1.46, 0.5%; nsncd and systemd's NSS plugins |
 | 65  | `noDuplicateUtilLinux` | 285.70 MiB | 8.72, 3.0%; two strings in /etc, no package changed |
+| 66  | `wrappers-without-propagation` | rejected, gate 1 | the test driver does not get the flake's specialArgs |
+| 67  | `wrappers-without-propagation` | 278.50 MiB | 7.20, 2.5%; a 60-byte metadata file held 7 MiB |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.

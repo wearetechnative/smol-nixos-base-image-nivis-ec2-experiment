@@ -4,7 +4,13 @@
 # "accepted" means. Membership lives in modules/smol/profiles.nix.
 { ... }:
 {
-  imports = [ ../baseline ];
+  imports = [
+    ../baseline
+
+    # Not a `smol.*` toggle: it replaces an upstream module, and
+    # `disabledModules` and `imports` cannot depend on an option. Ledger #67.
+    ../../modules/smol/wrappers-without-propagation.nix
+  ];
 
   smol.profile = "aggressive";
 }

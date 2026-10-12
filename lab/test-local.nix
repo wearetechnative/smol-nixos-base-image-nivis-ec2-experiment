@@ -24,6 +24,12 @@ pkgs.testers.runNixOSTest {
   # system instantiate nixpkgs per node, exactly as the flake does.
   node.pkgsReadOnly = false;
 
+  # The flake hands this to every variant through `specialArgs`; the test
+  # driver builds its nodes itself, so it has to hand over the same thing or
+  # `modules/smol/wrappers-without-propagation.nix` looks for it in
+  # `_module.args` and the evaluation recurses. Experiment 66.
+  node.specialArgs.smolWrappersPatched = import ./wrappers-patch.nix pkgs;
+
   nodes = {
     target =
       { ... }:

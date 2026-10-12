@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **286 MiB** | 81.2% |
-| **raw VHD** | 2599 MiB | **412 MiB** | 84.1% |
-| **boot time** | 40.8s | **13.6s** | 66.7% |
+| **closure** | 1516 MiB | **279 MiB** | 81.6% |
+| **raw VHD** | 2599 MiB | **400 MiB** | 84.6% |
+| **boot time** | 40.8s | **13.3s** | 67.3% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -67,27 +67,27 @@ without changing the closure by a single byte. Why it moved is
 
 | state | n | |
 | --- | --- | --- |
-| accepted | 20 | `████████████████············` |
+| accepted | 21 | `█████████████████···········` |
 | rejected | 3 | `██··························` |
 | needs-upstream | 0 | `····························` |
-| todo | 13 | `██████████··················` |
+| todo | 11 | `█████████···················` |
 
 ### Stop criteria (BRIEFING section 9)
 
 - [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (5 of 8)
-- [ ] every backlog item accepted, rejected or needs-upstream (13 still todo)
+- [ ] every backlog item accepted, rejected or needs-upstream (11 still todo)
 - [x] `FLOOR.md` justifies every remaining path over 1 MiB
 
 ### Last six ledger entries
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 60 | `no-lvm` | +5.9 | +8.0 | **accepted** |
-| 61 | `no-bash-completion` | +1.2 | -2.0 | **accepted** |
 | 62 | `slim-openssh` | +1.4 | +2.0 | **accepted** |
 | 63 | `no-nscd` | n/a | n/a | rejected: build failed |
 | 64 | `no-nscd` | +1.5 | +4.0 | **accepted** |
 | 65 | `no-duplicate-util-linux` | +8.7 | +6.0 | **accepted** |
+| 66 | `wrappers-without-propagation` | +7.2 | +12.0 | rejected: gate 1 failed |
+| 67 | `wrappers-without-propagation` | +7.2 | +12.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

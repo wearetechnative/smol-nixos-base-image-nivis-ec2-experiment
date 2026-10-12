@@ -48,8 +48,26 @@
             self.nixosModules.smol
           ]
           ++ modules;
-          specialArgs = { inherit nivis; };
+          specialArgs = {
+            inherit nivis;
+
+            # A patched copy of nixpkgs' security/wrappers module, built
+            # here rather than inside the module system. `disabledModules`
+            # and `imports` are evaluated before `config` exists, so a
+            # module that replaces another cannot reach `pkgs` to build the
+            # replacement. A specialArg can, because it is passed in from
+            # outside the fixpoint.
+            #
+            # Unoverlaid nixpkgs is the right source: the derivation only
+            # copies three text files and substitutes one line in them.
+            smolWrappersPatched = smolWrappersPatched system;
+          };
         };
+
+      # See modules/smol/wrappers-without-propagation.nix for what this is
+      # for and what it saves. lab/test-local.nix uses the same file, so both
+      # gates build the same module.
+      smolWrappersPatched = system: import ./lab/wrappers-patch.nix nixpkgs.legacyPackages.${system};
 
       # system -> { "<name>" = <config>; } for every tracked system variant.
       variants = {

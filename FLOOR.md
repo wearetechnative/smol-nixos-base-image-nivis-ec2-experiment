@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 285.70 MiB at ledger #65, from a 1516.25 MiB baseline, 81.2% off.
-Raw VHD 412.11 MiB.
+Closure 278.50 MiB at ledger #67, from a 1516.25 MiB baseline, 81.6% off.
+Raw VHD 400.10 MiB.
 38 paths are over 1 MiB.
 
 ### Genuine floor
@@ -58,7 +58,6 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | MiB   | path | referrers | next move |
 | ----- | ---- | --------- | --------- |
 | 10.31 | `gcc-16.2.0-lib` | `db-4.8`, `db-5.3`, `gmp`, `gptfdisk`, `make-initrd-ng`, `nixos-init`, `nsncd` | seven referrers, so it follows the others rather than leading |
-| 7.20  | `linux-headers-static-7.2` | every `security-wrapper-*` | `security.wrappers` must stay: pam_unix needs `unix_chkpwd` or login loops. The seven wrappers that are not `unix_chkpwd`, `mount` or `umount` could go, but the derivation stays either way |
 | 4.36  | `iproute2-7.1.0` | `ip` on the DHCP path | floor since #53, which cut the four packages it dragged behind it |
 | 3.61  | `db-4.8.30` | `linux-pam` | pam's own Berkeley DB backend |
 | 2.93  | `glibc-2.44-25-bin` | activation script, `shadow`, `system-path` | `smol.minimalSystemPackages` puts `glibc` on the path for `getent` |
