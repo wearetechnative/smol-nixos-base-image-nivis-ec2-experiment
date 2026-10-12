@@ -33,6 +33,7 @@ let
     ];
     noAmazonInit = [ "aggressive" ];
     noInstallerTools = [ "aggressive" ];
+    noLvm = [ "aggressive" ];
     noPerl = [ "aggressive" ];
     noPython = [ "aggressive" ];
     noSudo = [ "aggressive" ];

@@ -11,6 +11,7 @@
     ./no-default-packages.nix
     ./no-kernel-modules.nix
     ./no-lastlog.nix
+    ./no-lvm.nix
     ./no-nix.nix
     ./no-perl.nix
     ./no-documentation.nix
