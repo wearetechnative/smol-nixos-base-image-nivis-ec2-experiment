@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **269 MiB** | 82.2% |
-| **raw VHD** | 2599 MiB | **386 MiB** | 85.1% |
-| **boot time** | 40.8s | **14.5s** | 64.5% |
+| **closure** | 1516 MiB | **266 MiB** | 82.4% |
+| **raw VHD** | 2599 MiB | **380 MiB** | 85.4% |
+| **boot time** | 40.8s | **15.9s** | 60.9% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -74,7 +74,7 @@ without changing the closure by a single byte. Why it moved is
 
 ### Stop criteria (BRIEFING section 9)
 
-- [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (5 of 8)
+- [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (4 of 8)
 - [ ] every backlog item accepted, rejected or needs-upstream (5 still todo)
 - [x] `FLOOR.md` justifies every remaining path over 1 MiB
 
@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 69 | `lean-image-block-size` | +0.0 | n/a | rejected: image did not build, so it was not measured |
 | 70 | `lean-image-block-size` | +0.0 | +398.1 | rejected: image did not build, so it was not measured |
 | 71 | `lean-image-inode-blocks` | +0.0 | +0.0 | rejected: neither closure nor image is smaller than accepted |
 | 72 | `xz-initrd` | +4.2 | +12.0 | **accepted** |
 | 73 | `c-locale-only` | +2.5 | -6.0 | **accepted** |
 | 74 | `no-procps` | +2.3 | +0.0 | **accepted** |
+| 75 | `openssh-server-only` | +3.1 | +6.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

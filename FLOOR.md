@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 269.48 MiB at ledger #74, from a 1516.25 MiB baseline, 82.2% off.
-Raw VHD 386.10 MiB.
+Closure 266.39 MiB at ledger #75, from a 1516.25 MiB baseline, 82.4% off.
+Raw VHD 380.10 MiB.
 38 paths are over 1 MiB.
 
 ### Genuine floor
@@ -36,7 +36,7 @@ Raw VHD 386.10 MiB.
 | 13.98 | `util-linux-2.42.3-lib` | libmount, libblkid and libuuid, which systemd links |
 | 9.60  | `util-linux-2.42.3-bin` | `findmnt` is contract check 7, `agetty` is the console |
 | 9.00  | `openssl-3.5.8` | sshd and the TLS trust that contract check 5 exercises |
-| 8.78  | `openssh-10.5p1` | the only way in. The whole contract runs over it |
+| 5.65  | `openssh-10.5p1` | the only way in. The whole contract runs over it. Its client programs left in #75 |
 | 7.10  | `bash-interactive-5.3p15` | the login shell, and `lab/verify.sh` is `sh` |
 | 4.85  | `e2fsprogs-1.47.4` | `fsck` at boot and `resize2fs` for `growpart`, which is contract check 9 |
 | 4.45  | `systemd-minimal-libs-261.3` | `pam_timestamp_check` in linux-pam. systemd takes `pam` as a build input, so pointing pam at the real systemd is a cycle |
