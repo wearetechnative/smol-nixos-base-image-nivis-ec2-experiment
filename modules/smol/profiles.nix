@@ -21,6 +21,7 @@ let
       "aggressive"
     ];
     noDuplicateSystemd = [ "aggressive" ];
+    noEditor = [ "aggressive" ];
     noFirewall = [ "aggressive" ];
     noKernelModules = [ "aggressive" ];
     noLastlog = [ "aggressive" ];
@@ -36,6 +37,7 @@ let
     noPython = [ "aggressive" ];
     noSudo = [ "aggressive" ];
     noSwitchToConfiguration = [ "aggressive" ];
+    noUserDataDecompression = [ "aggressive" ];
     noSsmAgent = [ "aggressive" ];
     slimSystemd = [ "aggressive" ];
   };

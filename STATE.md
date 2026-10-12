@@ -16,12 +16,12 @@ twenty-one experiments assuming they tracked each other.
 
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
-| closure | 1516.25 MiB | 364.27 MiB | 76.0% |
-| raw VHD | 2598.64 MiB | 482.13 MiB | 81.4% |
-| boot time | 40.8s | 14.1s | 65.4% |
+| closure | 1516.25 MiB | 333.50 MiB | 78.0% |
+| raw VHD | 2598.64 MiB | 470.12 MiB | 81.9% |
+| boot time | 40.8s | 13.1s | 67.8% |
 
-Twenty-one accepted strategies. The image is what gets uploaded, imported as a
-snapshot and stored as an AMI, so it is the number that costs money.
+22 accepted experiments covering 22 strategies. The image is what gets
+uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
 | --- | -------- | ------------- | ----- |
@@ -29,16 +29,16 @@ snapshot and stored as an AMI, so it is the number that costs money.
 | 2   | `noFlakeRegistry` | 1316.50 MiB | 199.75, 13.2% |
 | 3   | `noInstallerTools` | rejected, build failed | guard caught an incomplete removal |
 | 4   | `noAmazonInit` | 1215.40 MiB | 101.10, 7.7% |
-| 5   | `noInstallerTools` | 1203.06 MiB | 12.34, 1.0% |
+| 5   | `noInstallerTools` | 1203.06 MiB | 12.33, 1.0% |
 | 6   | `noSsmAgent` | 1092.73 MiB | 110.33, 9.2% |
 | 7   | `noEbsNvmeId` | rejected, build failed | wrong build phase, my error |
 | 8   | `noPython` | rejected, gate 1 failed | harness could not handle an overlay |
-| 9   | `noPython` | 955.86 MiB | 136.87, 12.5% |
-| 10  | `noDocumentation` | 861.99 MiB | 93.87, 9.8% |
-| 11  | `noDefaultPackages` | 858.60 MiB | 3.39, 0.4% |
+| 9   | `noPython` | 955.83 MiB | 136.91, 12.5% |
+| 10  | `noDocumentation` | 862.00 MiB | 93.83, 9.8% |
+| 11  | `noDefaultPackages` | 858.61 MiB | 3.39, 0.4% |
 | 12  | `nitroKernel` | rejected, build failed | kconfig dialogue derails |
 | 13  | `noKernelModules` | rejected, gate 1 failed | firewall needs netfilter modules |
-| 14  | `noFirewall` | 851.07 MiB | 7.53, 0.9% |
+| 14  | `noFirewall` | 851.06 MiB | 7.55, 0.9% |
 | 15  | `noKernelModules` | rejected, gate 2 failed | no `ena`, no network |
 | 16  | `noKernelModules` | rejected, gate 2 failed | no `af_packet`, dhcpcd hangs |
 | 17  | `noKernelModules` | 698.13 MiB | 152.93, 18.0% |
@@ -52,21 +52,24 @@ snapshot and stored as an AMI, so it is the number that costs money.
 | 25  | `leanImage` | **image 1400.35 to 856.21 MiB** | 544.14, 38.9%, closure unchanged |
 | 26  | `noNix` | 610.59 MiB | 87.54, 12.5%; the appliance track still had Nix |
 | 27 to 30 | `minimalSystemPackages` | rejected | three lab defects, one real |
-| 31  | `minimalSystemPackages` | 553.27 MiB | 57.32, 9.4%; 57 packages down to 16 |
+| 31  | `minimalSystemPackages` | 552.99 MiB | 57.60, 9.4%; 57 packages down to 16 |
 | 32 to 35 | `slimSystemd` | rejected | four builds, each naming one missing systemd file |
-| 36  | `slimSystemd` | 515.03 MiB | 38.24, 6.9%; systemd 63.02 to 52.04 MiB |
+| 36  | `slimSystemd` | 515.03 MiB | 37.97, 6.9%; systemd 63.02 to 52.04 MiB |
 | 37  | `noPerl` | rejected | **needs-upstream**: perl is held by `install-grub.pl` |
 | 38  | `emptyHwdb` | rejected, build failed | `systemd-hwdb` writes nothing from no input |
 | 39  | `emptyHwdb` | 501.82 MiB | 13.21, 2.6% |
 | 40  | `minimalCoreutils` | rejected | protocol trap: both sides of the comparison moved |
 | 41  | `minimalCoreutils` | 489.07 MiB | 12.75, 2.5% |
 | 42  | `minimalInitrdModules` | rejected, gate 1 panicked | 1.41 MiB; the initrd is userland, not modules |
-| 43  | `noSudo` | 483.26 MiB | 5.81, 1.2%; found by writing `FLOOR.md` |
+| 43  | `noSudo` | 483.26 MiB | 5.82, 1.2%; found by writing `FLOOR.md` |
 | 44  | `noSwitchToConfiguration` | rejected, disk full | gate 1 passed; the machine, not the candidate |
-| 45  | `noSwitchToConfiguration` | 428.60 MiB | 54.65, 11.3%; the blocker removed |
-| 46  | `noPerl` | 386.38 MiB | 58.00, 13.7%; the same module that saved nothing in #37 |
+| 45  | `noSwitchToConfiguration` | 428.60 MiB | 54.66, 11.3%; the blocker removed |
+| 46  | `noPerl` | 369.85 MiB | 58.75, 13.7%; the same module that saved nothing in #37 |
 | 47  | `noDuplicateSystemd` | rejected, guard | two more holders: dbus and pam |
-| 48  | `noDuplicateSystemd` | 364.27 MiB | 22.11, 6.1% |
+| 48  | `noDuplicateSystemd` | 347.40 MiB | 22.45, 6.1% |
+| 49  | `noEditor` | 344.91 MiB | 2.50, 0.7%; `file` had a second holder |
+| 50  | `noUserDataDecompression` | rejected, gate 2 failed | `mkForce` on a service path dropped `coreutils` |
+| 51  | `noUserDataDecompression` | 333.50 MiB | 11.41, 3.3% |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.
@@ -82,9 +85,9 @@ chroot without anything entering the runtime closure.
 
 | # | strategy | closure saving |
 | - | -------- | -------------- |
-| 45 | `noSwitchToConfiguration` | 54.65 MiB |
-| 46 | `noPerl`, unchanged since it measured zero in #37 | 58.00 MiB |
-| 48 | `noDuplicateSystemd`, after two more holders turned up | 22.11 MiB |
+| 45 | `noSwitchToConfiguration` | 54.66 MiB |
+| 46 | `noPerl`, unchanged since it measured zero in #37 | 58.75 MiB |
+| 48 | `noDuplicateSystemd`, after two more holders turned up | 22.45 MiB |
 
 134.76 MiB against the 127.53 MiB predicted.
 

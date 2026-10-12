@@ -7,79 +7,88 @@ A path listed here without a convincing reason is not a floor entry, it is a
 `BACKLOG.md` item. Stop criterion 2 is not met while any such path exists,
 and several below are honestly marked as backlog rather than floor.
 
-Regenerate the raw list with:
+Sizes are MiB, bytes divided by 1048576. Through ledger #48 the closure
+totals in this file were bytes divided by 1000000 and labelled MiB; the
+per-path sizes were always correct. Regenerate the raw list with:
 
 ```sh
-just measure accepted | jq -r '.top_paths[] | "\(.bytes)\t\(.path)"'
+nix path-info -r --json --json-format 1 \
+  "$(nix eval --raw .#nixosConfigurations.accepted-x86_64-linux.config.system.build.toplevel.outPath)"
 ```
+
+`just measure` reports only the 20 largest, which is no longer the whole
+list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 364.27 MiB at ledger #48, from a 1516.25 MiB baseline. 63 paths are
-over 1 MiB; the 30 largest are listed, which is 374 MiB of the 489.
+Closure 333.50 MiB at ledger #51, from a 1516.25 MiB baseline, 78.0% off. 51 paths are
+over 1 MiB, 305.8 MiB of the 333.5.
 
-### Previously blocked, now removed
-
-Six paths and 127.53 MiB were held by `switch-to-configuration`, which
-could not be removed because the amazon image builder calls it. That is
-fixed: `smol.leanImage` patches `make-disk-image` to bind-mount the
-builder's store over the image's store for the bootloader step, so the
-installer is reachable in the chroot without entering the runtime closure.
-
-| MiB   | path | removed by |
-| ----- | ---- | ---------- |
-| 55.18 | `perl-5.42.3` | #46 |
-| 36.30 | `grub-2.14` | #45 |
-| 22.26 | `systemd-minimal-261.3` | #48, after two more holders |
-| 6.62  | `btrfs-progs-7.1` | #45 |
-| 3.64  | `perl-5.42.3-man` | #46 |
-
-`systemd-minimal-libs` at 4.45 MiB stays and is listed under floor below:
-`pam_timestamp_check` in linux-pam holds it, and systemd takes `pam` as a
-build input, so pointing pam at the real systemd is a genuine cycle.
-
-### Genuine floor### Genuine floor
+### Genuine floor
 
 | MiB   | path | why it stays |
 | ----- | ---- | ------------ |
-| 4.45  | `systemd-minimal-libs-261.3` | `pam_timestamp_check` in linux-pam. systemd takes `pam` as a build input, so pointing pam at the real systemd is a cycle |
 | 52.04 | `systemd-261.3` | already built with 20 features off (#36). It is PID 1, journald, logind, udev and timesyncd, and contract checks 2, 3 and 6 are about things it does |
 | 33.93 | `glibc-2.44-25` | the C library |
 | 24.77 | `initrd-linux-6.18.55` | the initrd must carry a systemd userland, because `smol.noKernelModules` force-loads `ena`, `af_packet`, `fuse` and `configfs` there |
 | 21.97 | `linux-6.18.55` | the kernel image. A trimmed config was tried in #12 and derails nixpkgs' `make config` dialogue |
 | 13.98 | `util-linux-2.42.3-lib` | libmount, libblkid and libuuid, which systemd links |
-| 9.61  | `util-linux-2.42.3-bin` | `findmnt` is contract check 7, `agetty` is the console |
+| 9.60  | `util-linux-2.42.3-bin` | `findmnt` is contract check 7, `agetty` is the console |
 | 9.00  | `openssl-3.5.8` | sshd and the TLS trust that contract check 5 exercises |
 | 8.78  | `openssh-10.5p1` | the only way in. The whole contract runs over it |
 | 7.10  | `bash-interactive-5.3p15` | the login shell, and `lab/verify.sh` is `sh` |
 | 4.85  | `e2fsprogs-1.47.4` | `fsck` at boot and `resize2fs` for `growpart`, which is contract check 9 |
+| 4.45  | `systemd-minimal-libs-261.3` | `pam_timestamp_check` in linux-pam. systemd takes `pam` as a build input, so pointing pam at the real systemd is a cycle |
 | 4.44  | `shadow-4.20.2` | `login` and the PAM stack SSH sessions go through |
-| 4.36  | `iproute2-7.1.0` | `ip`, used by the DHCP path |
 | 3.70  | `ncurses-6.6` | terminfo for an interactive SSH session |
 | 3.43  | `gawk-5.4.1` | `lab/verify.sh` uses `awk` in checks 3 and 9 |
+| 2.71  | `kbd-2.9.0` | `console.enable = false` does not remove it: `systemd-261.3` references it directly, for `systemd-vconsole-setup` |
+| 2.03  | `tzdata-2026d` | referenced by `libcap` and by six units. Contract check 6 is about the clock |
+| 1.87  | `linux-pam-1.7.2` | sshd and `login` both authenticate through it |
+| 1.80  | `bash-5.3p15` | `/bin/sh`, and every unit script's shebang |
+| 1.67  | `coreutils-9.11` | on the default path of every systemd service, as #50 demonstrated the hard way |
 
 ### Traced, with a decision still owed
 
-`nix why-depends` run on each, 2026-10-11. Knowing the holder is not the
-same as having a reason to keep it, so these stay out of the floor until
-each is accepted, rejected or marked `needs-upstream`.
+Direct referrers, not `nix why-depends` chains, taken from the same
+`path-info` dump on 2026-10-12. A path with several referrers needs all of
+them gone, which is what experiments 18 through 48 kept re-learning.
 
-| MiB   | path | holder | verdict |
-| ----- | ---- | ------ | ------- |
-| 10.54 | `file-5.48` | on `fetch-ec2-metadata.service`'s PATH | that service makes contract check 1 pass; whether it calls `file` is still unknown |
-| 10.31 | `gcc-16.2.0-lib` | was `perl-5.42.3-env`; perl is gone and this is not, so the holder has changed | retrace |
-| 8.72  | `util-linux-minimal-2.42.3-bin` | `systemd-generator-environment.json` | a second util-linux build, like the systemd duplicate. Not yet attacked |
-| 7.20  | `linux-headers-static-7.2` | `suid-sgid-wrappers.service` | the wrapper builder. `security.wrappers` must stay: pam_unix needs `unix_chkpwd` or login loops |
-| 5.90  | `sqlite-3.53.3` | `lslogins` in `util-linux-bin` | survived `smol.noLastlog` (#19). Needs util-linux built without it |
-| 4.24  | `db-5.3.28` | `arpd` in `iproute2` | iproute2 is kept for `ip`; `arpd` is not used |
-| 4.12  | `elfutils-0.195` | not traced | |
-| 3.61  | `db-4.8.30` | not traced | the second Berkeley DB |
+| MiB   | path | referrers | next move |
+| ----- | ---- | --------- | --------- |
+| 10.31 | `gcc-16.2.0-lib` | `db-4.8`, `db-5.3`, `gmp`, `gptfdisk`, `make-initrd-ng`, `nixos-init`, `nsncd` | seven referrers, so it follows the others rather than leading |
+| 8.72  | `util-linux-minimal-2.42.3-bin` | `etc-systemd-system.conf`, `lvm2-scripts`, `systemd-generator-environment.json` | a second util-linux build. The `lvm2` referrer goes with `services.lvm.enable = false` |
+| 7.20  | `linux-headers-static-7.2` | every `security-wrapper-*` | `security.wrappers` must stay: pam_unix needs `unix_chkpwd` or login loops. The seven wrappers that are not `unix_chkpwd`, `mount` or `umount` could go, but the derivation stays either way |
+| 5.90  | `sqlite-3.53.3` | `util-linux-bin`, `util-linux-lib`, `util-linux-lastlog` | survived `smol.noLastlog` (#19). Needs util-linux built without lastlog2 |
+| 4.36  | `iproute2-7.1.0` | `ip` on the DHCP path | kept, but it drags four paths below |
+| 4.24  | `db-5.3.28` | `iproute2` | `arpd`, which nothing calls |
+| 4.12  | `elfutils-0.195` | `iproute2`, `libbpf` | `ip` does not need BPF here |
+| 3.61  | `db-4.8.30` | `linux-pam` | pam's own Berkeley DB backend |
+| 2.93  | `glibc-2.44-25-bin` | activation script, `shadow`, `system-path` | `smol.minimalSystemPackages` puts `glibc` on the path for `getent` |
 | 2.93  | `glibc-locales-2.44-25` | locale support | siraben's `s7` would cut this to C.UTF-8 only |
+| 2.80  | `krb5-1.22.2-lib` | `curl` | curl built with GSSAPI. Nothing here authenticates to Kerberos |
+| 2.61  | `lvm2-2.03.41-bin` | `system-units`, `tmpfiles.d` | `services.lvm.enable = false`. The root filesystem is a plain partition |
+| 2.60  | `libx11-1.8.13` | `xauth`, and `xauth` through `dbus-lib` | dbus built with X11 support, on a headless image. `libxcb`, `libxext`, `libxmu` and `libxt` follow it |
+| 2.32  | `procps-4.0.7` | `system-path` | on the minimal package list. `ps` is a debugging convenience, not a contract check |
+| 2.18  | `iptables-1.8.13-lib` | `iproute2` | the firewall is already off (`smol.noFirewall`) and `ip` does not need it |
+| 2.18  | `libbpf-1.7.0` | `iproute2` | as above |
+| 2.12  | `libcap-2.78` | systemd | floor, pending a check that nothing else holds it |
+| 2.07  | `util-linux-minimal-2.42.3-lib` | the minimal bin above | follows it |
+| 2.02  | `pcre2-10.48` | `gnugrep` | `grep -P`. Contract checks use plain patterns |
+| 1.99  | `libunistring-1.4.2` | `libidn2`, through curl | IDN support in curl |
+| 1.46  | `nsncd-1.5.3` | `nscd.service` | NixOS runs nsncd as its NSS cache. Whether `getent` (contract check 4) still works without it is untested |
+| 1.46  | `libxml2-2.15.4` | `libarchive` | and libarchive is held by systemd |
+| 1.42  | `e2fsprogs-1.47.4-bin` | the e2fsprogs above | follows it |
+| 1.38  | `libxcb-1.17.0` | `libx11` | follows it |
+| 1.26  | `curl-8.22.0` | `fetch-ec2-metadata.service` | contract check 1 depends on it |
+| 1.21  | `bash-completion-2.18.0` | `etc-bashrc` | `programs.bash.completion.enable = false` |
+| 1.16  | `fontconfig-2.18.3` | `fontconfig-etc` | on a machine with no fonts and no display |
+| 1.15  | `zstd-1.5.7` | systemd, for compressed journals | floor |
+| 1.15  | `libfido2-1.17.0` | `openssh` | hardware security keys. The lab authenticates with a plain ed25519 key |
+| 1.08  | `make-initrd-ng-0.1.0` | the initrd build | floor |
 
-57.57 MiB across nine paths, after `sudo` was removed in experiment #43.
-One is blocked upstream, two are untraced and the rest have a holder but no
-decision. **Stop criteria 2 and 3 are both not met**, and this table is the
-reason.
+Roughly 62 MiB sits in rows that have a named next move. **Stop criteria 2
+and 3 are both not met**, and this table is the reason.
 
 ## Mutable track
 

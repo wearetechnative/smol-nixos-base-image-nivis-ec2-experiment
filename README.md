@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **347 MiB** | 77.1% |
-| **raw VHD** | 2599 MiB | **482 MiB** | 81.4% |
-| **boot time** | 40.8s | **14.1s** | 65.3% |
+| **closure** | 1516 MiB | **334 MiB** | 78.0% |
+| **raw VHD** | 2599 MiB | **470 MiB** | 81.9% |
+| **boot time** | 40.8s | **13.1s** | 67.8% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -74,7 +74,7 @@ without changing the closure by a single byte. Why it moved is
 
 ### Stop criteria (BRIEFING section 9)
 
-- [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (0 of 8)
+- [ ] the last 8 accepted experiments each saved under 1% or under 2 MiB (1 of 8)
 - [ ] every backlog item accepted, rejected or needs-upstream (13 still todo)
 - [x] `FLOOR.md` justifies every remaining path over 1 MiB
 
@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 43 | `no-sudo` | +5.8 | +8.0 | **accepted** |
-| 44 | `no-switch-to-configuration` | +54.7 | n/a | rejected: gate 2 failed |
-| 45 | `no-switch-to-configuration` | +54.7 | +56.0 | **accepted** |
 | 46 | `no-perl` | +58.7 | +68.0 | **accepted** |
 | 47 | `no-duplicate-systemd` | n/a | n/a | rejected: build failed |
 | 48 | `no-duplicate-systemd` | +22.4 | +24.0 | **accepted** |
+| 49 | `no-editor` | +2.5 | +4.0 | **accepted** |
+| 50 | `no-user-data-decompression` | +11.4 | +12.0 | rejected: gate 2 failed |
+| 51 | `no-user-data-decompression` | +11.4 | +8.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

@@ -239,3 +239,29 @@ reads this file before it writes a module.
   untracked and ungated. Experiment 40 hit this: `systems/accepted` quietly
   went from 501.82 to 489 MiB with nothing in the ledger to say so. Add an
   option and flip it in the candidate, so the two systems genuinely differ.
+
+## `nix why-depends` without `--all` records one reason, not the reason
+
+`FLOOR.md`'s holder column was filled in from single `nix why-depends`
+runs. That shows one path to the store path, and the module system is full
+of store paths with several independent holders: `file-5.48` had two,
+`systemd-minimal` had five (#18, #20, #45, #47, #48), and after `smol.noPerl`
+the holder of `gcc-16.2.0-lib` changed without anyone editing that row.
+
+Trace with `--all` before deciding, and re-trace a holder recorded by an
+earlier experiment rather than trusting the note. A removal aimed at a path
+with a second holder passes both gates, logs a real but small delta, and
+leaves the number in `FLOOR.md` looking unexplained. Experiment 49 is that
+case exactly.
+
+## `mkForce` on a service `path` also discards the default service path
+
+`nixos/lib/systemd-lib.nix` gives every stage-2 service `coreutils`,
+`findutils`, `gnugrep`, `gnused` and `systemd` through a `mkAfter`
+definition of the same option. `lib.mkForce [ pkgs.curl ]` on
+`systemd.services.<name>.path` wins over that too, so the unit runs with
+`curl` alone and dies on the first `mkdir`.
+
+Experiment 50 is the case: gate 1 passed, the EC2 instance never came up,
+and the serial console said `mkdir: command not found`. When forcing a
+service path, restate that list. Experiment 51 does.
