@@ -56,6 +56,24 @@ in
     '';
   };
 
+  options.smol.minimalSystemPackages.withProcps = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = ''
+      Whether `procps` stays on the system path.
+
+      It is 2.32 MiB and `system-path` is its only referrer, so it is
+      there for a person who has logged in: `ps`, `free`, `uptime`,
+      `sysctl`. Nothing on the image calls any of them, and neither does
+      the contract. `systemctl status` answers the same questions through
+      PID 1, which is where the appliance's processes actually live.
+
+      An option rather than a straight change to the package list, so the
+      two could be measured against each other: experiment 40 is why. The
+      default is `false` since ledger #74, which measured 2.33 MiB.
+    '';
+  };
+
   options.smol.minimalSystemPackages.extra = lib.mkOption {
     type = lib.types.listOf lib.types.package;
     default = [ ];
@@ -97,9 +115,9 @@ in
         # static curl the harness pushes is musl and resolves DNS itself.
         # Experiment 28.
         pkgs.openresolv
-        pkgs.procps
         pkgs.less
       ]
+      ++ lib.optional cfg.withProcps pkgs.procps
     );
   };
 }

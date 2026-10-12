@@ -48,9 +48,9 @@ out how much higher is the point.
 
 | | baseline | now | off |
 | --- | --- | --- | --- |
-| **closure** | 1516 MiB | **272 MiB** | 82.1% |
-| **raw VHD** | 2599 MiB | **392 MiB** | 84.9% |
-| **boot time** | 40.8s | **15.2s** | 62.8% |
+| **closure** | 1516 MiB | **269 MiB** | 82.2% |
+| **raw VHD** | 2599 MiB | **386 MiB** | 85.1% |
+| **boot time** | 40.8s | **14.5s** | 64.5% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
@@ -82,12 +82,12 @@ without changing the closure by a single byte. Why it moved is
 
 | id | strategy | closure MiB | image MiB | decision |
 | --- | --- | --- | --- | --- |
-| 68 | `lean-image-additional-space` | +0.0 | +2.0 | **accepted** |
 | 69 | `lean-image-block-size` | +0.0 | n/a | rejected: image did not build, so it was not measured |
 | 70 | `lean-image-block-size` | +0.0 | +398.1 | rejected: image did not build, so it was not measured |
 | 71 | `lean-image-inode-blocks` | +0.0 | +0.0 | rejected: neither closure nor image is smaller than accepted |
 | 72 | `xz-initrd` | +4.2 | +12.0 | **accepted** |
 | 73 | `c-locale-only` | +2.5 | -6.0 | **accepted** |
+| 74 | `no-procps` | +2.3 | +0.0 | **accepted** |
 
 Full history in [`ledger.jsonl`](ledger.jsonl), one note per experiment in
 [`experiments/`](experiments/).

@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 271.81 MiB at ledger #73, from a 1516.25 MiB baseline, 82.1% off.
-Raw VHD 392.10 MiB.
+Closure 269.48 MiB at ledger #74, from a 1516.25 MiB baseline, 82.2% off.
+Raw VHD 386.10 MiB.
 38 paths are over 1 MiB.
 
 ### Genuine floor
@@ -61,7 +61,6 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 4.36  | `iproute2-7.1.0` | `ip` on the DHCP path | floor since #53, which cut the four packages it dragged behind it |
 | 3.61  | `db-4.8.30` | `linux-pam` | pam's own Berkeley DB backend |
 | 2.93  | `glibc-2.44-25-bin` | activation script, `shadow`, `system-path` | `smol.minimalSystemPackages` puts `glibc` on the path for `getent` |
-| 2.32  | `procps-4.0.7` | `system-path` | on the minimal package list. `ps` is a debugging convenience, not a contract check |
 | 2.12  | `libcap-2.78` | systemd | floor, pending a check that nothing else holds it |
 | 2.07  | `util-linux-minimal-2.42.3-lib` | `systemd` links it, and `sulogin`, `mount`, `swapon` are compiled into systemd from the same build's other outputs | floor until nixpkgs' systemd/util-linux/pam cycle can be broken. #65 removed the `bin` output, which was only a PATH entry; these are references from the binary |
 | 2.02  | `pcre2-10.48` | `gnugrep` | `grep -P`. Contract checks use plain patterns |
