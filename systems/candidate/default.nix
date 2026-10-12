@@ -6,4 +6,6 @@
 {
   imports = [ ../accepted ];
 
+  smol.noLastlog.withLastlog2 = false;
+
 }

@@ -21,8 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 319.97 MiB at ledger #54, from a 1516.25 MiB baseline, 78.9% off.
-47 paths are over 1 MiB.
+Closure 313.04 MiB at ledger #55, from a 1516.25 MiB baseline, 79.4% off.
+40 paths are over 1 MiB.
 
 ### Genuine floor
 
@@ -66,7 +66,6 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 2.93  | `glibc-locales-2.44-25` | locale support | siraben's `s7` would cut this to C.UTF-8 only |
 | 2.80  | `krb5-1.22.2-lib` | `curl` | curl built with GSSAPI. Nothing here authenticates to Kerberos |
 | 2.61  | `lvm2-2.03.41-bin` | `system-units`, `tmpfiles.d` | `services.lvm.enable = false`. The root filesystem is a plain partition |
-| 2.60  | `libx11-1.8.13` | `xauth`, and `xauth` through `dbus-lib` | dbus built with X11 support, on a headless image. `libxcb`, `libxext`, `libxmu` and `libxt` follow it |
 | 2.32  | `procps-4.0.7` | `system-path` | on the minimal package list. `ps` is a debugging convenience, not a contract check |
 | 2.12  | `libcap-2.78` | systemd | floor, pending a check that nothing else holds it |
 | 2.07  | `util-linux-minimal-2.42.3-lib` | the minimal bin above | follows it |
@@ -75,17 +74,15 @@ them gone, which is what experiments 18 through 48 kept re-learning.
 | 1.46  | `nsncd-1.5.3` | `nscd.service` | NixOS runs nsncd as its NSS cache. Whether `getent` (contract check 4) still works without it is untested |
 | 1.46  | `libxml2-2.15.4` | `libarchive` | and libarchive is held by systemd |
 | 1.42  | `e2fsprogs-1.47.4-bin` | the e2fsprogs above | follows it |
-| 1.38  | `libxcb-1.17.0` | `libx11` | follows it |
 | 1.26  | `curl-8.22.0` | `fetch-ec2-metadata.service` | contract check 1 depends on it |
 | 1.21  | `bash-completion-2.18.0` | `etc-bashrc` | `programs.bash.completion.enable = false` |
-| 1.16  | `fontconfig-2.18.3` | `fontconfig-etc` | on a machine with no fonts and no display |
 | 1.15  | `zstd-1.5.7` | systemd, for compressed journals | floor |
 | 1.15  | `libfido2-1.17.0` | `openssh` | hardware security keys. The lab authenticates with a plain ed25519 key |
 | 1.08  | `make-initrd-ng-0.1.0` | the initrd build | floor |
 
 `db-5.3.28`, `iptables-lib`, `libbpf` and `elfutils` left in #53 and #54,
-12.72 MiB between them. Roughly 49 MiB sits in rows that still have a
-named next move. **Stop criteria 2
+12.72 MiB between them. `xauth` and its five `libX*`, plus `fontconfig`, left in #55. Roughly 42
+MiB sits in rows that still have a named next move. **Stop criteria 2
 and 3 are both not met**, and this table is the reason.
 
 ## Mutable track

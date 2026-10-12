@@ -37,6 +37,7 @@ let
     noPython = [ "aggressive" ];
     noSudo = [ "aggressive" ];
     noSwitchToConfiguration = [ "aggressive" ];
+    noX11 = [ "aggressive" ];
     noUserDataDecompression = [ "aggressive" ];
     noSsmAgent = [ "aggressive" ];
     slimIproute2 = [ "aggressive" ];

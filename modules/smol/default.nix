@@ -23,6 +23,7 @@
     ./no-installer-tools.nix
     ./slim-systemd.nix
     ./no-sudo.nix
+    ./no-x11.nix
     ./slim-iproute2.nix
     ./no-user-data-decompression.nix
     ./no-ssm-agent.nix
