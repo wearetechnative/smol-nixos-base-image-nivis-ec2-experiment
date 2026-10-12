@@ -21,7 +21,8 @@ list of paths over 1 MiB.
 
 ## Appliance track
 
-Closure 304.39 MiB at ledger #58, from a 1516.25 MiB baseline, 79.9% off.
+Closure 304.39 MiB at ledger #59, from a 1516.25 MiB baseline, 79.9% off.
+Raw VHD 430.11 MiB.
 38 paths are over 1 MiB.
 
 ### Genuine floor

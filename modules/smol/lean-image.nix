@@ -39,6 +39,29 @@ in
     the closure
   '';
 
+  options.smol.leanImage.pristineBuilderVm = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    description = ''
+      Whether the VM that builds the image comes from an unoverlaid
+      nixpkgs.
+
+      The image's contents come from `pkgs`, which carries every smol
+      overlay, and that is not changed by this. The VM is a QEMU and a
+      kernel whose only job is to hold a loop device, and taking those from
+      `import pkgs.path { }` instead is what stops a systemd or util-linux
+      override from rebuilding QEMU, gtk4, mesa and pipewire before the
+      image can be measured. Experiments 48, 55 and 58 each paid about an
+      hour for that; 57 could not finish at all.
+
+      It is not a pure refactor, which is why it is an option and not a
+      straight change: the image built this way is 2 MiB smaller and
+      differs in 154 million bytes, so the builder VM does reach the
+      result. Ledger #59 measured it and passed both gates, and the default
+      is `true` since.
+    '';
+  };
+
   config = lib.mkIf cfg.enable {
     image.modules.amazon =
       {
@@ -82,7 +105,19 @@ in
               ''
             )
             {
-              inherit lib config pkgs;
+              inherit lib config;
+
+              pkgs =
+                if cfg.pristineBuilderVm then
+                  pkgs.extend (
+                    _: _: {
+                      inherit (import pkgs.path { inherit (pkgs.stdenv.hostPlatform) system; })
+                        vmTools
+                        ;
+                    }
+                  )
+                else
+                  pkgs;
 
               name = config.image.baseName;
               inherit (config.image) baseName;

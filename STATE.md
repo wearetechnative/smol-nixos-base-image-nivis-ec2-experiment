@@ -17,10 +17,10 @@ twenty-one experiments assuming they tracked each other.
 | measure | baseline | now | off |
 | ------- | -------- | --- | --- |
 | closure | 1516.25 MiB | 304.39 MiB | 79.9% |
-| raw VHD | 2598.64 MiB | 432.11 MiB | 83.4% |
-| boot time | 40.8s | 13.6s | 66.6% |
+| raw VHD | 2598.64 MiB | 430.11 MiB | 83.4% |
+| boot time | 40.8s | 14.5s | 64.5% |
 
-27 accepted experiments covering 25 strategies. The image is what gets
+28 accepted experiments covering 25 strategies. The image is what gets
 uploaded, imported as a snapshot and stored as an AMI, so it is the number that costs money.
 
 | id  | strategy | closure after | delta |
@@ -77,6 +77,7 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 56  | `noLastlog.withLastlog2` | 307.24 MiB | 5.80, 1.9%; sqlite, four experiments late |
 | 57  | `slimCurl` | rejected twice | an overlay on curl rebuilds LLVM; then the guard found two more curl referrers |
 | 58  | `slimCurl` | 304.39 MiB | 2.84, 0.9%; krb5 leaves, the image does not move |
+| 59  | `leanImage.pristineBuilderVm` | closure unchanged | **image 2.00 MiB**, and overlays stop rebuilding QEMU |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
 closure size.

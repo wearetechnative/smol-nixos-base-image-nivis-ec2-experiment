@@ -302,6 +302,11 @@ handful of things, or QEMU once.
 curl rebuilds LLVM, clang, mesa and QEMU. Experiment 57 ran three hours and
 reached `clang-21.1.8` before it was killed, for an expected 4.8 MiB.
 
+Experiment 59 took most of the sting out of this: the image builder's VM
+now comes from an unoverlaid nixpkgs, so a package override no longer
+rebuilds QEMU, gtk4, mesa and pipewire. It does not help with LLVM, which
+is a build input of the package itself rather than of the builder.
+
 Before overriding a package, ask what takes it as a *build* input, not only
 what references it at runtime:
 
