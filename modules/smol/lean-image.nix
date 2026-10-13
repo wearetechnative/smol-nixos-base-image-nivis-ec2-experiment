@@ -39,6 +39,36 @@ in
     the closure
   '';
 
+  options.smol.leanImage.copyChannel = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = ''
+      Whether the image carries a copy of the nixpkgs source as a nix
+      channel. `make-disk-image` defaults to `true`; this strategy has
+      turned it off since #25, which is where 544 MiB of image went.
+
+      It stays an option so the two can be compared with everything else
+      held constant. Backlog item `e15` is why: boot time fell from 34.4s
+      to 14.3s at #25 and that experiment changed two things at once.
+    '';
+  };
+
+  options.smol.leanImage.diskSize = lib.mkOption {
+    type = lib.types.str;
+    default = "auto";
+    description = ''
+      The size `make-disk-image` gives the filesystem.
+      `maintainers/scripts/ec2/amazon-image.nix` pins it to 4096 MiB;
+      make-disk-image's own default, and what this uses, is `"auto"`,
+      which sizes it to its contents plus `additionalSpace`.
+
+      It is an option so that the two can be compared on EC2 with
+      everything else held constant, which is what backlog item `e15`
+      needed: boot time fell from 34.4s to 14.3s at ledger #25, and that
+      experiment changed both this and `copyChannel` at once.
+    '';
+  };
+
   options.smol.leanImage.additionalSpace = lib.mkOption {
     type = lib.types.str;
     default = "32M";
@@ -152,8 +182,8 @@ in
               partitionTableType = if config.ec2.efi then "efi" else "legacy+gpt";
 
               # The two changes this strategy exists for.
-              copyChannel = false;
-              diskSize = "auto";
+              inherit (cfg) copyChannel;
+              inherit (cfg) diskSize;
               inherit (cfg) additionalSpace;
 
               # The stock builder writes a configuration.nix into the image so

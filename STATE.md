@@ -94,7 +94,13 @@ uploaded, imported as a snapshot and stored as an AMI, so it is the number that 
 | 75  | `slimOpenssh.serverOnly` | 266.39 MiB | 3.09, 1.1%; eight client programs nothing runs |
 
 Boot time has moved between 12.3s and 41.9s with no clear relationship to
-closure size.
+closure size, and `e15` settled why: it has no relationship to the image
+either. Three deploys of one closure, auto-sized, fixed at 4 GiB, and
+fixed at 4 GiB with the nixpkgs channel back in, differ by 0.9s across a
+604 MB range of image. The boot is 1.66s kernel, 3.61s initrd and 8.87s
+userspace, and the userspace is `dhcpcd` waiting 5.68s for a lease while
+a handful of device units settle for 4.4s. See
+`experiments/e15-boot-time.md`.
 
 ## The blocker is gone
 

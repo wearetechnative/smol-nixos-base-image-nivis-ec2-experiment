@@ -206,5 +206,14 @@ boot_seconds=$("${SSH[@]}" "systemd-analyze --no-pager" 2>/dev/null |
 [ -n "$boot_seconds" ] || boot_seconds=null
 say "boot time ${boot_seconds}s"
 
+# The breakdown, into the log only. Backlog e15 asked where 22 seconds went
+# and the lab had no record of it, because only the total was ever kept.
+{
+  echo "--- systemd-analyze"
+  "${SSH[@]}" "systemd-analyze --no-pager" 2>&1 || true
+  echo "--- systemd-analyze blame, top 15"
+  "${SSH[@]}" "systemd-analyze blame --no-pager" 2>&1 | head -15 || true
+} >>"$LOG" 2>&1
+
 gate=pass
 say "GATE 2 PASS"
