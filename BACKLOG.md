@@ -65,14 +65,14 @@ of the lab's savings.
 | - | ---------- | --------------- | ------ |
 | e1 | custom Nitro kernel config: ENA and NVMe built in, unused subsystems off | the module tree is already gone via n7; what is left is the 21.97 MiB bzImage and the 28.52 MiB initrd | rejected #12, kconfig dialogue derails; revisit with a different technique |
 | e2 | networkd instead of dhcpcd | 0.48 MiB | closed without an experiment: `dhcpcd-10.3.2` is 0.48 MiB and `systemd-minimal-libs`, its other claim, is shared with `linux-pam`. Not worth a contract change to the one thing that brings the network up |
-| e3 | erofs or squashfs compressed store | unknown | todo |
-| e4 | dropbear instead of openssh | unknown | todo |
+| e3 | erofs or squashfs compressed store | unknown | **blocked by the image builder**: `nixos/lib/make-disk-image.nix` asserts `partitionTableType != "none" -> fsType == "ext4"`, because it needs `mkfs`'s `-E offset` flag. A compressed store needs either an image built another way or a read-only store mounted over an ext4 root, which is a different machine and not a strategy |
+| e4 | dropbear instead of openssh | ~5.6 MiB | **blocked by the harness**: openssh is 5.65 MiB after #75, and dropbear ships no `scp`, which `lab/test-local.nix` and `lab/deploy-ec2.sh` both use to push the static curl the HTTPS check needs. Changing that is a contract-adjacent change and BRIEFING §3 reserves those for Pim |
 | e5 | remove the duplicate systemd builds | 22.26 MiB | rejected #18 and #20, blocked behind s6; a different route is written up in experiments/018 |
-| e6 | image compression at AMI registration time | unknown | todo |
+| e6 | ~~image compression at AMI registration time~~ | 0 | closed on 2026-10-13 without an experiment: the VHD `make-disk-image` writes is **already dynamic**, `conectix` at offset 0, so the sparse blocks are not stored. Beyond that, VM Import/Export takes RAW, VHD, VMDK and OVA and no compressed container, so there is nothing to compress on the way in. `gzip` of the current image is 161 MiB against 380, and that number only matters if AWS ever accepts it |
 | e28 | `pkgs.bashNonInteractive` as the system shell | 7.10 MiB | **needs-upstream**: in nixpkgs `pkgs.bash` *is* `bashInteractive`. Probed on 2026-10-13: setting `environment.binsh`, `users.defaultUserShell`, `environment.shells`, the system path and `amazon-ec2-utils` leaves two referrers, and both are hardcoded, `prepare-root` (stage 2's shebang) and `networking.localCommands` |
 | e15 | why boot time fell from 36.4s to 14.3s when the channel left the image | not a size item, but the largest unexplained effect in the lab | todo |
 | e16 | ~~read the rest of `make-disk-image.nix` for other defaults nothing overrides~~ | 2.00 MiB | done #68 to #71: the automatic sizing only has to be large enough, the VHD is sparse, and the image is its contents |
-| e7 | filesystem choice for the root volume | unknown | todo |
+| e7 | filesystem choice for the root volume | unknown | **blocked by the same assertion as `e3`**. It is also unclear what it would buy: btrfs with `compress=zstd` is the interesting case and it brings back `btrfs-progs`, 6.62 MiB, which #45 removed |
 | e8 | drop every Python script, so CPython leaves the image | 136.55 MiB | accepted #9, 136.87 MiB |
 | e9 | `nix.enable = false` on the appliance track | duplicate of `n3` | accepted #26, 87.54 MiB |
 | e10 | `icu4c-78.3`, 39.69 MiB; nothing known yet about what pulls it in | explained | accepted #26: it came from Nix itself |
