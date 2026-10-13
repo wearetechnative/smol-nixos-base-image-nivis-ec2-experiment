@@ -1,13 +1,16 @@
 # STATE
 
-Single source of truth for where the lab is right now (BRIEFING §10). Update
-it at every step change, not at the end of a session.
+**The lab is closed.** `REPORT.md` is the result and the thing to read
+first; this file is the running log that produced it.
 
-## Phase
+Closed on 2026-10-13 after 75 numbered experiments, with the backlog empty
+and every remaining item needing a nixpkgs change rather than a NixOS
+option. BRIEFING §9's first stop criterion, eight small savings in a row,
+was not met: the lab stopped because there was nothing left it could reach
+on its own, not because the curve flattened.
 
-Phase 0 complete. Phase 2 in progress, ahead of phase 1: auditing the
-platform's own defaults turned out to pay better than replaying the ISO work,
-so that came first.
+Nothing is live. `just reap` finds no AWS resources, `systems/candidate`
+is reset to `systems/accepted`, and `main` is pushed.
 
 ## Where the appliance track stands
 

@@ -56,4 +56,4 @@
 - [x] 6.1 Update `experiments/000-nivis.md` with what the real run taught
 - [x] 6.2 Append anything surprising to `GOTCHAS.md`
 - [x] 6.3 Update `docs/TESTING.md` with the gate 2 section as built
-- [ ] 6.4 Update `STATE.md`, then archive and commit
+- [x] 6.4 Update `STATE.md`, then archive and commit

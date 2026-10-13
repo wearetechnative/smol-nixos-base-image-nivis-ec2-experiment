@@ -1,11 +1,11 @@
 ---
 # smol-nixos-base-image-nivis-ec2-experiment-dodr
 title: Store, image and filesystem
-status: in-progress
+status: completed
 type: epic
 priority: normal
 created_at: 2026-10-09T11:51:38Z
-updated_at: 2026-10-11T07:24:57Z
+updated_at: 2026-10-13T07:16:57Z
 parent: smol-nixos-base-image-nivis-ec2-experiment-6waj
 ---
 
@@ -20,3 +20,7 @@ Experiment 25: the image carried a full nixpkgs source tree as a nix channel, in
 
 - [ ] e16 read the rest of make-disk-image.nix for other unoverridden defaults
 - [ ] e15 explain the 36.4s to 14.3s boot time drop
+
+## Summary of Changes
+
+Store and image. `leanImage` 544.14 MiB of image at #25, the single largest result in the lab, from one default in `make-disk-image`. Experiments 68 to 71 then established that the image is its contents: the VHD is sparse and CHS-rounded, and the sizing knobs cannot move it. `e3` and `e7`, a compressed store and a non-ext4 root, are blocked by that builder's own assertion.

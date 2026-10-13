@@ -28,7 +28,7 @@ pkgs.testers.runNixOSTest {
   # driver builds its nodes itself, so it has to hand over the same thing or
   # `modules/smol/wrappers-without-propagation.nix` looks for it in
   # `_module.args` and the evaluation recurses. Experiment 66.
-  node.specialArgs.smolWrappersPatched = import ./wrappers-patch.nix pkgs;
+  node.specialArgs.smolWrappersPatched = import ./wrappers-patch.nix pkgs.path;
 
   nodes = {
     target =

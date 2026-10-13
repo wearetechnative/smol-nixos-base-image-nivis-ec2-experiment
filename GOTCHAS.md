@@ -412,3 +412,24 @@ place at #51.
 
 Divide by 1048576, or say MB.
 
+## A path in generated Nix source has to stay a path
+
+`lab/wrappers-patch.nix` writes a copy of a nixpkgs module with
+`builtins.toFile`, and the copy has to point at files that were next to
+the original. Writing the absolute location as text produces a build that
+fails inside the sandbox:
+
+```
+cc1: fatal error: /nix/store/...-source/nixos/modules/security/wrappers/wrapper.c:
+No such file or directory
+```
+
+A string that looks like a store path is not a dependency. The generated
+text has to contain `${<path>}`, an interpolation that the *generated*
+file performs when it is evaluated, so Nix copies the file and records it.
+
+The same file is also why that patch is not a derivation: `runCommand`
+gives the result a system, and `nix flake check` then fails on the
+aarch64 variant with `platform mismatch` on an x86_64 host. Copying three
+text files does not need a builder.
+

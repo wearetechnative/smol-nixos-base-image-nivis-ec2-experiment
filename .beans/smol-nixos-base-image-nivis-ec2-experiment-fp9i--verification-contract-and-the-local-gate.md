@@ -1,11 +1,11 @@
 ---
 # smol-nixos-base-image-nivis-ec2-experiment-fp9i
 title: Verification contract and the local gate
-status: in-progress
+status: completed
 type: epic
 priority: high
 created_at: 2026-10-09T11:51:08Z
-updated_at: 2026-10-10T11:24:58Z
+updated_at: 2026-10-13T07:16:56Z
 parent: smol-nixos-base-image-nivis-ec2-experiment-8uwi
 ---
 
@@ -20,3 +20,7 @@ The contract of BRIEFING section 3, as one script both gates run. Done: `just ga
 - [x] contract version 1 recorded in docs/TESTING.md and frozen
 
 Gate 1 needed node.pkgsReadOnly = false before any overlay-based strategy could pass it. Found by experiment 008; would have blocked every siraben item.
+
+## Summary of Changes
+
+The contract is `lab/verify.sh`, ten checks, run identically by gate 1 and gate 2 so the two cannot drift. It never changed after phase 0, which is what makes every ledger line comparable.

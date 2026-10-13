@@ -58,16 +58,17 @@
             # replacement. A specialArg can, because it is passed in from
             # outside the fixpoint.
             #
-            # Unoverlaid nixpkgs is the right source: the derivation only
-            # copies three text files and substitutes one line in them.
-            smolWrappersPatched = smolWrappersPatched system;
+            # It is a plain store file, not a derivation: a derivation has
+            # a system, and `nix flake check` then fails on the aarch64
+            # variant with a platform mismatch on an x86_64 host.
+            inherit smolWrappersPatched;
           };
         };
 
       # See modules/smol/wrappers-without-propagation.nix for what this is
       # for and what it saves. lab/test-local.nix uses the same file, so both
       # gates build the same module.
-      smolWrappersPatched = system: import ./lab/wrappers-patch.nix nixpkgs.legacyPackages.${system};
+      smolWrappersPatched = import ./lab/wrappers-patch.nix nixpkgs;
 
       # system -> { "<name>" = <config>; } for every tracked system variant.
       variants = {

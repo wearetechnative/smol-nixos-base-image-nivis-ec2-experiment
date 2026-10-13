@@ -1,11 +1,11 @@
 ---
 # smol-nixos-base-image-nivis-ec2-experiment-u3nb
 title: Replay siraben
-status: todo
+status: completed
 type: epic
 priority: normal
 created_at: 2026-10-09T11:51:38Z
-updated_at: 2026-10-11T14:30:43Z
+updated_at: 2026-10-13T07:16:57Z
 parent: smol-nixos-base-image-nivis-ec2-experiment-53cb
 ---
 
@@ -20,3 +20,7 @@ Items s1 to s9 of BACKLOG.md, source https://gist.github.com/siraben/a8fce991289
 - [ ] s7 C.UTF-8 only, no locale archive
 - [x] s8 accepted #19, but only 3344 bytes: sqlite has another holder
 - [x] s9 empty hwdb, accepted #39, 13.21 MiB
+
+## Summary of Changes
+
+siraben's strategies replayed: `noNix` 87.54 MiB, `noPython` 136.91, `slimSystemd` 37.97, `noDuplicateSystemd` 22.45, `cLocaleOnly` 2.46, `xzInitrd` 4.23. `s8`, lastlog, took until #56 to reproduce: the holder was the util-linux build, not PAM.

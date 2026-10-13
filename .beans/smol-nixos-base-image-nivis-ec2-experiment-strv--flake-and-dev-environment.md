@@ -1,11 +1,11 @@
 ---
 # smol-nixos-base-image-nivis-ec2-experiment-strv
 title: Flake and dev environment
-status: in-progress
+status: completed
 type: epic
 priority: normal
 created_at: 2026-10-09T11:51:08Z
-updated_at: 2026-10-10T10:17:03Z
+updated_at: 2026-10-13T07:16:56Z
 parent: smol-nixos-base-image-nivis-ec2-experiment-8uwi
 ---
 
@@ -20,3 +20,7 @@ Done: `nix flake check` is green on x86_64-linux and aarch64-linux, `nix develop
 - [ ] CI or a `just check` run recorded in the first commit
 
 Note: aarch64 remains unbuildable locally; tracked under Still open in STATE.md.
+
+## Summary of Changes
+
+Flake with plain `genAttrs` over two systems, no flake-utils, devShell, formatter, `nivis.plan`, and `packages.image-<variant>`. It also grew `lab/wrappers-patch.nix` and the pristine builder VM, both in `REPORT.md` section 6.

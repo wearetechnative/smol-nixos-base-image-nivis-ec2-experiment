@@ -9,12 +9,19 @@ with a measured saving, its trade-offs and its source. The repo documents
 itself: the ledger, `REPORT.md` and the generated option docs together say
 what was tried, what worked, what failed and why.
 
+**The lab is closed.** 1516.25 MiB of closure down to 266.39, and a 2598.64
+MiB upload down to 380.10, across 75 experiments. Start with
+[`REPORT.md`](REPORT.md): the result, the floor, the four findings that
+belong upstream, and what a configurable production image should take from
+this one.
+
 ## Where to look
 
 | file | what it holds |
 | ---------------- | ------------------------------------------------ |
 | `BRIEFING.md`    | the brief, and the source of truth |
-| `STATE.md`       | where the lab is right now |
+| `REPORT.md`      | **the result, and what the next project inherits** |
+| `STATE.md`       | the running log, experiment by experiment |
 | `CLAUDE.md`      | how the work is run |
 | `docs/TESTING.md`| the verification contract and the two gates |
 | `ledger.jsonl`   | one append-only line per experiment |
