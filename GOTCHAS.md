@@ -362,3 +362,53 @@ Measure allocated size with `du --block-size=1`, not `stat -c %s`, when
 the question is how much data there is. To make the image smaller, take
 something out of the closure.
 
+## A derivation in `imports` is read as a module, not as a path
+
+`imports = [ someDerivation ]` does not import the directory the
+derivation builds. The module system takes the attrset itself, and its
+`system` attribute lands on NixOS's `system` option:
+
+```
+you're trying to define a value of type `string'
+rather than an attribute set for the option `system'!
+```
+
+Interpolate it: `imports = [ "${someDerivation}" ]`. Experiment 66.
+
+## Gate 1 does not get the flake's `specialArgs`
+
+`pkgs.testers.runNixOSTest` builds its nodes itself, so a module argument
+that `flake.nix` passes through `specialArgs` is simply absent there. The
+module system then looks for it in `_module.args`, which needs `config`,
+and the evaluation recurses:
+
+```
+noting that argument `smolWrappersPatched` is not externally provided,
+so querying `_module.args` instead, requiring `config`
+error: infinite recursion encountered
+```
+
+Whatever the flake passes in, `lab/test-local.nix` has to pass too, from
+the same file so the two cannot drift. It does that with
+`node.specialArgs`. Experiment 66.
+
+## A package can override a phase and drop its hooks
+
+`postInstallCheck` never fires for openssh, because the package sets
+`installCheckPhase` wholesale and does not call `runHook
+postInstallCheck`. The same is true of any package that writes a phase
+rather than extending one, and nothing warns about it.
+
+Append to the phase itself when that happens: `installCheckPhase =
+old.installCheckPhase + "..."`. Experiment 75.
+
+## MiB is bytes divided by 1048576
+
+`ledger.jsonl` stores bytes. `lab/experiment.sh` and `lab/stats.py` divide
+by 1048576 and so does `FLOOR.md` now, but through ledger #48 several
+notes and `STATE.md` divided by 1000000 and called the result MiB, which
+reads as a 4.9% error in the lab's favour. The numbers were corrected in
+place at #51.
+
+Divide by 1048576, or say MB.
+
