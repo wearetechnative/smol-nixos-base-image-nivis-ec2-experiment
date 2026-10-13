@@ -4,3 +4,4 @@ result-*
 experiments/logs/
 experiments/state/
 .direnv/
+__pycache__/

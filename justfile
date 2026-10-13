@@ -25,6 +25,14 @@ fmt:
 stats:
     python3 ./lab/stats.py
 
+# Rebuild the results site from ledger.jsonl, REPORT.md and the notes.
+site:
+    python3 ./site/build.py
+
+# Fail if the published site is out of step with the data it claims to show.
+site-check:
+    python3 ./site/build.py --check
+
 # Regenerate docs/options.md from the smol.* option descriptions.
 docs:
     jj st > /dev/null

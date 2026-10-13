@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{meta_description}}">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{meta_description}}">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.className = "js";</script>
+</head>
+<body>
+
+<div class="counter" id="counter" aria-hidden="true">
+  <span class="counter-value" id="counter-value">{{closure_from}}</span>
+  <span class="counter-unit">MiB</span>
+  <span class="counter-label">closure at experiment <span id="counter-id">1</span></span>
+</div>
+
+<header class="hero">
+  <p class="eyebrow">{{eyebrow}}</p>
+  <h1 class="hero-title">{{hero_title}}</h1>
+  <p class="hero-lede">{{hero_lede}}</p>
+
+  <div class="headline">
+    <div class="headline-item">
+      <span class="headline-key">closure</span>
+      <span class="headline-from">{{closure_from}}</span>
+      <span class="headline-arrow" aria-hidden="true">&rarr;</span>
+      <span class="headline-to shrink">{{closure_to}}</span>
+      <span class="headline-unit">MiB</span>
+      <span class="headline-pct">&minus;{{closure_pct}}%</span>
+    </div>
+    <div class="headline-item">
+      <span class="headline-key">raw VHD</span>
+      <span class="headline-from">{{image_from}}</span>
+      <span class="headline-arrow" aria-hidden="true">&rarr;</span>
+      <span class="headline-to shrink">{{image_to}}</span>
+      <span class="headline-unit">MiB</span>
+      <span class="headline-pct">&minus;{{image_pct}}%</span>
+    </div>
+    <div class="headline-item">
+      <span class="headline-key">boot</span>
+      <span class="headline-from">{{boot_from}}</span>
+      <span class="headline-arrow" aria-hidden="true">&rarr;</span>
+      <span class="headline-to">{{boot_to}}</span>
+      <span class="headline-unit">s &plusmn; {{boot_sd}}</span>
+      <span class="headline-pct">&minus;{{boot_pct}}%</span>
+    </div>
+  </div>
+  <p class="hero-note">{{hero_note}}</p>
+</header>
+
+<main>
+
+<section class="section section--question">
+  <h2>The question</h2>
+  <p class="lead">{{question_lead}}</p>
+  <p>{{question_body}}</p>
+</section>
+
+<section class="section section--method">
+  <h2>How it ran</h2>
+  <ul class="method">
+    {{method_items}}
+  </ul>
+  <p class="aside">{{method_note}}</p>
+</section>
+
+<section class="section section--descent" id="descent">
+  <h2>The descent</h2>
+  <p class="lead">{{descent_lead}}</p>
+  {{descent_svg}}
+  <p class="aside">{{descent_note}}</p>
+</section>
+
+<section class="section section--insight">
+  <h2>The one insight</h2>
+  <p class="pull">{{insight_pull}}</p>
+  <p>{{insight_body}}</p>
+  {{bars_svg}}
+</section>
+
+<section class="section section--boot">
+  <h2>Boot time does not track size</h2>
+  <p class="lead">{{boot_lead}}</p>
+  {{boot_svg}}
+  <p class="aside">{{boot_note}}</p>
+</section>
+
+<section class="section section--floor">
+  <h2>The floor</h2>
+  <p class="lead">{{floor_lead}}</p>
+  <table class="floor">
+    <thead><tr><th>MiB</th><th>what</th></tr></thead>
+    <tbody>
+      {{floor_rows}}
+    </tbody>
+  </table>
+</section>
+
+<section class="section section--tally">
+  <h2>The honest tally</h2>
+  <div class="tally">
+    {{tally_items}}
+  </div>
+  <p class="pull">{{tally_pull}}</p>
+  <ul class="groups">
+    {{rejection_groups}}
+  </ul>
+</section>
+
+<section class="section section--upstream">
+  <h2>What belongs upstream</h2>
+  <p class="lead">{{upstream_lead}}</p>
+  <ol class="upstream">
+    {{upstream_items}}
+  </ol>
+</section>
+
+<section class="section section--next">
+  <h2>What is next</h2>
+  <p class="lead">{{next_lead}}</p>
+  <p>{{next_body}}</p>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p class="footer-line">{{footer_provenance}}</p>
+  <p class="footer-line"><a href="{{repo_url}}">{{repo_label}}</a> &middot; <a href="{{report_url}}">{{report_label}}</a> &middot; <a href="{{ledger_url}}">{{ledger_label}}</a></p>
+  <p class="footer-brand">{{footer_brand}}</p>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

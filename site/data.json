@@ -1,0 +1,1330 @@
+{
+  "boot_controls": {
+    "runs": [
+      {
+        "boot_seconds": 13.3,
+        "label": "accepted, auto-sized, no channel",
+        "vhd_mb": 398.0,
+        "virtual": "~390 MiB"
+      },
+      {
+        "boot_seconds": 13.44,
+        "label": "same closure, diskSize = \"4096\"",
+        "vhd_mb": 438.0,
+        "virtual": "4 GiB"
+      },
+      {
+        "boot_seconds": 14.17,
+        "label": "same closure, diskSize = \"4096\" and copyChannel = true",
+        "vhd_mb": 1002.0,
+        "virtual": "4 GiB"
+      }
+    ],
+    "source": "experiments/e15-boot-time.md"
+  },
+  "boot_spread": {
+    "all_max": 41.858,
+    "all_min": 12.296,
+    "max": 15.926,
+    "mean": 14.3195,
+    "min": 12.763,
+    "samples": [
+      14.55,
+      14.197,
+      14.025,
+      13.552,
+      13.318,
+      12.763,
+      15.228,
+      15.156,
+      14.48,
+      15.926
+    ],
+    "sd": 0.9111160463958476,
+    "window": 10
+  },
+  "floor": [
+    {
+      "mib": 52.55,
+      "what": "systemd, already built with 21 features off"
+    },
+    {
+      "mib": 33.93,
+      "what": "glibc"
+    },
+    {
+      "mib": 23.55,
+      "what": "util-linux, lib and bin"
+    },
+    {
+      "mib": 21.97,
+      "what": "the kernel"
+    },
+    {
+      "mib": 17.64,
+      "what": "the initrd, xz-compressed"
+    },
+    {
+      "mib": 10.31,
+      "what": "gcc-lib, held by six unrelated packages"
+    },
+    {
+      "mib": 9.0,
+      "what": "openssl"
+    },
+    {
+      "mib": 7.1,
+      "what": "bash-interactive"
+    },
+    {
+      "mib": 5.65,
+      "what": "openssh, server programs only"
+    }
+  ],
+  "generated_from": {
+    "controls": "experiments/e15-boot-time.md",
+    "ledger": "ledger.jsonl",
+    "report": "REPORT.md"
+  },
+  "headline": {
+    "boot": {
+      "from_seconds": 40.753,
+      "pct": 64.8627094937796,
+      "sd": 0.9111160463958476,
+      "to_seconds": 14.3195
+    },
+    "closure": {
+      "from_mib": 1516.2512893676758,
+      "pct": 82.43132548185064,
+      "to_mib": 266.38525390625
+    },
+    "image": {
+      "from_mib": 2598.64453125,
+      "pct": 85.37330910195068,
+      "to_mib": 380.095703125
+    }
+  },
+  "insight": {
+    "pct": 63.59417755226831,
+    "strategies": [
+      "no-flake-registry",
+      "no-kernel-modules",
+      "no-python",
+      "no-ssm-agent",
+      "no-amazon-init",
+      "no-documentation"
+    ],
+    "tail_count": 33,
+    "tail_mib": 455.02400970458984,
+    "top6_mib": 794.8420257568359,
+    "total_mib": 1249.8660354614258
+  },
+  "plateaus": [
+    [
+      7,
+      8
+    ],
+    [
+      12,
+      13
+    ],
+    [
+      15,
+      16
+    ],
+    [
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    [
+      27,
+      28,
+      29,
+      30
+    ],
+    [
+      32,
+      33,
+      34,
+      35
+    ],
+    [
+      37,
+      38
+    ],
+    [
+      69,
+      70,
+      71
+    ]
+  ],
+  "references": {
+    "packages_on_path": 57,
+    "smol_options": 34,
+    "switch_to_configuration_mib": 54.655006408691406,
+    "xz_boot_cost": 2.465,
+    "xz_saving_mib": 4.2311553955078125
+  },
+  "rejection_groups": [
+    {
+      "body": "system.forbiddenDependenciesRegexes is set by each module to name what should have left. It caught #3 (nixos-rebuild still present), #20 and #47 (systemd-minimal had more holders), #52 (elfutils had a third holder) and #57 (krb5 had two more referrers). Writing the guard for what you hope leaves, rather than what you know leaves, is what makes it useful.",
+      "count": 4,
+      "name": "The guard did its job"
+    },
+    {
+      "body": "Wrong build phase, an unasserted string replacement that silently matched nothing, a measurement that compared only closures, an image that failed to build and was logged as a 100% saving, an integer interpolated into a string, and a mkForce that removed more than it meant to. Each produced a protocol change; see \u00a76.",
+      "count": 6,
+      "name": "The lab's own defects"
+    },
+    {
+      "body": "A trimmed kernel config derails nixpkgs' make config. Dropping the module tree needs ena, af_packet, fuse and configfs force-loaded in the initrd and the firewall off. An auto-sized image with no slack left growpart nothing to grow into.",
+      "count": 5,
+      "name": "Genuinely too far"
+    }
+  ],
+  "savings": [
+    {
+      "closure_mib": 199.75193786621094,
+      "id": 2,
+      "image_mib": 0.0,
+      "slug": "no-flake-registry"
+    },
+    {
+      "closure_mib": 152.9259490966797,
+      "id": 17,
+      "image_mib": 0.0,
+      "slug": "no-kernel-modules"
+    },
+    {
+      "closure_mib": 136.90631866455078,
+      "id": 9,
+      "image_mib": 0.0,
+      "slug": "no-python"
+    },
+    {
+      "closure_mib": 110.33158111572266,
+      "id": 6,
+      "image_mib": 0.0,
+      "slug": "no-ssm-agent"
+    },
+    {
+      "closure_mib": 101.10106658935547,
+      "id": 4,
+      "image_mib": 0.0,
+      "slug": "no-amazon-init"
+    },
+    {
+      "closure_mib": 93.8251724243164,
+      "id": 10,
+      "image_mib": 0.0,
+      "slug": "no-documentation"
+    },
+    {
+      "closure_mib": 87.53502655029297,
+      "id": 26,
+      "image_mib": 94.02294921875,
+      "slug": "no-nix"
+    },
+    {
+      "closure_mib": 58.748329162597656,
+      "id": 46,
+      "image_mib": 68.01708984375,
+      "slug": "no-perl"
+    },
+    {
+      "closure_mib": 57.599571228027344,
+      "id": 31,
+      "image_mib": 86.021484375,
+      "slug": "minimal-system-packages"
+    },
+    {
+      "closure_mib": 54.655006408691406,
+      "id": 45,
+      "image_mib": 56.013671875,
+      "slug": "no-switch-to-configuration"
+    },
+    {
+      "closure_mib": 37.96623992919922,
+      "id": 36,
+      "image_mib": 46.01123046875,
+      "slug": "slim-systemd"
+    },
+    {
+      "closure_mib": 22.44921112060547,
+      "id": 48,
+      "image_mib": 24.005859375,
+      "slug": "no-duplicate-systemd"
+    },
+    {
+      "closure_mib": 13.206413269042969,
+      "id": 39,
+      "image_mib": 16.00390625,
+      "slug": "empty-hwdb"
+    },
+    {
+      "closure_mib": 12.747398376464844,
+      "id": 41,
+      "image_mib": 14.00341796875,
+      "slug": "minimal-coreutils"
+    },
+    {
+      "closure_mib": 12.334266662597656,
+      "id": 5,
+      "image_mib": 0.0,
+      "slug": "no-installer-tools"
+    },
+    {
+      "closure_mib": 11.404289245605469,
+      "id": 51,
+      "image_mib": 8.001953125,
+      "slug": "no-user-data-decompression"
+    },
+    {
+      "closure_mib": 8.720298767089844,
+      "id": 65,
+      "image_mib": 6.00146484375,
+      "slug": "no-duplicate-util-linux"
+    },
+    {
+      "closure_mib": 7.551109313964844,
+      "id": 14,
+      "image_mib": 0.0,
+      "slug": "no-firewall"
+    },
+    {
+      "closure_mib": 7.200752258300781,
+      "id": 67,
+      "image_mib": 12.0029296875,
+      "slug": "wrappers-without-propagation"
+    },
+    {
+      "closure_mib": 6.938995361328125,
+      "id": 55,
+      "image_mib": 12.0029296875,
+      "slug": "no-x11"
+    },
+    {
+      "closure_mib": 6.8907470703125,
+      "id": 53,
+      "image_mib": 10.00244140625,
+      "slug": "slim-iproute2"
+    },
+    {
+      "closure_mib": 6.636566162109375,
+      "id": 54,
+      "image_mib": 8.001953125,
+      "slug": "slim-systemd-no-libbpf"
+    },
+    {
+      "closure_mib": 5.8789520263671875,
+      "id": 60,
+      "image_mib": 8.001953125,
+      "slug": "no-lvm"
+    },
+    {
+      "closure_mib": 5.815193176269531,
+      "id": 43,
+      "image_mib": 8.001953125,
+      "slug": "no-sudo"
+    },
+    {
+      "closure_mib": 5.799552917480469,
+      "id": 56,
+      "image_mib": 8.001953125,
+      "slug": "no-lastlog2"
+    },
+    {
+      "closure_mib": 4.2311553955078125,
+      "id": 72,
+      "image_mib": 12.0029296875,
+      "slug": "xz-initrd"
+    },
+    {
+      "closure_mib": 3.3938446044921875,
+      "id": 11,
+      "image_mib": 0.0,
+      "slug": "no-default-packages"
+    },
+    {
+      "closure_mib": 3.0903701782226562,
+      "id": 75,
+      "image_mib": 6.00146484375,
+      "slug": "openssh-server-only"
+    },
+    {
+      "closure_mib": 2.8426437377929688,
+      "id": 58,
+      "image_mib": 0.0,
+      "slug": "slim-curl"
+    },
+    {
+      "closure_mib": 2.4983596801757812,
+      "id": 49,
+      "image_mib": 4.0009765625,
+      "slug": "no-editor"
+    },
+    {
+      "closure_mib": 2.4613494873046875,
+      "id": 73,
+      "image_mib": -6.00146484375,
+      "slug": "c-locale-only"
+    },
+    {
+      "closure_mib": 2.3322982788085938,
+      "id": 74,
+      "image_mib": 0.0,
+      "slug": "no-procps"
+    },
+    {
+      "closure_mib": 1.462005615234375,
+      "id": 64,
+      "image_mib": 4.0009765625,
+      "slug": "no-nscd"
+    },
+    {
+      "closure_mib": 1.3811264038085938,
+      "id": 62,
+      "image_mib": 2.00048828125,
+      "slug": "slim-openssh"
+    },
+    {
+      "closure_mib": 1.2497482299804688,
+      "id": 61,
+      "image_mib": -2.00048828125,
+      "slug": "no-bash-completion"
+    },
+    {
+      "closure_mib": 0.0031890869140625,
+      "id": 19,
+      "image_mib": 0.0,
+      "slug": "no-lastlog"
+    },
+    {
+      "closure_mib": 0.0,
+      "id": 25,
+      "image_mib": 544.138671875,
+      "slug": "lean-image"
+    },
+    {
+      "closure_mib": 0.0,
+      "id": 59,
+      "image_mib": 2.00048828125,
+      "slug": "pristine-builder-vm"
+    },
+    {
+      "closure_mib": 0.0,
+      "id": 68,
+      "image_mib": 2.0009765625,
+      "slug": "lean-image-additional-space"
+    }
+  ],
+  "series": [
+    {
+      "boot_seconds": 40.753,
+      "carried": false,
+      "closure_mib": 1516.2512893676758,
+      "decision": "baseline",
+      "id": 1,
+      "image_mib": 2598.64453125,
+      "reason": "",
+      "saved_mib": 0.0,
+      "slug": "baseline"
+    },
+    {
+      "boot_seconds": 40.42,
+      "carried": false,
+      "closure_mib": 1316.4993515014648,
+      "decision": "accepted",
+      "id": 2,
+      "image_mib": 2094.521484375,
+      "reason": "",
+      "saved_mib": 199.75193786621094,
+      "slug": "no-flake-registry"
+    },
+    {
+      "boot_seconds": 40.42,
+      "carried": true,
+      "closure_mib": 1316.4993515014648,
+      "decision": "rejected",
+      "id": 3,
+      "image_mib": 2094.521484375,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "no-installer-tools"
+    },
+    {
+      "boot_seconds": 41.858,
+      "carried": false,
+      "closure_mib": 1215.3982849121094,
+      "decision": "accepted",
+      "id": 4,
+      "image_mib": 1984.49462890625,
+      "reason": "",
+      "saved_mib": 101.10106658935547,
+      "slug": "no-amazon-init"
+    },
+    {
+      "boot_seconds": 40.034,
+      "carried": false,
+      "closure_mib": 1203.0640182495117,
+      "decision": "accepted",
+      "id": 5,
+      "image_mib": 1972.49169921875,
+      "reason": "",
+      "saved_mib": 12.334266662597656,
+      "slug": "no-installer-tools"
+    },
+    {
+      "boot_seconds": 40.063,
+      "carried": false,
+      "closure_mib": 1092.732437133789,
+      "decision": "accepted",
+      "id": 6,
+      "image_mib": 1858.4638671875,
+      "reason": "",
+      "saved_mib": 110.33158111572266,
+      "slug": "no-ssm-agent"
+    },
+    {
+      "boot_seconds": 40.063,
+      "carried": true,
+      "closure_mib": 1092.732437133789,
+      "decision": "rejected",
+      "id": 7,
+      "image_mib": 1858.4638671875,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "no-ebsnvme-id"
+    },
+    {
+      "boot_seconds": 40.063,
+      "carried": true,
+      "closure_mib": 1092.732437133789,
+      "decision": "rejected",
+      "id": 8,
+      "image_mib": 1858.4638671875,
+      "reason": "gate 1 failed",
+      "saved_mib": null,
+      "slug": "no-python"
+    },
+    {
+      "boot_seconds": 38.08,
+      "carried": false,
+      "closure_mib": 955.8261184692383,
+      "decision": "accepted",
+      "id": 9,
+      "image_mib": 1714.4287109375,
+      "reason": "",
+      "saved_mib": 136.90631866455078,
+      "slug": "no-python"
+    },
+    {
+      "boot_seconds": 36.405,
+      "carried": false,
+      "closure_mib": 862.0009460449219,
+      "decision": "accepted",
+      "id": 10,
+      "image_mib": 1584.39697265625,
+      "reason": "",
+      "saved_mib": 93.8251724243164,
+      "slug": "no-documentation"
+    },
+    {
+      "boot_seconds": 37.749,
+      "carried": false,
+      "closure_mib": 858.6071014404297,
+      "decision": "accepted",
+      "id": 11,
+      "image_mib": 1584.39697265625,
+      "reason": "",
+      "saved_mib": 3.3938446044921875,
+      "slug": "no-default-packages"
+    },
+    {
+      "boot_seconds": 37.749,
+      "carried": true,
+      "closure_mib": 858.6071014404297,
+      "decision": "rejected",
+      "id": 12,
+      "image_mib": 1584.39697265625,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "nitro-kernel"
+    },
+    {
+      "boot_seconds": 37.749,
+      "carried": true,
+      "closure_mib": 858.6071014404297,
+      "decision": "rejected",
+      "id": 13,
+      "image_mib": 1584.39697265625,
+      "reason": "gate 1 failed",
+      "saved_mib": null,
+      "slug": "no-kernel-modules"
+    },
+    {
+      "boot_seconds": 36.249,
+      "carried": false,
+      "closure_mib": 851.0559921264648,
+      "decision": "accepted",
+      "id": 14,
+      "image_mib": 1572.39404296875,
+      "reason": "",
+      "saved_mib": 7.551109313964844,
+      "slug": "no-firewall"
+    },
+    {
+      "boot_seconds": 36.249,
+      "carried": true,
+      "closure_mib": 851.0559921264648,
+      "decision": "rejected",
+      "id": 15,
+      "image_mib": 1572.39404296875,
+      "reason": "gate 2 failed",
+      "saved_mib": null,
+      "slug": "no-kernel-modules"
+    },
+    {
+      "boot_seconds": 36.249,
+      "carried": true,
+      "closure_mib": 851.0559921264648,
+      "decision": "rejected",
+      "id": 16,
+      "image_mib": 1572.39404296875,
+      "reason": "gate 2 failed",
+      "saved_mib": null,
+      "slug": "no-kernel-modules"
+    },
+    {
+      "boot_seconds": 36.391,
+      "carried": false,
+      "closure_mib": 698.1300430297852,
+      "decision": "accepted",
+      "id": 17,
+      "image_mib": 1404.35302734375,
+      "reason": "",
+      "saved_mib": 152.9259490966797,
+      "slug": "no-kernel-modules"
+    },
+    {
+      "boot_seconds": 36.391,
+      "carried": true,
+      "closure_mib": 698.1300430297852,
+      "decision": "rejected",
+      "id": 18,
+      "image_mib": 1404.35302734375,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "no-duplicate-systemd"
+    },
+    {
+      "boot_seconds": 34.391,
+      "carried": false,
+      "closure_mib": 698.1268539428711,
+      "decision": "accepted",
+      "id": 19,
+      "image_mib": 1400.35205078125,
+      "reason": "",
+      "saved_mib": 0.0031890869140625,
+      "slug": "no-lastlog"
+    },
+    {
+      "boot_seconds": 34.391,
+      "carried": true,
+      "closure_mib": 698.1268539428711,
+      "decision": "rejected",
+      "id": 20,
+      "image_mib": 1400.35205078125,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "no-duplicate-systemd"
+    },
+    {
+      "boot_seconds": 34.391,
+      "carried": true,
+      "closure_mib": 698.1268539428711,
+      "decision": "rejected",
+      "id": 21,
+      "image_mib": 1400.35205078125,
+      "reason": "gate 2 failed",
+      "saved_mib": null,
+      "slug": "no-switch-to-configuration"
+    },
+    {
+      "boot_seconds": 34.391,
+      "carried": true,
+      "closure_mib": 698.1268539428711,
+      "decision": "rejected",
+      "id": 22,
+      "image_mib": 1400.35205078125,
+      "reason": "not smaller than accepted",
+      "saved_mib": null,
+      "slug": "lean-image"
+    },
+    {
+      "boot_seconds": 34.391,
+      "carried": true,
+      "closure_mib": 698.1268539428711,
+      "decision": "rejected",
+      "id": 23,
+      "image_mib": 1400.35205078125,
+      "reason": "gate 2 failed",
+      "saved_mib": null,
+      "slug": "lean-image"
+    },
+    {
+      "boot_seconds": 34.391,
+      "carried": true,
+      "closure_mib": 698.1268539428711,
+      "decision": "rejected",
+      "id": 24,
+      "image_mib": 1400.35205078125,
+      "reason": "gate 2 failed",
+      "saved_mib": null,
+      "slug": "lean-image"
+    },
+    {
+      "boot_seconds": 14.338,
+      "carried": false,
+      "closure_mib": 698.1268539428711,
+      "decision": "accepted",
+      "id": 25,
+      "image_mib": 856.21337890625,
+      "reason": "",
+      "saved_mib": 0.0,
+      "slug": "lean-image"
+    },
+    {
+      "boot_seconds": 13.472,
+      "carried": false,
+      "closure_mib": 610.5918273925781,
+      "decision": "accepted",
+      "id": 26,
+      "image_mib": 762.1904296875,
+      "reason": "",
+      "saved_mib": 87.53502655029297,
+      "slug": "no-nix"
+    },
+    {
+      "boot_seconds": 13.472,
+      "carried": true,
+      "closure_mib": 610.5918273925781,
+      "decision": "rejected",
+      "id": 27,
+      "image_mib": 762.1904296875,
+      "reason": "gate 1 failed",
+      "saved_mib": null,
+      "slug": "minimal-system-packages"
+    },
+    {
+      "boot_seconds": 13.472,
+      "carried": true,
+      "closure_mib": 610.5918273925781,
+      "decision": "rejected",
+      "id": 28,
+      "image_mib": 762.1904296875,
+      "reason": "gate 1 failed",
+      "saved_mib": null,
+      "slug": "minimal-system-packages"
+    },
+    {
+      "boot_seconds": 13.472,
+      "carried": true,
+      "closure_mib": 610.5918273925781,
+      "decision": "rejected",
+      "id": 29,
+      "image_mib": 762.1904296875,
+      "reason": "gate 1 failed",
+      "saved_mib": null,
+      "slug": "minimal-system-packages"
+    },
+    {
+      "boot_seconds": 13.472,
+      "carried": true,
+      "closure_mib": 610.5918273925781,
+      "decision": "rejected",
+      "id": 30,
+      "image_mib": 762.1904296875,
+      "reason": "gate 2 failed",
+      "saved_mib": null,
+      "slug": "minimal-system-packages"
+    },
+    {
+      "boot_seconds": 13.634,
+      "carried": false,
+      "closure_mib": 552.9922561645508,
+      "decision": "accepted",
+      "id": 31,
+      "image_mib": 676.1689453125,
+      "reason": "",
+      "saved_mib": 57.599571228027344,
+      "slug": "minimal-system-packages"
+    },
+    {
+      "boot_seconds": 13.634,
+      "carried": true,
+      "closure_mib": 552.9922561645508,
+      "decision": "rejected",
+      "id": 32,
+      "image_mib": 676.1689453125,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "slim-systemd"
+    },
+    {
+      "boot_seconds": 13.634,
+      "carried": true,
+      "closure_mib": 552.9922561645508,
+      "decision": "rejected",
+      "id": 33,
+      "image_mib": 676.1689453125,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "slim-systemd"
+    },
+    {
+      "boot_seconds": 13.634,
+      "carried": true,
+      "closure_mib": 552.9922561645508,
+      "decision": "rejected",
+      "id": 34,
+      "image_mib": 676.1689453125,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "slim-systemd"
+    },
+    {
+      "boot_seconds": 13.634,
+      "carried": true,
+      "closure_mib": 552.9922561645508,
+      "decision": "undecided",
+      "id": 35,
+      "image_mib": 676.1689453125,
+      "reason": "gate 2 skipped",
+      "saved_mib": null,
+      "slug": "slim-systemd"
+    },
+    {
+      "boot_seconds": 13.506,
+      "carried": false,
+      "closure_mib": 515.0260162353516,
+      "decision": "accepted",
+      "id": 36,
+      "image_mib": 630.15771484375,
+      "reason": "",
+      "saved_mib": 37.96623992919922,
+      "slug": "slim-systemd"
+    },
+    {
+      "boot_seconds": 13.506,
+      "carried": true,
+      "closure_mib": 515.0260162353516,
+      "decision": "undecided",
+      "id": 37,
+      "image_mib": 630.15771484375,
+      "reason": "gate 2 skipped",
+      "saved_mib": null,
+      "slug": "no-perl"
+    },
+    {
+      "boot_seconds": 13.506,
+      "carried": true,
+      "closure_mib": 515.0260162353516,
+      "decision": "rejected",
+      "id": 38,
+      "image_mib": 630.15771484375,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "empty-hwdb"
+    },
+    {
+      "boot_seconds": 12.436,
+      "carried": false,
+      "closure_mib": 501.8196029663086,
+      "decision": "accepted",
+      "id": 39,
+      "image_mib": 614.15380859375,
+      "reason": "",
+      "saved_mib": 13.206413269042969,
+      "slug": "empty-hwdb"
+    },
+    {
+      "boot_seconds": 12.436,
+      "carried": true,
+      "closure_mib": 501.8196029663086,
+      "decision": "rejected",
+      "id": 40,
+      "image_mib": 614.15380859375,
+      "reason": "neither closure nor image is smaller than accepted",
+      "saved_mib": null,
+      "slug": "minimal-coreutils"
+    },
+    {
+      "boot_seconds": 12.999,
+      "carried": false,
+      "closure_mib": 489.07220458984375,
+      "decision": "accepted",
+      "id": 41,
+      "image_mib": 600.150390625,
+      "reason": "",
+      "saved_mib": 12.747398376464844,
+      "slug": "minimal-coreutils"
+    },
+    {
+      "boot_seconds": 12.999,
+      "carried": true,
+      "closure_mib": 489.07220458984375,
+      "decision": "rejected",
+      "id": 42,
+      "image_mib": 600.150390625,
+      "reason": "gate 1 failed",
+      "saved_mib": null,
+      "slug": "minimal-initrd-modules"
+    },
+    {
+      "boot_seconds": 12.296,
+      "carried": false,
+      "closure_mib": 483.2570114135742,
+      "decision": "accepted",
+      "id": 43,
+      "image_mib": 592.1484375,
+      "reason": "",
+      "saved_mib": 5.815193176269531,
+      "slug": "no-sudo"
+    },
+    {
+      "boot_seconds": 12.296,
+      "carried": true,
+      "closure_mib": 483.2570114135742,
+      "decision": "rejected",
+      "id": 44,
+      "image_mib": 592.1484375,
+      "reason": "gate 2 failed",
+      "saved_mib": null,
+      "slug": "no-switch-to-configuration"
+    },
+    {
+      "boot_seconds": 14.043,
+      "carried": false,
+      "closure_mib": 428.6020050048828,
+      "decision": "accepted",
+      "id": 45,
+      "image_mib": 574.14404296875,
+      "reason": "",
+      "saved_mib": 54.655006408691406,
+      "slug": "no-switch-to-configuration"
+    },
+    {
+      "boot_seconds": 14.657,
+      "carried": false,
+      "closure_mib": 369.85367584228516,
+      "decision": "accepted",
+      "id": 46,
+      "image_mib": 506.126953125,
+      "reason": "",
+      "saved_mib": 58.748329162597656,
+      "slug": "no-perl"
+    },
+    {
+      "boot_seconds": 14.657,
+      "carried": true,
+      "closure_mib": 369.85367584228516,
+      "decision": "rejected",
+      "id": 47,
+      "image_mib": 506.126953125,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "no-duplicate-systemd"
+    },
+    {
+      "boot_seconds": 14.134,
+      "carried": false,
+      "closure_mib": 347.4044647216797,
+      "decision": "accepted",
+      "id": 48,
+      "image_mib": 482.12109375,
+      "reason": "",
+      "saved_mib": 22.44921112060547,
+      "slug": "no-duplicate-systemd"
+    },
+    {
+      "boot_seconds": 12.92,
+      "carried": false,
+      "closure_mib": 344.9061050415039,
+      "decision": "accepted",
+      "id": 49,
+      "image_mib": 478.1201171875,
+      "reason": "",
+      "saved_mib": 2.4983596801757812,
+      "slug": "no-editor"
+    },
+    {
+      "boot_seconds": 12.92,
+      "carried": true,
+      "closure_mib": 344.9061050415039,
+      "decision": "rejected",
+      "id": 50,
+      "image_mib": 478.1201171875,
+      "reason": "gate 2 failed",
+      "saved_mib": null,
+      "slug": "no-user-data-decompression"
+    },
+    {
+      "boot_seconds": 13.107,
+      "carried": false,
+      "closure_mib": 333.50181579589844,
+      "decision": "accepted",
+      "id": 51,
+      "image_mib": 470.1181640625,
+      "reason": "",
+      "saved_mib": 11.404289245605469,
+      "slug": "no-user-data-decompression"
+    },
+    {
+      "boot_seconds": 13.107,
+      "carried": true,
+      "closure_mib": 333.50181579589844,
+      "decision": "rejected",
+      "id": 52,
+      "image_mib": 470.1181640625,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "slim-iproute2"
+    },
+    {
+      "boot_seconds": 15.16,
+      "carried": false,
+      "closure_mib": 326.61106872558594,
+      "decision": "accepted",
+      "id": 53,
+      "image_mib": 460.11572265625,
+      "reason": "",
+      "saved_mib": 6.8907470703125,
+      "slug": "slim-iproute2"
+    },
+    {
+      "boot_seconds": 14.226,
+      "carried": false,
+      "closure_mib": 319.97450256347656,
+      "decision": "accepted",
+      "id": 54,
+      "image_mib": 452.11376953125,
+      "reason": "",
+      "saved_mib": 6.636566162109375,
+      "slug": "slim-systemd-no-libbpf"
+    },
+    {
+      "boot_seconds": 14.068,
+      "carried": false,
+      "closure_mib": 313.03550720214844,
+      "decision": "accepted",
+      "id": 55,
+      "image_mib": 440.11083984375,
+      "reason": "",
+      "saved_mib": 6.938995361328125,
+      "slug": "no-x11"
+    },
+    {
+      "boot_seconds": 14.937,
+      "carried": false,
+      "closure_mib": 307.23595428466797,
+      "decision": "accepted",
+      "id": 56,
+      "image_mib": 432.10888671875,
+      "reason": "",
+      "saved_mib": 5.799552917480469,
+      "slug": "no-lastlog2"
+    },
+    {
+      "boot_seconds": 14.937,
+      "carried": true,
+      "closure_mib": 307.23595428466797,
+      "decision": "rejected",
+      "id": 57,
+      "image_mib": 432.10888671875,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "slim-curl"
+    },
+    {
+      "boot_seconds": 13.613,
+      "carried": false,
+      "closure_mib": 304.393310546875,
+      "decision": "accepted",
+      "id": 58,
+      "image_mib": 432.10888671875,
+      "reason": "",
+      "saved_mib": 2.8426437377929688,
+      "slug": "slim-curl"
+    },
+    {
+      "boot_seconds": 14.487,
+      "carried": false,
+      "closure_mib": 304.393310546875,
+      "decision": "accepted",
+      "id": 59,
+      "image_mib": 430.1083984375,
+      "reason": "",
+      "saved_mib": 0.0,
+      "slug": "pristine-builder-vm"
+    },
+    {
+      "boot_seconds": 15.103,
+      "carried": false,
+      "closure_mib": 298.5143585205078,
+      "decision": "accepted",
+      "id": 60,
+      "image_mib": 422.1064453125,
+      "reason": "",
+      "saved_mib": 5.8789520263671875,
+      "slug": "no-lvm"
+    },
+    {
+      "boot_seconds": 14.55,
+      "carried": false,
+      "closure_mib": 297.26461029052734,
+      "decision": "accepted",
+      "id": 61,
+      "image_mib": 424.10693359375,
+      "reason": "",
+      "saved_mib": 1.2497482299804688,
+      "slug": "no-bash-completion"
+    },
+    {
+      "boot_seconds": 14.197,
+      "carried": false,
+      "closure_mib": 295.88348388671875,
+      "decision": "accepted",
+      "id": 62,
+      "image_mib": 422.1064453125,
+      "reason": "",
+      "saved_mib": 1.3811264038085938,
+      "slug": "slim-openssh"
+    },
+    {
+      "boot_seconds": 14.197,
+      "carried": true,
+      "closure_mib": 295.88348388671875,
+      "decision": "rejected",
+      "id": 63,
+      "image_mib": 422.1064453125,
+      "reason": "build failed",
+      "saved_mib": null,
+      "slug": "no-nscd"
+    },
+    {
+      "boot_seconds": 14.025,
+      "carried": false,
+      "closure_mib": 294.4214782714844,
+      "decision": "accepted",
+      "id": 64,
+      "image_mib": 418.10546875,
+      "reason": "",
+      "saved_mib": 1.462005615234375,
+      "slug": "no-nscd"
+    },
+    {
+      "boot_seconds": 13.552,
+      "carried": false,
+      "closure_mib": 285.70117950439453,
+      "decision": "accepted",
+      "id": 65,
+      "image_mib": 412.10400390625,
+      "reason": "",
+      "saved_mib": 8.720298767089844,
+      "slug": "no-duplicate-util-linux"
+    },
+    {
+      "boot_seconds": 13.552,
+      "carried": true,
+      "closure_mib": 285.70117950439453,
+      "decision": "rejected",
+      "id": 66,
+      "image_mib": 412.10400390625,
+      "reason": "gate 1 failed",
+      "saved_mib": null,
+      "slug": "wrappers-without-propagation"
+    },
+    {
+      "boot_seconds": 13.318,
+      "carried": false,
+      "closure_mib": 278.50042724609375,
+      "decision": "accepted",
+      "id": 67,
+      "image_mib": 400.10107421875,
+      "reason": "",
+      "saved_mib": 7.200752258300781,
+      "slug": "wrappers-without-propagation"
+    },
+    {
+      "boot_seconds": 12.763,
+      "carried": false,
+      "closure_mib": 278.50042724609375,
+      "decision": "accepted",
+      "id": 68,
+      "image_mib": 398.10009765625,
+      "reason": "",
+      "saved_mib": 0.0,
+      "slug": "lean-image-additional-space"
+    },
+    {
+      "boot_seconds": 12.763,
+      "carried": true,
+      "closure_mib": 278.50042724609375,
+      "decision": "rejected",
+      "id": 69,
+      "image_mib": 398.10009765625,
+      "reason": "image did not build, so it was not measured",
+      "saved_mib": null,
+      "slug": "lean-image-block-size"
+    },
+    {
+      "boot_seconds": 12.763,
+      "carried": true,
+      "closure_mib": 278.50042724609375,
+      "decision": "rejected",
+      "id": 70,
+      "image_mib": 398.10009765625,
+      "reason": "image did not build, so it was not measured",
+      "saved_mib": null,
+      "slug": "lean-image-block-size"
+    },
+    {
+      "boot_seconds": 12.763,
+      "carried": true,
+      "closure_mib": 278.50042724609375,
+      "decision": "rejected",
+      "id": 71,
+      "image_mib": 398.10009765625,
+      "reason": "neither closure nor image is smaller than accepted",
+      "saved_mib": null,
+      "slug": "lean-image-inode-blocks"
+    },
+    {
+      "boot_seconds": 15.228,
+      "carried": false,
+      "closure_mib": 274.26927185058594,
+      "decision": "accepted",
+      "id": 72,
+      "image_mib": 386.09716796875,
+      "reason": "",
+      "saved_mib": 4.2311553955078125,
+      "slug": "xz-initrd"
+    },
+    {
+      "boot_seconds": 15.156,
+      "carried": false,
+      "closure_mib": 271.80792236328125,
+      "decision": "accepted",
+      "id": 73,
+      "image_mib": 392.0986328125,
+      "reason": "",
+      "saved_mib": 2.4613494873046875,
+      "slug": "c-locale-only"
+    },
+    {
+      "boot_seconds": 14.48,
+      "carried": false,
+      "closure_mib": 269.47562408447266,
+      "decision": "accepted",
+      "id": 74,
+      "image_mib": 386.09716796875,
+      "reason": "",
+      "saved_mib": 2.3322982788085938,
+      "slug": "no-procps"
+    },
+    {
+      "boot_seconds": 15.926,
+      "carried": false,
+      "closure_mib": 266.38525390625,
+      "decision": "accepted",
+      "id": 75,
+      "image_mib": 380.095703125,
+      "reason": "",
+      "saved_mib": 3.0903701782226562,
+      "slug": "openssh-server-only"
+    }
+  ],
+  "tally": {
+    "accepted": 39,
+    "baseline": 1,
+    "rejected": 33,
+    "total": 75,
+    "undecided": 2
+  },
+  "upstream": [
+    {
+      "body": "nixos/modules/security/wrappers/wrapper.nix takes linuxHeaders as a buildInputs entry; the static stdenv writes nix-support/propagated-build-inputs into the output; the activation script copies the wrapper out of that package, so the file and its 7.20 MiB of kernel headers stay. The binary itself never references them. One postFixup = \"rm -rf $out/nix-support\" fixes it, and this costs every NixOS system with a setuid wrapper, not just small ones. Ledger #67.",
+      "reference": "Ledger #67",
+      "title": "Setuid wrappers propagate linuxHeaders into the runtime closure"
+    },
+    {
+      "body": "nixpkgs calls systemd with util-linux = util-linuxMinimal to break it, and NixOS then writes that build into PID 1's PATH and the generator environment, so the image carries two util-linux builds. The lab removed the 8.72 MiB bin output by changing the two PATHs (#65); the remaining 2.47 MiB is referenced by the systemd binary and needs the cycle broken. Overriding the package instead is an infinite recursion, because systemdMinimal resolves systemd from the final package set.",
+      "reference": "",
+      "title": "The systemd / linux-pam / util-linux cycle forces a second util-linux"
+    },
+    {
+      "body": "7.10 MiB against 1.80 for bashNonInteractive, which is already in every closure as runtimeShell. Pointing environment.binsh, users.defaultUserShell, environment.shells, the system path and amazon-ec2-utils at the non-interactive build still leaves two referrers, both hardcoded: stage 2's prepare-root shebang and networking.localCommands. Backlog e28.",
+      "reference": "Backlog e28",
+      "title": "pkgs.bash is bashInteractive"
+    },
+    {
+      "body": "It charges two filesystem blocks per inode; with 13016 files that is 101.7 MiB of a 398 MiB estimate, which reads like the image is mostly slack. It is not: the VHD is sparse, so the estimate only has to be large enough. Halving the allowance moved the allocated size by 64 KiB (#71), and a 1 KiB block size ran the bootloader step out of space (#70). Worth a comment upstream so the next person does not spend three experiments on it. Two further items are blocked rather than upstream-shaped: a compressed store (e3) and any non-ext4 root (e7) both hit make-disk-image's assertion that a partition table implies ext4.",
+      "reference": "",
+      "title": "make-disk-image's automatic sizing cannot be tuned usefully, and its inode allowance is misleading"
+    }
+  ],
+  "wins": [
+    {
+      "closure_mib": 199.75193786621094,
+      "id": 2,
+      "image_mib": 0.0,
+      "slug": "no-flake-registry"
+    },
+    {
+      "closure_mib": 152.9259490966797,
+      "id": 17,
+      "image_mib": 0.0,
+      "slug": "no-kernel-modules"
+    },
+    {
+      "closure_mib": 136.90631866455078,
+      "id": 9,
+      "image_mib": 0.0,
+      "slug": "no-python"
+    },
+    {
+      "closure_mib": 110.33158111572266,
+      "id": 6,
+      "image_mib": 0.0,
+      "slug": "no-ssm-agent"
+    },
+    {
+      "closure_mib": 101.10106658935547,
+      "id": 4,
+      "image_mib": 0.0,
+      "slug": "no-amazon-init"
+    },
+    {
+      "closure_mib": 93.8251724243164,
+      "id": 10,
+      "image_mib": 0.0,
+      "slug": "no-documentation"
+    },
+    {
+      "closure_mib": 87.53502655029297,
+      "id": 26,
+      "image_mib": 94.02294921875,
+      "slug": "no-nix"
+    },
+    {
+      "closure_mib": 58.748329162597656,
+      "id": 46,
+      "image_mib": 68.01708984375,
+      "slug": "no-perl"
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How small can a NixOS EC2 base image get?</title>
+<meta name="description" content="A closed research lab: 75 experiments shrinking a NixOS EC2 base image to 266 MiB of closure, measured, with the failures kept.">
+<meta property="og:title" content="How small can a NixOS EC2 base image get?">
+<meta property="og:description" content="A closed research lab: 75 experiments shrinking a NixOS EC2 base image to 266 MiB of closure, measured, with the failures kept.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.className = "js";</script>
+</head>
+<body>
+
+<div class="counter" id="counter" aria-hidden="true">
+  <span class="counter-value" id="counter-value">1 516</span>
+  <span class="counter-unit">MiB</span>
+  <span class="counter-label">closure at experiment <span id="counter-id">1</span></span>
+</div>
+
+<header class="hero">
+  <p class="eyebrow">TechNative research lab</p>
+  <h1 class="hero-title">We took 82% off a NixOS EC2 base image, and wrote down everything that did not work.</h1>
+  <p class="hero-lede">75 numbered experiments. Every one of them had to boot on Nitro, deploy, and pass the same ten-check contract over SSH before it counted.</p>
+
+  <div class="headline">
+    <div class="headline-item">
+      <span class="headline-key">closure</span>
+      <span class="headline-from">1 516</span>
+      <span class="headline-arrow" aria-hidden="true">&rarr;</span>
+      <span class="headline-to shrink">266</span>
+      <span class="headline-unit">MiB</span>
+      <span class="headline-pct">&minus;82%</span>
+    </div>
+    <div class="headline-item">
+      <span class="headline-key">raw VHD</span>
+      <span class="headline-from">2 599</span>
+      <span class="headline-arrow" aria-hidden="true">&rarr;</span>
+      <span class="headline-to shrink">380</span>
+      <span class="headline-unit">MiB</span>
+      <span class="headline-pct">&minus;85%</span>
+    </div>
+    <div class="headline-item">
+      <span class="headline-key">boot</span>
+      <span class="headline-from">40.8</span>
+      <span class="headline-arrow" aria-hidden="true">&rarr;</span>
+      <span class="headline-to">14.3</span>
+      <span class="headline-unit">s &plusmn; 0.9</span>
+      <span class="headline-pct">&minus;65%</span>
+    </div>
+  </div>
+  <p class="hero-note">Boot time is a spread, not a number: the last 10 accepted experiments boot between 12.8 and 15.9 seconds. A single run is not the result.</p>
+</header>
+
+<main>
+
+<section class="section section--question">
+  <h2>The question</h2>
+  <p class="lead">How small can a NixOS base image for AWS EC2 get while it still boots, deploys, and stays fully usable over SSH?</p>
+  <p>Not how small an image can be made in principle. How small it can be and still be a machine you would run. The contract fixed that: ten checks, the same script locally and on the real instance, covering the SSH key arriving from instance metadata, DNS, HTTPS with a working trust store, the clock, the root filesystem growing to its volume, and surviving a reboot. A strategy that broke any of them was rejected, whatever it saved.</p>
+</section>
+
+<section class="section section--method">
+  <h2>How it ran</h2>
+  <ul class="method">
+    <li>One strategy per experiment, measured against a frozen baseline.</li>
+    <li>Two gates: a local QEMU boot, then a real EC2 instance, both running the same contract script.</li>
+    <li>An append-only ledger, one line per experiment, accepted or not.</li>
+    <li>Every removal guarded, so a package that did not actually leave fails the build instead of the review.</li>
+  </ul>
+  <p class="aside">The deployment went through nivis, which is the mechanism and not the point. The full method is in the repository.</p>
+</section>
+
+<section class="section section--descent" id="descent">
+  <h2>The descent</h2>
+  <p class="lead">Size across all 75 experiments. The flat stretches are the 33 rejections: the line holds while the lab is stuck.</p>
+  <svg class="chart chart--descent" viewBox="0 0 1000 420" role="img" aria-label="Closure size across all 75 experiments">
+<line class="grid" x1="64" y1="356.0" x2="982" y2="356.0"/><text class="tick" x="54" y="360.0" text-anchor="end">0</text>
+<line class="grid" x1="64" y1="273.5" x2="982" y2="273.5"/><text class="tick" x="54" y="277.5" text-anchor="end">400</text>
+<line class="grid" x1="64" y1="191.0" x2="982" y2="191.0"/><text class="tick" x="54" y="195.0" text-anchor="end">800</text>
+<line class="grid" x1="64" y1="108.5" x2="982" y2="108.5"/><text class="tick" x="54" y="112.5" text-anchor="end">1 200</text>
+<line class="grid" x1="64" y1="26.0" x2="982" y2="26.0"/><text class="tick" x="54" y="30.0" text-anchor="end">1 600</text>
+<text class="axis" x="54" y="14" text-anchor="end">MiB</text>
+<path class="descent-line" d="M64.0,43.3 L76.4,43.3L76.4,84.5 L88.8,84.5L88.8,84.5 L101.2,84.5L101.2,105.3 L113.6,105.3L113.6,107.9 L126.0,107.9L126.0,130.6 L138.4,130.6L138.4,130.6 L150.8,130.6L150.8,130.6 L163.2,130.6L163.2,158.9 L175.6,158.9L175.6,178.2 L188.1,178.2L188.1,178.9 L200.5,178.9L200.5,178.9 L212.9,178.9L212.9,178.9 L225.3,178.9L225.3,180.5 L237.7,180.5L237.7,180.5 L250.1,180.5L250.1,180.5 L262.5,180.5L262.5,212.0 L274.9,212.0L274.9,212.0 L287.3,212.0L287.3,212.0 L299.7,212.0L299.7,212.0 L312.1,212.0L312.1,212.0 L324.5,212.0L324.5,212.0 L336.9,212.0L336.9,212.0 L349.3,212.0L349.3,212.0 L361.7,212.0L361.7,212.0 L374.1,212.0L374.1,230.1 L386.5,230.1L386.5,230.1 L398.9,230.1L398.9,230.1 L411.4,230.1L411.4,230.1 L423.8,230.1L423.8,230.1 L436.2,230.1L436.2,241.9 L448.6,241.9L448.6,241.9 L461.0,241.9L461.0,241.9 L473.4,241.9L473.4,241.9 L485.8,241.9L485.8,241.9 L498.2,241.9L498.2,249.8 L510.6,249.8L510.6,249.8 L523.0,249.8L523.0,249.8 L535.4,249.8L535.4,252.5 L547.8,252.5L547.8,252.5 L560.2,252.5L560.2,255.1 L572.6,255.1L572.6,255.1 L585.0,255.1L585.0,256.3 L597.4,256.3L597.4,256.3 L609.8,256.3L609.8,267.6 L622.2,267.6L622.2,279.7 L634.6,279.7L634.6,279.7 L647.1,279.7L647.1,284.3 L659.5,284.3L659.5,284.9 L671.9,284.9L671.9,284.9 L684.3,284.9L684.3,287.2 L696.7,287.2L696.7,287.2 L709.1,287.2L709.1,288.6 L721.5,288.6L721.5,290.0 L733.9,290.0L733.9,291.4 L746.3,291.4L746.3,292.6 L758.7,292.6L758.7,292.6 L771.1,292.6L771.1,293.2 L783.5,293.2L783.5,293.2 L795.9,293.2L795.9,294.4 L808.3,294.4L808.3,294.7 L820.7,294.7L820.7,295.0 L833.1,295.0L833.1,295.0 L845.5,295.0L845.5,295.3 L857.9,295.3L857.9,297.1 L870.4,297.1L870.4,297.1 L882.8,297.1L882.8,298.6 L895.2,298.6L895.2,298.6 L907.6,298.6L907.6,298.6 L920.0,298.6L920.0,298.6 L932.4,298.6L932.4,298.6 L944.8,298.6L944.8,299.4 L957.2,299.4L957.2,299.9 L969.6,299.9L969.6,300.4 L982.0,300.4L982.0,301.1"/>
+<rect class="plateau" x="135.4" y="26" width="18.4" height="330"/>
+<rect class="plateau" x="197.5" y="26" width="18.4" height="330"/>
+<rect class="plateau" x="234.7" y="26" width="18.4" height="330"/>
+<rect class="plateau" x="296.7" y="26" width="55.6" height="330"/>
+<rect class="plateau" x="383.5" y="26" width="43.2" height="330"/>
+<rect class="plateau" x="445.6" y="26" width="43.2" height="330"/>
+<rect class="plateau" x="507.6" y="26" width="18.4" height="330"/>
+<rect class="plateau" x="904.6" y="26" width="30.8" height="330"/>
+<line class="reject-tick" x1="88.8" y1="371" x2="88.8" y2="385"><title>#3 no-installer-tools: build failed</title></line>
+<line class="reject-tick" x1="138.4" y1="371" x2="138.4" y2="385"><title>#7 no-ebsnvme-id: build failed</title></line>
+<line class="reject-tick" x1="150.8" y1="371" x2="150.8" y2="385"><title>#8 no-python: gate 1 failed</title></line>
+<line class="reject-tick" x1="200.5" y1="371" x2="200.5" y2="385"><title>#12 nitro-kernel: build failed</title></line>
+<line class="reject-tick" x1="212.9" y1="371" x2="212.9" y2="385"><title>#13 no-kernel-modules: gate 1 failed</title></line>
+<line class="reject-tick" x1="237.7" y1="371" x2="237.7" y2="385"><title>#15 no-kernel-modules: gate 2 failed</title></line>
+<line class="reject-tick" x1="250.1" y1="371" x2="250.1" y2="385"><title>#16 no-kernel-modules: gate 2 failed</title></line>
+<line class="reject-tick" x1="274.9" y1="371" x2="274.9" y2="385"><title>#18 no-duplicate-systemd: build failed</title></line>
+<line class="reject-tick" x1="299.7" y1="371" x2="299.7" y2="385"><title>#20 no-duplicate-systemd: build failed</title></line>
+<line class="reject-tick" x1="312.1" y1="371" x2="312.1" y2="385"><title>#21 no-switch-to-configuration: gate 2 failed</title></line>
+<line class="reject-tick" x1="324.5" y1="371" x2="324.5" y2="385"><title>#22 lean-image: not smaller than accepted</title></line>
+<line class="reject-tick" x1="336.9" y1="371" x2="336.9" y2="385"><title>#23 lean-image: gate 2 failed</title></line>
+<line class="reject-tick" x1="349.3" y1="371" x2="349.3" y2="385"><title>#24 lean-image: gate 2 failed</title></line>
+<line class="reject-tick" x1="386.5" y1="371" x2="386.5" y2="385"><title>#27 minimal-system-packages: gate 1 failed</title></line>
+<line class="reject-tick" x1="398.9" y1="371" x2="398.9" y2="385"><title>#28 minimal-system-packages: gate 1 failed</title></line>
+<line class="reject-tick" x1="411.4" y1="371" x2="411.4" y2="385"><title>#29 minimal-system-packages: gate 1 failed</title></line>
+<line class="reject-tick" x1="423.8" y1="371" x2="423.8" y2="385"><title>#30 minimal-system-packages: gate 2 failed</title></line>
+<line class="reject-tick" x1="448.6" y1="371" x2="448.6" y2="385"><title>#32 slim-systemd: build failed</title></line>
+<line class="reject-tick" x1="461.0" y1="371" x2="461.0" y2="385"><title>#33 slim-systemd: build failed</title></line>
+<line class="reject-tick" x1="473.4" y1="371" x2="473.4" y2="385"><title>#34 slim-systemd: build failed</title></line>
+<line class="reject-tick" x1="485.8" y1="371" x2="485.8" y2="385"><title>#35 slim-systemd: gate 2 skipped</title></line>
+<line class="reject-tick" x1="510.6" y1="371" x2="510.6" y2="385"><title>#37 no-perl: gate 2 skipped</title></line>
+<line class="reject-tick" x1="523.0" y1="371" x2="523.0" y2="385"><title>#38 empty-hwdb: build failed</title></line>
+<line class="reject-tick" x1="547.8" y1="371" x2="547.8" y2="385"><title>#40 minimal-coreutils: neither closure nor image is smaller than accepted</title></line>
+<line class="reject-tick" x1="572.6" y1="371" x2="572.6" y2="385"><title>#42 minimal-initrd-modules: gate 1 failed</title></line>
+<line class="reject-tick" x1="597.4" y1="371" x2="597.4" y2="385"><title>#44 no-switch-to-configuration: gate 2 failed</title></line>
+<line class="reject-tick" x1="634.6" y1="371" x2="634.6" y2="385"><title>#47 no-duplicate-systemd: build failed</title></line>
+<line class="reject-tick" x1="671.9" y1="371" x2="671.9" y2="385"><title>#50 no-user-data-decompression: gate 2 failed</title></line>
+<line class="reject-tick" x1="696.7" y1="371" x2="696.7" y2="385"><title>#52 slim-iproute2: build failed</title></line>
+<line class="reject-tick" x1="758.7" y1="371" x2="758.7" y2="385"><title>#57 slim-curl: build failed</title></line>
+<line class="reject-tick" x1="833.1" y1="371" x2="833.1" y2="385"><title>#63 no-nscd: build failed</title></line>
+<line class="reject-tick" x1="870.4" y1="371" x2="870.4" y2="385"><title>#66 wrappers-without-propagation: gate 1 failed</title></line>
+<line class="reject-tick" x1="907.6" y1="371" x2="907.6" y2="385"><title>#69 lean-image-block-size: image did not build, so it was not measured</title></line>
+<line class="reject-tick" x1="920.0" y1="371" x2="920.0" y2="385"><title>#70 lean-image-block-size: image did not build, so it was not measured</title></line>
+<line class="reject-tick" x1="932.4" y1="371" x2="932.4" y2="385"><title>#71 lean-image-inode-blocks: neither closure nor image is smaller than accepted</title></line>
+<text class="axis" x="54" y="382" text-anchor="end">rejected</text>
+<g class="win" style="--i:0"><circle class="win-dot" cx="76.4" cy="84.5" r="4"/><line class="win-stem" x1="76.4" y1="84.5" x2="76.4" y2="66.5"/><text class="win-label" x="82.4" y="62.5">no-flake-registry <tspan class="win-value">200</tspan></text></g>
+<g class="win" style="--i:1"><circle class="win-dot" cx="262.5" cy="212.0" r="4"/><line class="win-stem" x1="262.5" y1="212.0" x2="262.5" y2="174.0"/><text class="win-label" x="268.5" y="170.0">no-kernel-modules <tspan class="win-value">153</tspan></text></g>
+<g class="win" style="--i:2"><circle class="win-dot" cx="163.2" cy="158.9" r="4"/><line class="win-stem" x1="163.2" y1="158.9" x2="163.2" y2="100.9"/><text class="win-label" x="169.2" y="96.9">no-python <tspan class="win-value">137</tspan></text></g>
+<g class="win" style="--i:3"><circle class="win-dot" cx="126.0" cy="130.6" r="4"/><line class="win-stem" x1="126.0" y1="130.6" x2="126.0" y2="112.6"/><text class="win-label" x="132.0" y="108.6">no-ssm-agent <tspan class="win-value">110</tspan></text></g>
+<g class="win" style="--i:4"><circle class="win-dot" cx="101.2" cy="105.3" r="4"/><line class="win-stem" x1="101.2" y1="105.3" x2="101.2" y2="67.3"/><text class="win-label" x="107.2" y="63.3">no-amazon-init <tspan class="win-value">101</tspan></text></g>
+<g class="win" style="--i:5"><circle class="win-dot" cx="175.6" cy="178.2" r="4"/><line class="win-stem" x1="175.6" y1="178.2" x2="175.6" y2="120.2"/><text class="win-label" x="181.6" y="116.2">no-documentation <tspan class="win-value">94</tspan></text></g>
+<g class="win" style="--i:6"><circle class="win-dot" cx="374.1" cy="230.1" r="4"/><line class="win-stem" x1="374.1" y1="230.1" x2="374.1" y2="212.1"/><text class="win-label" x="380.1" y="208.1">no-nix <tspan class="win-value">88</tspan></text></g>
+<g class="win" style="--i:7"><circle class="win-dot" cx="622.2" cy="279.7" r="4"/><line class="win-stem" x1="622.2" y1="279.7" x2="622.2" y2="241.7"/><text class="win-label" x="628.2" y="237.7">no-perl <tspan class="win-value">59</tspan></text></g>
+<text class="tick" x="64.0" y="404" text-anchor="middle">1</text>
+<text class="tick" x="188.1" y="404" text-anchor="middle">11</text>
+<text class="tick" x="312.1" y="404" text-anchor="middle">21</text>
+<text class="tick" x="436.2" y="404" text-anchor="middle">31</text>
+<text class="tick" x="560.2" y="404" text-anchor="middle">41</text>
+<text class="tick" x="684.3" y="404" text-anchor="middle">51</text>
+<text class="tick" x="808.3" y="404" text-anchor="middle">61</text>
+<text class="tick" x="932.4" y="404" text-anchor="middle">71</text>
+<text class="axis" x="523.0" y="418" text-anchor="middle">experiment</text>
+</svg>
+  <p class="aside">The longest plateau is experiments 20 to 24, where switch-to-configuration was given up on and filed as blocked upstream. Experiment 45 came back to it and took 55 MiB out. A chart of successes only cannot show that.</p>
+</section>
+
+<section class="section section--insight">
+  <h2>The one insight</h2>
+  <p class="pull">Six strategies account for 795 of the 1 250 MiB, and they are the same finding stated six ways.</p>
+  <p>A stock NixOS EC2 image carries the tools to rebuild itself. The flake registry, the nixpkgs channel, Python, Perl, the SSM agent, the activation machinery and 57 packages on the system path are all there so the running machine can reconfigure itself. An appliance that is replaced rather than reconfigured needs none of them. Everything after that is smaller and harder: the last 455 MiB took 33 experiments.</p>
+  <svg class="chart chart--bars" viewBox="0 0 1000 442" role="img" aria-label="Closure saved by the 12 largest strategies">
+<g class="bar" style="--i:0"><text class="bar-name" x="198" y="19" text-anchor="end">no-flake-registry</text><rect class="bar-rect" x="210" y="0" width="700.0" height="26" rx="2"/><text class="bar-value" x="920.0" y="19">199.8</text></g>
+<g class="bar" style="--i:1"><text class="bar-name" x="198" y="55" text-anchor="end">no-kernel-modules</text><rect class="bar-rect" x="210" y="36" width="535.9" height="26" rx="2"/><text class="bar-value" x="755.9" y="55">152.9</text></g>
+<g class="bar" style="--i:2"><text class="bar-name" x="198" y="91" text-anchor="end">no-python</text><rect class="bar-rect" x="210" y="72" width="479.8" height="26" rx="2"/><text class="bar-value" x="699.8" y="91">136.9</text></g>
+<g class="bar" style="--i:3"><text class="bar-name" x="198" y="127" text-anchor="end">no-ssm-agent</text><rect class="bar-rect" x="210" y="108" width="386.6" height="26" rx="2"/><text class="bar-value" x="606.6" y="127">110.3</text></g>
+<g class="bar" style="--i:4"><text class="bar-name" x="198" y="163" text-anchor="end">no-amazon-init</text><rect class="bar-rect" x="210" y="144" width="354.3" height="26" rx="2"/><text class="bar-value" x="574.3" y="163">101.1</text></g>
+<g class="bar" style="--i:5"><text class="bar-name" x="198" y="199" text-anchor="end">no-documentation</text><rect class="bar-rect" x="210" y="180" width="328.8" height="26" rx="2"/><text class="bar-value" x="548.8" y="199">93.8</text></g>
+<g class="bar" style="--i:6"><text class="bar-name" x="198" y="235" text-anchor="end">no-nix</text><rect class="bar-rect" x="210" y="216" width="306.8" height="26" rx="2"/><text class="bar-value" x="526.8" y="235">87.5</text></g>
+<g class="bar" style="--i:7"><text class="bar-name" x="198" y="271" text-anchor="end">no-perl</text><rect class="bar-rect" x="210" y="252" width="205.9" height="26" rx="2"/><text class="bar-value" x="425.9" y="271">58.7</text></g>
+<g class="bar" style="--i:8"><text class="bar-name" x="198" y="307" text-anchor="end">minimal-system-packages</text><rect class="bar-rect" x="210" y="288" width="201.8" height="26" rx="2"/><text class="bar-value" x="421.8" y="307">57.6</text></g>
+<g class="bar" style="--i:9"><text class="bar-name" x="198" y="343" text-anchor="end">no-switch-to-configuration</text><rect class="bar-rect" x="210" y="324" width="191.5" height="26" rx="2"/><text class="bar-value" x="411.5" y="343">54.7</text></g>
+<g class="bar" style="--i:10"><text class="bar-name" x="198" y="379" text-anchor="end">slim-systemd</text><rect class="bar-rect" x="210" y="360" width="133.0" height="26" rx="2"/><text class="bar-value" x="353.0" y="379">38.0</text></g>
+<g class="bar" style="--i:11"><text class="bar-name" x="198" y="415" text-anchor="end">no-duplicate-systemd</text><rect class="bar-rect" x="210" y="396" width="78.7" height="26" rx="2"/><text class="bar-value" x="298.7" y="415">22.4</text></g>
+</svg>
+</section>
+
+<section class="section section--boot">
+  <h2>Boot time does not track size</h2>
+  <p class="lead">One closure, three images, three boots. 604 MB of extra files cost 0.73 seconds.</p>
+  <svg class="chart chart--boot" viewBox="0 0 1000 300" role="img" aria-label="Boot time against image size for three control runs">
+<line class="grid" x1="70" y1="240.0" x2="960" y2="240.0"/><text class="tick" x="60" y="244.0" text-anchor="end">0s</text>
+<line class="grid" x1="70" y1="187.5" x2="960" y2="187.5"/><text class="tick" x="60" y="191.5" text-anchor="end">5s</text>
+<line class="grid" x1="70" y1="135.0" x2="960" y2="135.0"/><text class="tick" x="60" y="139.0" text-anchor="end">10s</text>
+<line class="grid" x1="70" y1="82.5" x2="960" y2="82.5"/><text class="tick" x="60" y="86.5" text-anchor="end">15s</text>
+<line class="grid" x1="70" y1="30.0" x2="960" y2="30.0"/><text class="tick" x="60" y="34.0" text-anchor="end">20s</text>
+<line class="boot-trend" x1="385.6" y1="100.3" x2="864.6" y2="91.2"/>
+<g class="boot-point" style="--i:0"><circle cx="385.6" cy="100.3" r="7"/><text class="boot-value" x="385.6" y="84.3" text-anchor="middle">13.30s</text><text class="tick" x="385.6" y="274" text-anchor="middle">398 MB</text><title>accepted, auto-sized, no channel</title></g>
+<g class="boot-point" style="--i:1"><circle cx="417.4" cy="98.9" r="7"/><text class="boot-value" x="417.4" y="82.9" text-anchor="middle">13.44s</text><text class="tick" x="417.4" y="274" text-anchor="middle">438 MB</text><title>same closure, diskSize = &quot;4096&quot;</title></g>
+<g class="boot-point" style="--i:2"><circle cx="864.6" cy="91.2" r="7"/><text class="boot-value" x="864.6" y="75.2" text-anchor="middle">14.17s</text><text class="tick" x="864.6" y="274" text-anchor="middle">1 002 MB</text><title>same closure, diskSize = &quot;4096&quot; and copyChannel = true</title></g>
+<text class="axis" x="515.0" y="296" text-anchor="middle">image size</text>
+</svg>
+  <p class="aside">Boot time fell from 40.8 to about 14.3 seconds over the lab, and none of that is explained by size. The drop at experiment 25 was tested directly and does not reproduce: the image is not what makes the machine slow. The only boot effect ever isolated is compressing the initrd with xz, which costs 2.5 seconds for 4.23 MiB.</p>
+</section>
+
+<section class="section section--floor">
+  <h2>The floor</h2>
+  <p class="lead">What is left, and why it stays. This is the machine: a kernel, an initrd, a C library, an init system, a shell and the programs the contract exercises.</p>
+  <table class="floor">
+    <thead><tr><th>MiB</th><th>what</th></tr></thead>
+    <tbody>
+      <tr><td class="num">52.55</td><td>systemd, already built with 21 features off</td></tr>
+      <tr><td class="num">33.93</td><td>glibc</td></tr>
+      <tr><td class="num">23.55</td><td>util-linux, lib and bin</td></tr>
+      <tr><td class="num">21.97</td><td>the kernel</td></tr>
+      <tr><td class="num">17.64</td><td>the initrd, xz-compressed</td></tr>
+      <tr><td class="num">10.31</td><td>gcc-lib, held by six unrelated packages</td></tr>
+      <tr><td class="num">9.00</td><td>openssl</td></tr>
+      <tr><td class="num">7.10</td><td>bash-interactive</td></tr>
+      <tr><td class="num">5.65</td><td>openssh, server programs only</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section section--tally">
+  <h2>The honest tally</h2>
+  <div class="tally">
+    <div class="tally-item tally-item--baseline"><span class="tally-n">1</span> <span class="tally-k">baseline</span></div>
+    <div class="tally-item tally-item--accepted"><span class="tally-n">39</span> <span class="tally-k">accepted</span></div>
+    <div class="tally-item tally-item--rejected"><span class="tally-n">33</span> <span class="tally-k">rejected</span></div>
+    <div class="tally-item tally-item--undecided"><span class="tally-n">2</span> <span class="tally-k">undecided</span></div>
+  </div>
+  <p class="pull">The rejections taught the most. Six of them were the lab's own defects, and each one produced a change to the protocol.</p>
+  <ul class="groups">
+    <li><span class="group-n">4</span> <span class="group-name">The guard did its job</span> <span class="group-body">system.forbiddenDependenciesRegexes is set by each module to name what should have left. It caught #3 (nixos-rebuild still present), #20 and #47 (systemd-minimal had more holders), #52 (elfutils had a third holder) and #57 (krb5 had two more referrers). Writing the guard for what you hope leaves, rather than what you know leaves, is what makes it useful.</span></li>
+    <li><span class="group-n">6</span> <span class="group-name">The lab&#x27;s own defects</span> <span class="group-body">Wrong build phase, an unasserted string replacement that silently matched nothing, a measurement that compared only closures, an image that failed to build and was logged as a 100% saving, an integer interpolated into a string, and a mkForce that removed more than it meant to. Each produced a protocol change; see §6.</span></li>
+    <li><span class="group-n">5</span> <span class="group-name">Genuinely too far</span> <span class="group-body">A trimmed kernel config derails nixpkgs&#x27; make config. Dropping the module tree needs ena, af_packet, fuse and configfs force-loaded in the initrd and the firewall off. An auto-sized image with no slack left growpart nothing to grow into.</span></li>
+  </ul>
+</section>
+
+<section class="section section--upstream">
+  <h2>What belongs upstream</h2>
+  <p class="lead">Four results are not about this image. They are things nixpkgs or NixOS does that cost every user, and each one is reproducible from the repository.</p>
+  <ol class="upstream">
+    <li><h3>Setuid wrappers propagate linuxHeaders into the runtime closure</h3><p>nixos/modules/security/wrappers/wrapper.nix takes linuxHeaders as a buildInputs entry; the static stdenv writes nix-support/propagated-build-inputs into the output; the activation script copies the wrapper out of that package, so the file and its 7.20 MiB of kernel headers stay. The binary itself never references them. One postFixup = &quot;rm -rf $out/nix-support&quot; fixes it, and this costs every NixOS system with a setuid wrapper, not just small ones. Ledger #67.</p></li>
+    <li><h3>The systemd / linux-pam / util-linux cycle forces a second util-linux</h3><p>nixpkgs calls systemd with util-linux = util-linuxMinimal to break it, and NixOS then writes that build into PID 1&#x27;s PATH and the generator environment, so the image carries two util-linux builds. The lab removed the 8.72 MiB bin output by changing the two PATHs (#65); the remaining 2.47 MiB is referenced by the systemd binary and needs the cycle broken. Overriding the package instead is an infinite recursion, because systemdMinimal resolves systemd from the final package set.</p></li>
+    <li><h3>pkgs.bash is bashInteractive</h3><p>7.10 MiB against 1.80 for bashNonInteractive, which is already in every closure as runtimeShell. Pointing environment.binsh, users.defaultUserShell, environment.shells, the system path and amazon-ec2-utils at the non-interactive build still leaves two referrers, both hardcoded: stage 2&#x27;s prepare-root shebang and networking.localCommands. Backlog e28.</p></li>
+    <li><h3>make-disk-image&#x27;s automatic sizing cannot be tuned usefully, and its inode allowance is misleading</h3><p>It charges two filesystem blocks per inode; with 13016 files that is 101.7 MiB of a 398 MiB estimate, which reads like the image is mostly slack. It is not: the VHD is sparse, so the estimate only has to be large enough. Halving the allowance moved the allocated size by 64 KiB (#71), and a 1 KiB block size ran the bootloader step out of space (#70). Worth a comment upstream so the next person does not spend three experiments on it. Two further items are blocked rather than upstream-shaped: a compressed store (e3) and any non-ext4 root (e7) both hit make-disk-image&#x27;s assertion that a partition table implies ext4.</p></li>
+  </ol>
+</section>
+
+<section class="section section--next">
+  <h2>What is next</h2>
+  <p class="lead">The reusable result is the measurements, not the image.</p>
+  <p>34 NixOS options, each with what it saves, what it costs and the ledger line that proves it. That is what feeds into ElastiNix, where these strategies get used and shown to work in a configurable production image. The configurable image is the next project. This one is the map.</p>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p class="footer-line">Every number on this page is generated from the repository: 75 ledger lines, the report, and the experiment notes. Nothing here is typed by hand.</p>
+  <p class="footer-line"><a href="https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment">the repository</a> &middot; <a href="https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/REPORT.md">the report</a> &middot; <a href="https://github.com/wearetechnative/smol-nixos-base-image-nivis-ec2-experiment/blob/main/ledger.jsonl">the ledger</a></p>
+  <p class="footer-brand">A TechNative research lab.</p>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

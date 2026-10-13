@@ -1,11 +1,11 @@
 ---
 # smol-nixos-base-image-nivis-ec2-experiment-zct3
 title: 05 Publish the results
-status: in-progress
+status: completed
 type: milestone
 priority: normal
 created_at: 2026-10-13T22:37:57Z
-updated_at: 2026-10-13T22:37:59Z
+updated_at: 2026-10-13T23:08:29Z
 ---
 
 The research is done and `REPORT.md` is written. This milestone turns that
@@ -21,7 +21,12 @@ and where the two disagree about what this work is, the site brief wins.
 The lab stays closed as research. The repository is open again for
 publishing.
 
-[ ] a results site that reads top to bottom without motion
-[ ] every number on it traceable to `ledger.jsonl`, `REPORT.md` or an
+[x] a results site that reads top to bottom without motion
+[x] every number on it traceable to `ledger.jsonl`, `REPORT.md` or an
     experiment note, and regenerated rather than typed
-[ ] published from `main`, at a URL the blog and the Discourse post can link
+[x] published from `main`, at a URL the blog and the Discourse post can link
+## Summary of Changes
+
+The results are published. One epic, one OpenSpec change, and the
+repository's first CI. The research stays closed; `REPORT.md` is still the
+document of record and the site is its public face.

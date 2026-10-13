@@ -12,6 +12,15 @@ on its own, not because the curve flattened.
 Nothing is live. `just reap` finds no AWS resources, `systems/candidate`
 is reset to `systems/accepted`, and `main` is pushed.
 
+The research is closed; the repository is open for publishing. The results
+site lives in `site/`, is built from `ledger.jsonl`, `REPORT.md` and the
+experiment notes by `just site`, and is published at
+
+  https://wearetechnative.github.io/smol-nixos-base-image-nivis-ec2-experiment/
+
+`just site-check` fails if the published page has drifted from the data,
+and the same check runs in CI on every push.
+
 ## Where the appliance track stands
 
 Two numbers now, because they are not the same thing and this lab spent

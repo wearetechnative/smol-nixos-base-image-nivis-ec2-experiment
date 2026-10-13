@@ -7,12 +7,19 @@
 let
   cfg = config.smol.noUserDataDecompression;
 
-  fetcher = pkgs.runCommand "ec2-metadata-fetcher-no-decompress.sh" { } ''
-    substitute ${pkgs.path}/nixos/modules/virtualisation/ec2-metadata-fetcher.sh $out \
-      --replace-fail \
-        ' && try_decompress "$metaDir/user-data"' \
-        ""
-  '';
+  upstream = builtins.readFile "${pkgs.path}/nixos/modules/virtualisation/ec2-metadata-fetcher.sh";
+
+  call = " && try_decompress \"$metaDir/user-data\"";
+
+  # String work, not a derivation. `pkgs.runCommand` gives the result a
+  # system, and `nix flake check` then fails on the aarch64 variant with a
+  # platform mismatch on an x86_64 host. Patching a shell script needs no
+  # builder. See GOTCHAS.md.
+  #
+  # `replaceStrings` is silent when it matches nothing, where
+  # `substitute --replace-fail` was loud, so the assertion below restores
+  # what the build used to guarantee.
+  fetcher = builtins.replaceStrings [ call ] [ "" ] upstream;
 in
 {
   options.smol.noUserDataDecompression.enable = lib.mkEnableOption ''
@@ -65,6 +72,18 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = fetcher != upstream;
+        message = ''
+          smol.noUserDataDecompression found no call to try_decompress in
+          nixos/modules/virtualisation/ec2-metadata-fetcher.sh. nixpkgs has
+          changed the script; re-read it before adjusting this module, and
+          see experiments/050-no-user-data-decompression.md.
+        '';
+      }
+    ];
+
     systemd.services.fetch-ec2-metadata = {
       path = lib.mkForce [
         cfg.curl
@@ -74,7 +93,7 @@ in
         pkgs.gnused
         config.systemd.package
       ];
-      script = lib.mkForce (builtins.readFile fetcher);
+      script = lib.mkForce fetcher;
     };
 
     system.forbiddenDependenciesRegexes = [ "-file-[0-9]" ];

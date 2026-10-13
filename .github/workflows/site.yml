@@ -1,0 +1,63 @@
+# Build the results site from the repository's data and publish it.
+#
+# The first CI this repository has had. The lab's own gates boot machines
+# and cannot run here; what this checks instead is that the page still
+# says what the data says. See openspec/changes/archive/*-add-results-site.
+name: site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3"
+
+      # Provenance. Rebuilding from ledger.jsonl, REPORT.md and the
+      # experiment notes has to reproduce the committed page exactly. A
+      # number that is not in the data cannot reach the site, and a
+      # number that was hand-edited fails here.
+      - name: The site is in step with the data
+        run: python3 site/build.py --check
+
+      - name: The README and the report agree on the boot figure
+        run: python3 site/verify.py
+
+      # Only the four published files. The build scripts stay in the
+      # repository and out of the artefact.
+      - name: Assemble the artefact
+        run: |
+          mkdir -p _site
+          cp site/index.html site/style.css site/main.js site/data.json _site/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

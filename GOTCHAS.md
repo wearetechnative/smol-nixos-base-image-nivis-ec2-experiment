@@ -433,3 +433,10 @@ gives the result a system, and `nix flake check` then fails on the
 aarch64 variant with `platform mismatch` on an x86_64 host. Copying three
 text files does not need a builder.
 
+`modules/smol/no-user-data-decompression.nix` had the same defect from
+ledger #51 until the site work ran `nix flake check` for the first time in
+months and found it. Patching a shell script does not need a builder
+either. Watch the trade when you convert one: `substitute --replace-fail`
+fails loudly on no match, and `builtins.replaceStrings` returns the input
+unchanged, so the module needs an assertion to keep the guarantee.
+

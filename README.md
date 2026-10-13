@@ -9,6 +9,8 @@ with a measured saving, its trade-offs and its source. The repo documents
 itself: the ledger, `REPORT.md` and the generated option docs together say
 what was tried, what worked, what failed and why.
 
+**The results are published at [https://wearetechnative.github.io/smol-nixos-base-image-nivis-ec2-experiment/](https://wearetechnative.github.io/smol-nixos-base-image-nivis-ec2-experiment/).**
+
 **The lab is closed.** 1516.25 MiB of closure down to 266.39, and a 2598.64
 MiB upload down to 380.10, across 75 experiments. Start with
 [`REPORT.md`](REPORT.md): the result, the floor, the four findings that
@@ -21,6 +23,7 @@ this one.
 | ---------------- | ------------------------------------------------ |
 | `BRIEFING.md`    | the brief, and the source of truth |
 | `REPORT.md`      | **the result, and what the next project inherits** |
+| `site/`         | the results site, built from the data and published with Pages |
 | `STATE.md`       | the running log, experiment by experiment |
 | `CLAUDE.md`      | how the work is run |
 | `docs/TESTING.md`| the verification contract and the two gates |
@@ -57,10 +60,14 @@ out how much higher is the point.
 | --- | --- | --- | --- |
 | **closure** | 1516 MiB | **266 MiB** | 82.4% |
 | **raw VHD** | 2599 MiB | **380 MiB** | 85.4% |
-| **boot time** | 40.8s | **15.9s** | 60.9% |
+| **boot time** | 40.8s | **14.3s** &plusmn; 0.9 | 64.9% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
+
+Boot time is the mean of the last 10 accepted experiments,
+with its standard deviation, because it is noisy: they range from
+12.8s to 15.9s. A single run is not the result.
 
 ![size and boot time per accepted experiment](docs/progress.svg)
 

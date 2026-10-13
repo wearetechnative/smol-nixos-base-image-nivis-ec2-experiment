@@ -6,13 +6,16 @@ hand-maintained, so the README cannot drift from the ledger, and a number
 that is not in the ledger cannot appear in the README (BRIEFING section 12).
 """
 
-import json
 import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+
 import re
 import sys
 
-REPO = pathlib.Path(__file__).resolve().parent.parent
-MIB = 1048576
+import ledger
+from ledger import MIB, REPO
 
 BEGIN = "<!-- STATS:BEGIN -->"
 END = "<!-- STATS:END -->"
@@ -26,18 +29,8 @@ IMAGE = "#58a6ff"
 BOOT = "#d29922"
 
 
-def load_ledger():
-    rows = []
-    with open(REPO / "ledger.jsonl") as fh:
-        for line in fh:
-            line = line.strip()
-            if line:
-                rows.append(json.loads(line))
-    return rows
-
-
-def accepted(rows):
-    return [r for r in rows if r["decision"] in ("accepted", "baseline")]
+load_ledger = ledger.load
+accepted = ledger.kept
 
 
 def svg(points):
@@ -176,8 +169,7 @@ def bar(n, total, width=28):
     return "█" * filled + "·" * (width - filled)
 
 
-def pct(before, after):
-    return 0.0 if before == 0 else (before - after) * 100 / before
+pct = ledger.pct
 
 
 def main():
@@ -199,6 +191,7 @@ def main():
     (REPO / "docs" / "progress.svg").write_text(svg(points))
 
     base, now = acc[0], acc[-1]
+    spread = ledger.boot_spread(rows)
     counts = backlog_counts()
     total = sum(counts.values()) or 1
 
@@ -246,10 +239,14 @@ def main():
 | --- | --- | --- | --- |
 | **closure** | {base['closure_after'] / MIB:.0f} MiB | **{now['closure_after'] / MIB:.0f} MiB** | {pct(base['closure_after'], now['closure_after']):.1f}% |
 | **raw VHD** | {base['image_bytes'] / MIB:.0f} MiB | **{now['image_bytes'] / MIB:.0f} MiB** | {pct(base['image_bytes'], now['image_bytes']):.1f}% |
-| **boot time** | {base['boot_seconds']:.1f}s | **{now['boot_seconds']:.1f}s** | {pct(base['boot_seconds'], now['boot_seconds']):.1f}% |
+| **boot time** | {base['boot_seconds']:.1f}s | **{spread['mean']:.1f}s** &plusmn; {spread['sd']:.1f} | {pct(base['boot_seconds'], spread['mean']):.1f}% |
 
 The raw VHD is what gets uploaded, imported as an EBS snapshot and stored as
 an AMI. It is the number that costs money, and it is not the closure.
+
+Boot time is the mean of the last {spread['window']} accepted experiments,
+with its standard deviation, because it is noisy: they range from
+{spread['min']:.1f}s to {spread['max']:.1f}s. A single run is not the result.
 
 ![size and boot time per accepted experiment](docs/progress.svg)
 

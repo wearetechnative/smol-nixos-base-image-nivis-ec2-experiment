@@ -15,7 +15,7 @@ closed: this file and `GOTCHAS.md` are what the next project inherits.
 | ------- | -------- | ----- | --- |
 | closure | 1516.25 MiB | **266.39 MiB** | 82.4% |
 | raw VHD, uploaded to S3 | 2598.64 MiB | **380.10 MiB** | 85.4% |
-| boot, t3.micro, guest-measured | 40.8s | 14.1s | 65% |
+| boot, t3.micro, guest-measured | 40.8s | **14.3s +/- 0.9** | 65% |
 
 Both numbers matter and they are not the same thing. The closure is what
 the machine is; the VHD is what gets uploaded, imported as an EBS snapshot
@@ -33,6 +33,11 @@ nothing is claimed here that is not in it (BRIEFING §12).
   can read as 0, as 2, or as 12 in the image column. #58 removed 2.84 MiB
   of closure with a byte-identical image; #73 shrank the closure and the
   image grew 6 MiB. Below about 2 MiB, read the closure.
+- **Boot time is a spread, not a value.** The last ten accepted
+  experiments boot between 12.8 and 15.9 seconds, mean 14.32, standard
+  deviation 0.91. Earlier drafts of this file quoted 14.141s, from an e15
+  control, and `README.md` quoted 15.926s, from ledger #75. Both are real
+  and both are samples. The figure above is the mean with its deviation.
 - **Apparent size is not allocated size.** `stat -c %s` on the VHD reports
   the virtual disk; `du --block-size=1` reports what exists. The lab
   records the first, consistently, and the gap is 5 to 10 percent.
